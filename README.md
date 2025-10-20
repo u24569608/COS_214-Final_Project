@@ -42,7 +42,7 @@ cd plant-nursery-simulator
 
 |-------|------|------|--------|----------|
 
-| ![Your Photo](https://placehold.co/100x100/EFEFEF/AAAAAA?text=You) | Adriano | Team Lead /  | [GitHub](https://github.com/your-github) | [LinkedIn](https://linkedin.com/in/your-linkedin) |
+| ![Your Photo](plant-nursery-simulator/docs/images/adriano.jpg) | Adriano | Team Lead /  | [GitHub](https://github.com/your-github) | [LinkedIn](https://linkedin.com/in/your-linkedin) |
 
 | ![Zoe's Photo](https://placehold.co/100x100/EFEFEF/AAAAAA?text=Zoe) | Zoe | Lead Developer | [GitHub](https://github.com/zoe-github) | [LinkedIn](https://linkedin.com/in/zoe-linkedin) |
 
