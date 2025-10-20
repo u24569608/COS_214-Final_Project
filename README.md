@@ -28,20 +28,12 @@ Follow these instructions to compile and run the simulation on your local machin
 
 ### Prerequisites
 
-- C++ compiler that supports **C++17** (e.g., GCC, Clang)  
+- C++ compiler that supports **C++11** (e.g., GCC, Clang)  
 
 - `make` build automation tool
 
----
-
-### Installation & Compilation
-
-Clone the repository:
-
-```bash
 
 git clone https://github.com/your-username/plant-nursery-simulator.git
-
 cd plant-nursery-simulator
 
 ## 👥 Meet the Development Team – *The Tormentos*
@@ -56,7 +48,7 @@ cd plant-nursery-simulator
 
 | ![Johan's Photo](https://placehold.co/100x100/EFEFEF/AAAAAA?text=Johan) | Johan | Lead Developer  | [GitHub](https://github.com/johan-github) | [LinkedIn](https://linkedin.com/in/johan-linkedin) |
 
-| ![Connor's Photo](https://placehold.co/100x100/EFEFEF/AAAAAA?text=Connor) | Connor | | [GitHub](https://github.com/connor-github) | [LinkedIn](https://linkedin.com/in/connor-linkedin) |
+| ![Connor's Photo](https://placehold.co/100x100/EFEFEF/AAAAAA?text=Connor) | Connor | Lead Developer | [GitHub](https://github.com/connor-github) | [LinkedIn](https://linkedin.com/in/connor-linkedin) |
 
 | ![Bulelani's Photo](https://placehold.co/100x100/EFEFEF/AAAAAA?text=Bulelani) | Bulelani | Lead Developer | [GitHub](https://github.com/bulelani-github) | [LinkedIn](https://linkedin.com/in/bulelani-linkedin) |
 
