@@ -51,8 +51,8 @@ cd plant-nursery-simulator
     <td><img src="plant-nursery-simulator/docs/images/adriano.jpg" width="90" height="100" /></td>
     <td>Adriano</td>
     <td>Team Lead / code implamentation</td>
-    <td><a href="https://github.com/your-github">GitHub</a></td>
-    <td><a href="https://linkedin.com/in/your-linkedin">LinkedIn</a></td>
+    <td><a href="[https://github.com/your-github](https://github.com/Adri4no098)">GitHub</a></td>
+    <td><a href="https://linkedin.com/in/adriano-jorge-909486378">LinkedIn</a></td>
   </tr>
   <tr>
     <td><img src="plant-nursery-simulator/docs/images/zoe.jpg" width="90" height="100" /></td>
