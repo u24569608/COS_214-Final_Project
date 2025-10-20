@@ -1,1 +1,13 @@
-.DS_Store
+# Compiled files
+build/
+*.o
+*.exe
+*.out
+
+# IDE files
+.vscode/
+*.suo
+*.user
+
+# Other
+*.log
