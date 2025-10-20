@@ -36,7 +36,6 @@ Follow these instructions to compile and run the simulation on your local machin
 git clone https://github.com/your-username/plant-nursery-simulator.git
 cd plant-nursery-simulator
 
-## 👥 Meet the Development Team – *The Tormentos*
 
 ## 👥 Meet the Development Team – The Tormentos
 
