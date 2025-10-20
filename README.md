@@ -50,36 +50,36 @@ cd plant-nursery-simulator
   </tr>
   <tr>
     <td><img src="plant-nursery-simulator/docs/images/adriano.jpg" width="80" height="80" /></td>
-    <td>Your Name</td>
-    <td>Team Lead / System Architect</td>
+    <td>Adriano</td>
+    <td>Team Lead / code implamentation</td>
     <td><a href="https://github.com/your-github">GitHub</a></td>
     <td><a href="https://linkedin.com/in/your-linkedin">LinkedIn</a></td>
   </tr>
   <tr>
-    <td><img src="docs/images/zoe.jpg" width="80" height="80" /></td>
+    <td><img src="plant-nursery-simulator/docs/images/zoe.jpg" width="80" height="80" /></td>
     <td>Zoe</td>
-    <td>Lead Developer – Observer & Mediator</td>
+    <td>Lead Developer – Documenting & Implamentation</td>
     <td><a href="https://github.com/zoe-github">GitHub</a></td>
     <td><a href="https://linkedin.com/in/zoe-linkedin">LinkedIn</a></td>
   </tr>
   <tr>
-    <td><img src="docs/images/johan.jpg" width="80" height="80" /></td>
+    <td><img src="plant-nursery-simulator/docs/images/johan.jpg" width="80" height="80" /></td>
     <td>Johan</td>
-    <td>Lead Developer – Command & Strategy</td>
+    <td>Lead Developer – Diagrams & Implamentation</td>
     <td><a href="https://github.com/johan-github">GitHub</a></td>
     <td><a href="https://linkedin.com/in/johan-linkedin">LinkedIn</a></td>
   </tr>
   <tr>
-    <td><img src="docs/images/connor.jpg" width="80" height="80" /></td>
+    <td><img src="plant-nursery-simulator/docs/images/connor.jpg" width="80" height="80" /></td>
     <td>Connor</td>
-    <td>Lead Developer – Composite & Adapter</td>
+    <td>Lead Developer – Gui and implementation</td>
     <td><a href="https://github.com/connor-github">GitHub</a></td>
     <td><a href="https://linkedin.com/in/connor-linkedin">LinkedIn</a></td>
   </tr>
   <tr>
-    <td><img src="docs/images/bulelani.jpg" width="80" height="80" /></td>
+    <td><img src="plant-nursery-simulator/docs/images/bulelani.jpg" width="80" height="80" /></td>
     <td>Bulelani</td>
-    <td>Lead QA & Testing Engineer</td>
+    <td>Lead Developer - Code Implamentation</td>
     <td><a href="https://github.com/bulelani-github">GitHub</a></td>
     <td><a href="https://linkedin.com/in/bulelani-linkedin">LinkedIn</a></td>
   </tr>
