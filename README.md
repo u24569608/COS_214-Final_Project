@@ -38,17 +38,49 @@ cd plant-nursery-simulator
 
 ## 👥 Meet the Development Team – *The Tormentos*
 
-| Photo | Name | Role | GitHub | LinkedIn |
+## 👥 Meet the Development Team – The Tormentos
 
-|-------|------|------|--------|----------|
-
-| ![Your Photo](plant-nursery-simulator/docs/images/adriano.jpg) | Adriano | Team Lead /  | [GitHub](https://github.com/your-github) | [LinkedIn](https://linkedin.com/in/your-linkedin) |
-
-| ![Zoe's Photo](https://placehold.co/100x100/EFEFEF/AAAAAA?text=Zoe) | Zoe | Lead Developer | [GitHub](https://github.com/zoe-github) | [LinkedIn](https://linkedin.com/in/zoe-linkedin) |
-
-| ![Johan's Photo](https://placehold.co/100x100/EFEFEF/AAAAAA?text=Johan) | Johan | Lead Developer  | [GitHub](https://github.com/johan-github) | [LinkedIn](https://linkedin.com/in/johan-linkedin) |
-
-| ![Connor's Photo](https://placehold.co/100x100/EFEFEF/AAAAAA?text=Connor) | Connor | Lead Developer | [GitHub](https://github.com/connor-github) | [LinkedIn](https://linkedin.com/in/connor-linkedin) |
-
-| ![Bulelani's Photo](https://placehold.co/100x100/EFEFEF/AAAAAA?text=Bulelani) | Bulelani | Lead Developer | [GitHub](https://github.com/bulelani-github) | [LinkedIn](https://linkedin.com/in/bulelani-linkedin) |
-
+<table>
+  <tr>
+    <th>Photo</th>
+    <th>Name</th>
+    <th>Role</th>
+    <th>GitHub</th>
+    <th>LinkedIn</th>
+  </tr>
+  <tr>
+    <td><img src="plant-nursery-simulator/docs/images/adriano.jpg" width="80" height="80" /></td>
+    <td>Your Name</td>
+    <td>Team Lead / System Architect</td>
+    <td><a href="https://github.com/your-github">GitHub</a></td>
+    <td><a href="https://linkedin.com/in/your-linkedin">LinkedIn</a></td>
+  </tr>
+  <tr>
+    <td><img src="docs/images/zoe.jpg" width="80" height="80" /></td>
+    <td>Zoe</td>
+    <td>Lead Developer – Observer & Mediator</td>
+    <td><a href="https://github.com/zoe-github">GitHub</a></td>
+    <td><a href="https://linkedin.com/in/zoe-linkedin">LinkedIn</a></td>
+  </tr>
+  <tr>
+    <td><img src="docs/images/johan.jpg" width="80" height="80" /></td>
+    <td>Johan</td>
+    <td>Lead Developer – Command & Strategy</td>
+    <td><a href="https://github.com/johan-github">GitHub</a></td>
+    <td><a href="https://linkedin.com/in/johan-linkedin">LinkedIn</a></td>
+  </tr>
+  <tr>
+    <td><img src="docs/images/connor.jpg" width="80" height="80" /></td>
+    <td>Connor</td>
+    <td>Lead Developer – Composite & Adapter</td>
+    <td><a href="https://github.com/connor-github">GitHub</a></td>
+    <td><a href="https://linkedin.com/in/connor-linkedin">LinkedIn</a></td>
+  </tr>
+  <tr>
+    <td><img src="docs/images/bulelani.jpg" width="80" height="80" /></td>
+    <td>Bulelani</td>
+    <td>Lead QA & Testing Engineer</td>
+    <td><a href="https://github.com/bulelani-github">GitHub</a></td>
+    <td><a href="https://linkedin.com/in/bulelani-linkedin">LinkedIn</a></td>
+  </tr>
+</table>
