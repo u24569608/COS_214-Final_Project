@@ -1,4 +1,4 @@
-# Plant Palace
+# COS 214 Final Project — "Plant Palace"
 
 A sophisticated C++ simulation of a plant nursery management system, developed for the **COS 214 Final Project** at the **University of Pretoria**. This project demonstrates the practical application of various **software design patterns** to build a flexible, maintainable, and scalable system.
 
@@ -25,6 +25,8 @@ A sophisticated C++ simulation of a plant nursery management system, developed f
 ## Getting Started
 
 Follow these instructions to compile and run the simulation on your local machine.
+
+`Coming Soon`
 
 ### Prerequisites
 
@@ -69,7 +71,7 @@ cd plant-nursery-simulator
     <td><a href="https://linkedin.com/in/johan-linkedin">LinkedIn</a></td>
   </tr>
   <tr>
-    <td><img src="plant-nursery-simulator/docs/images/connor.jpg" width="120" height="140" /></td>
+    <td><img src="plant-nursery-simulator/docs/images/connor.jpg" width="120" height="150" /></td>
     <td>Connor</td>
     <td>Lead Developer, UI/UX & Code Implementation</td>
     <td><a href="https://github.com/connor-github">GitHub</a></td>
