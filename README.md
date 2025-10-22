@@ -1,8 +1,15 @@
-# COS 214 Final Project — "Plant Palace"
+<div align="center">
+<h1>Plant Palace</h1></div>
 
-A sophisticated C++ simulation of a plant nursery management system, developed for the **COS 214 Final Project** at the **University of Pretoria**. This project demonstrates the practical application of various **software design patterns** to build a flexible, maintainable, and scalable system.
 
----
+
+A sophisticated `C++` simulation of a plant nursery management system, developed for the **COS 214 Final Project** at the **University of Pretoria**. This project demonstrates the practical application of various **GoF Software Design Patterns** to build a flexible, maintainable, and scalable system.
+
+<h2>Badges</h2>
+
+![GitHub Issues](https://img.shields.io/github/issues/u24569608/COS_214-Final_Project)
+![GitHub Pull Requests](https://img.shields.io/github/issues-pr/u24569608/COS_214-Final_Project)
+![GitHub Repo Size](https://img.shields.io/github/repo-size/u24569608/COS_214-Final_Project)
 
 ## Key Features
 
@@ -20,26 +27,33 @@ A sophisticated C++ simulation of a plant nursery management system, developed f
 
 - **Flexible Data Loading** – Load inventory from various file formats (TXT, CSV) using the **Adapter** pattern.
 
----
-
 ## Getting Started
 
 Follow these instructions to compile and run the simulation on your local machine.
 
 `Coming Soon`
 
-### Prerequisites
+## Prerequisites
 
-- C++ compiler that supports **C++17** (e.g., GCC, Clang)  
+`Coming Soon`
 
-- `make` build automation tool
+
 
 
 git clone https://github.com/your-username/plant-nursery-simulator.git
 cd plant-nursery-simulator
 
 
-## Team
+<h2>🔧 Technologies</h2>
+<p align="center">
+  <a href="https://skillicons.dev">
+    <img src="https://skillicons.dev/icons?i=cpp,git,github,vscode" />
+  </a>
+</p>
+
+
+
+<h2>Team</h2>
 
 <table>
   <tr>
