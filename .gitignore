@@ -11,3 +11,7 @@ build/
 
 # Other
 *.log
+plant-nursery-simulator/docs/diagrams/.DS_Store
+plant-nursery-simulator/.DS_Store
+plant-nursery-simulator/docs/.DS_Store
+.DS_Store
