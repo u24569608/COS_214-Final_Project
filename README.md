@@ -38,7 +38,7 @@ Follow these instructions to compile and run the simulation on your local machin
 `Coming Soon`
 
 
-<h2>🔧 Technologies</h2>
+<h2>Technologies</h2>
 <p align="center">
   <a href="https://skillicons.dev">
     <img src="https://skillicons.dev/icons?i=cpp,git,github,vscode" />
