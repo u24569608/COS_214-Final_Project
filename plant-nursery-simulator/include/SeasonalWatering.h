@@ -10,7 +10,8 @@
 class SeasonalWatering : public WaterStrategy {
 public:
     SeasonalWatering();
-    void water() const override;
+    void water(PlantInstance& plant) const override;
+    void clone();
 };
 
 #endif // SEASONAL_WATERING_H

@@ -11,8 +11,8 @@ class OrderBuilder;
 class OrderDirector {
 public:
     OrderDirector();
-    void setBuilder(OrderBuilder* b);
-
+    
+    void setBuilder();
     void buildGiftBasket();
     void buildBeginnerSet();
     void buildFullGardenerKit(); // Creative

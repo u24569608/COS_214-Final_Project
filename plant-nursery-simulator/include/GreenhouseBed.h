@@ -4,6 +4,7 @@
 #include "GreenhouseComponent.h"
 #include <vector>
 #include <string>
+#include <memory>
 
 /**
  * @file GreenhouseBed.h
@@ -11,8 +12,8 @@
  */
 class GreenhouseBed : public GreenhouseComponent {
 public:
-    GreenhouseBed(std::string name);
-    ~GreenhouseBed();
+    GreenhouseBed();
+   
 
     void add(GreenhouseComponent* component) override;
     void remove(GreenhouseComponent* component) override;
@@ -33,7 +34,9 @@ public:
      * @brief Creative Function: Gets the current capacity.
      * @return int The number of components in this bed.
      */
-    int getCapacity() const;
+    int getSize() const;
+
+    std::unique_ptr<GreenhouseIterator> createIterator();
 
 private:
     std::vector<GreenhouseComponent*> children; ///< Child components.

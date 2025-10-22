@@ -25,7 +25,8 @@ public:
      * @param observer The observer to detach.
      */
     virtual void detach(Observer* observer);
-
+    
+protected:
     /**
      * @brief Notify all subscribed Observers of a change.
      */

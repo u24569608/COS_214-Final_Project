@@ -30,7 +30,7 @@ Follow these instructions to compile and run the simulation on your local machin
 
 ### Prerequisites
 
-- C++ compiler that supports **C++11** (e.g., GCC, Clang)  
+- C++ compiler that supports **C++17** (e.g., GCC, Clang)  
 
 - `make` build automation tool
 

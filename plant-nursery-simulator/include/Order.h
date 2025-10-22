@@ -1,6 +1,6 @@
 #ifndef ORDER_H
 #define ORDER_H
-
+//
 #include "StockItem.h" // Holds StockItems
 #include <vector>
 #include <string>
@@ -14,7 +14,7 @@ public:
     Order();
     
     void addItem(StockItem item);
-    void showOrder() const;
+    void printOrder() const;
 
     /**
      * @brief Creative Function: Calculates the total price of the order.

@@ -18,4 +18,4 @@ public:
     virtual void update(Subject* subject) = 0;
 };
 
-#endif // OBSERVER_H
+#endif // OBSERVER_H//

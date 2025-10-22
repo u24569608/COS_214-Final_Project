@@ -1,19 +1,20 @@
-#ifndef CSV_READER_H
-#define CSV_READER_H
+#ifndef CSV_READER_WRITER_H
+#define CSV_READER_WRITER_H
 
 #include <vector>
 #include <string>
 #include <utility> // For std::pair
 
 /**
- * @file CSVReader.h
+ * @file CSVReaderWriter.h
  * @brief The 'Adaptee' class for reading CSV files.
  * @details This is another incompatible interface.
  */
-class CSVReader {
+class CSVReaderWriter {
 public:
-    CSVReader();
+    CSVReaderWriter();
     std::vector<std::pair<std::string, int>> readCsv(std::string filePath);
+    void writeDataToCSV();
 };
 
-#endif // CSV_READER_H
+#endif // CSV_READER_WRITER_H

@@ -5,6 +5,7 @@
 
 // Forward declaration
 class FloorMediator; 
+class Inventory;
 
 /**
  * @file Colleague.h
@@ -19,8 +20,10 @@ public:
     virtual void receive(std::string message) = 0;
     virtual int getID() const = 0;
 
-protected:
+private:
     FloorMediator* mediator; ///< Pointer to the Mediator.
+    Inventory* inventory; ///< Pointer to the inventory.
+
 };
 
 #endif // COLLEAGUE_H

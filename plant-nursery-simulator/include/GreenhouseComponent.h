@@ -2,6 +2,9 @@
 #define GREENHOUSE_COMPONENT_H
 
 #include <string>
+#include <memory>
+
+class GreenhouseIterator;
 
 /**
  * @file GreenhouseComponent.h
@@ -23,6 +26,8 @@ public:
     virtual void remove(GreenhouseComponent* component);
 
     virtual std::string getName() const;
+
+    std::unique_ptr<GreenhouseIterator> createIterator();
 
 protected:
     std::string name;

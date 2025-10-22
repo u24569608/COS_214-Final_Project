@@ -2,7 +2,7 @@
 #define INVENTORY_ITERATOR_H
 
 // Forward declaration
-class PlantInstance;
+class StockItem;
 
 /**
  * @file InventoryIterator.h
@@ -11,10 +11,11 @@ class PlantInstance;
 class InventoryIterator {
 public:
     virtual ~InventoryIterator();
-    virtual PlantInstance* first() = 0;
-    virtual PlantInstance* next() = 0;
+    virtual StockItem* first() = 0;
+    virtual StockItem* next() = 0;
     virtual bool hasNext() const = 0;
-    virtual PlantInstance* currentItem() const = 0;
+    virtual StockItem* currentItem() const = 0;
+    void reset();
 };
 
 #endif // INVENTORY_ITERATOR_H

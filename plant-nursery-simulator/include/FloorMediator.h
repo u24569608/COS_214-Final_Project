@@ -2,7 +2,7 @@
 #define FLOOR_MEDIATOR_H
 
 #include <string>
-
+//
 // Forward declaration
 class Colleague; 
 

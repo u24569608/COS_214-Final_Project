@@ -10,10 +10,11 @@ class PlantInstance;
  */
 class PlantCommand {
 public:
-    virtual ~PlantCommand();
-    virtual void execute() = 0;
-protected:
     PlantCommand(PlantInstance* p);
+    virtual ~PlantCommand();
+    virtual void handleRequest() = 0;
+protected:
+    
     PlantInstance* plant; ///< The 'Receiver' of the command.
 };
 

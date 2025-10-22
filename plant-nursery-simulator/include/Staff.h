@@ -77,4 +77,4 @@ private:
     GreenhouseBed* assignedBed; ///< Bed this staff is responsible for
 };
 
-#endif // STAFF_H
+#endif // STAFF_H//

@@ -4,7 +4,7 @@
 #include "FloorMediator.h"
 #include <vector>
 #include <string>
-
+//
 // Forward declaration
 class Colleague;
 

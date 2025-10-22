@@ -5,7 +5,7 @@
 
 // Forward declaration
 class Inventory;
-class PlantInstance;
+class StockItem;
 
 /**
  * @file ConcreteInventoryIterator.h
@@ -15,14 +15,15 @@ class ConcreteInventoryIterator : public InventoryIterator {
 public:
     ConcreteInventoryIterator(Inventory* inv);
 
-    PlantInstance* first() override;
-    PlantInstance* next() override;
+    StockItem* first() override;
+    StockItem* next() override;
     bool hasNext() const override;
-    PlantInstance* currentItem() const override;
+    StockItem* currentItem() const override;
+    void reset();
 
 private:
     Inventory* inventory; ///< Pointer to the Aggregate it traverses.
-    int current; ///< The current position.
+    int currentIndex; ///< The current position.
 };
 
 #endif // CONCRETE_INVENTORY_ITERATOR_H

@@ -13,7 +13,7 @@ class PlantInstance;
 class WaterPlant : public PlantCommand {
 public:
     WaterPlant(PlantInstance* p);
-    void execute() override;
+    void handleRequest() override;
 };
 
 #endif // WATER_PLANT_H
