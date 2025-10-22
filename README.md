@@ -58,10 +58,10 @@ cd plant-nursery-simulator
   </tr>
   <tr>
     <td><img src="plant-nursery-simulator/docs/images/zoe.jpg" width="120" height="140" /></td>
-    <td>Zoe</td>
+    <td>Zoë</td>
     <td>Lead Developer, Documentation & Code Implementation</td>
-    <td><a href="https://github.com/zoe-github">GitHub</a></td>
-    <td><a href="https://linkedin.com/in/zoe-linkedin">LinkedIn</a></td>
+    <td><a href="https://github.com/ZoeJ72005/">GitHub</a></td>
+    <td><a href="https://www.linkedin.com/in/zo%C3%AB-joubert-8b494835a">LinkedIn</a></td>
   </tr>
   <tr>
     <td><img src="plant-nursery-simulator/docs/images/johan.jpg" width="120" height="140" /></td>
