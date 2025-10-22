@@ -6,6 +6,7 @@
 
 // Forward declaration
 class Order;
+class StockItem;
 
 /**
  * @file OrderBuilder.h
@@ -17,11 +18,7 @@ public:
     
     Order* getOrder();
     void createNewOrder();
-
-    virtual void addPlant(std::string name, double price) = 0;
-    virtual void addPot(std::string type, double price) = 0;
-    virtual void addGiftWrap(double price) = 0;
-    virtual void addSoil(std::string type, double price) = 0; // Creative
+    virtual void addItem(StockItem* item) = 0 ;
 
 protected:
     std::unique_ptr<Order> order;

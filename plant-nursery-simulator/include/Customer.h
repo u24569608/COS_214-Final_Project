@@ -3,7 +3,7 @@
 
 #include "Colleague.h"
 #include <string>
-
+//
 // Forward declarations
 class InventoryIterator;
 class StockItem;

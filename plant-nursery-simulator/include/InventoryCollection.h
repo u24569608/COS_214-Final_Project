@@ -18,4 +18,4 @@ public:
     virtual InventoryIterator* createIterator() = 0;
 };
 
-#endif // INVENTORY_COLLECTION_H
+#endif // INVENTORY_COLLECTION_H//

@@ -12,10 +12,7 @@ class CustomOrderBuilder : public OrderBuilder {
 public:
     CustomOrderBuilder();
     
-    void addPlant(std::string name, double price) override;
-    void addPot(std::string type, double price) override;
-    void addGiftWrap(double price) override;
-    void addSoil(std::string type, double price) override;
+    void addItem(StockItem* item);
 };
 
 #endif // CUSTOM_ORDER_BUILDER_H

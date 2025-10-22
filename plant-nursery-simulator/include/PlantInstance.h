@@ -4,6 +4,7 @@
 #include "Subject.h" // Is-a Subject (Observer)
 #include "GreenhouseComponent.h" // Is-a Component 'Leaf' (Composite)
 #include <string>
+#include "PlantState.h"
 
 // Forward declarations for pointers (Strategy, Prototype)
 class Plant;
@@ -22,7 +23,7 @@ class FertilizeStrategy;
 class PlantInstance : public Subject, public GreenhouseComponent {
 public:
     PlantInstance(Plant* plantType);
-    virtual ~PlantInstance();
+    ~PlantInstance();
 
     // === Strategy Pattern ===
     /**
@@ -68,11 +69,11 @@ private:
     Plant* plantType; ///< The prototype
     WaterStrategy* wStrategy; ///< Current water strategy
     FertilizeStrategy* fStrategy; ///< Current fertilize strategy
+    PlantState* plantState;
     
     int health;
     int waterLevel;
     int nutrientLevel;
-    int growthStage;
 };
 
 #endif // PLANT_INSTANCE_H

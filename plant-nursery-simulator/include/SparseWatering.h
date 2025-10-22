@@ -10,7 +10,9 @@
 class SparseWatering : public WaterStrategy {
 public:
     SparseWatering();
-    void water() const override;
+    void water(PlantInstance& plant) const override;
+    void clone();
+    
 };
 
 #endif // SPARSE_WATERING_H

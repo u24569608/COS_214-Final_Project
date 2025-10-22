@@ -3,15 +3,31 @@
 
 #include <string>
 
+class Order;
+class PlantInstance;
+class WaterStrategy;
+
 /**
  * @file StockItem.h
- * @brief A simple class representing an item in an order.
+ * @brief A complex class representing an item in an order.
  */
 class StockItem {
 public:
-    StockItem(std::string name, double price);
+    StockItem(std::string n, double p, PlantInstance* pl);
+    void getname();
+    void getPrice();
+    PlantInstance* getplant();
+    void setPrice(double price);
+    bool isPlant();
+    bool getIsAvailible();
+    void setIsAvailible(bool isAvailible);
+
+
+private:
     std::string name;
     double price;
+    PlantInstance* plant;
+    bool isAvailable;
 };
 
 #endif // STOCK_ITEM_H

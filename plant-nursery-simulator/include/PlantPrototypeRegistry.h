@@ -26,10 +26,11 @@ public:
 
     /**
      * @brief Clones a plant from the registry.
-     * @param name The key of the prototype to clone.
+     * @param name The key of the prototype to clone. 
+     * @param type the type of plant to clone.
      * @return Plant* A new clone, or nullptr if not found.
      */
-    Plant* createPlant(std::string name);
+    Plant* createPlant(std::string name, std::string type);
 
 private:
     std::map<std::string, std::unique_ptr<Plant>> prototypes;

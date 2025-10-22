@@ -2,6 +2,9 @@
 #define PLANT_H
 
 #include <string>
+#include "WaterStrategy.h"
+#include "FertilizeStrategy.h"
+
 
 /**
  * @file Plant.h
@@ -15,26 +18,30 @@ public:
      * @brief Creates a deep copy of this plant prototype.
      * @return Plant* A pointer to the newly cloned plant.
      */
-    virtual Plant* clone() const = 0;
+     Plant* clone() const ;
 
-    virtual std::string getName() const = 0;
-    virtual std::string getType() const = 0;
-
-    /**
-     * @brief Creative Function: Gets the ideal sunlight for this plant.
-     * @return std::string (e.g., "Full Sun", "Partial Shade").
-     */
-    virtual std::string getRequiredSunlight() const = 0;
+     std::string getName() const ;
+     std::string getType() const ;
 
     /**
-     * @brief Creative Function: Gets the native environment.
-     * @return std::string (e.g., "Tropical", "Desert", "Temperate").
+     * @brief Creative Function: Gets the ideal water strategy for this plant.
+     * @return WaterStrategy*.
      */
-    virtual std::string getNativeEnvironment() const = 0;
+     WaterStrategy* getDefaultWaterStrat() const;
+
+    /**
+     * @brief Creative Function: Gets the ideal fertilizer strategy.
+     * @return FertilizeStrategy*.
+     */
+     FertilizeStrategy* getDefaultFertStrat() const;
 
 protected:
     std::string name;
     std::string type;
+private:
+    WaterStrategy* defaultWaterStrat;
+    FertilizeStrategy* defaultFertilizerStrat;
+
 };
 
 #endif // PLANT_H

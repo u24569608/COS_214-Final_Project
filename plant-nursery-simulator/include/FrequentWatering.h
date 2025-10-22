@@ -10,7 +10,8 @@
 class FrequentWatering : public WaterStrategy {
 public:
     FrequentWatering();
-    void water() const override;
+    void water(PlantInstance& plant) const override;
+    void clone();
 };
 
 #endif // FREQUENT_WATERING_H

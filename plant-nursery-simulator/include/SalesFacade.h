@@ -23,10 +23,10 @@ public:
     SalesFacade(Inventory* inv, PaymentProcessor* pp, OrderBuilder* ob);
 
     /**
-     * @brief Simplifies buying a single plant at the counter.
+     * @brief Simplifies buying a single item at the counter.
      * @return bool True if the sale was successful.
      */
-    bool purchasePlant(Customer* customer, PlantInstance* plant, double price);
+    bool purchaseItem(Customer* customer, StockItem* item);
 
     /**
      * @brief Creative Function: Processes a complex custom order.
@@ -47,6 +47,8 @@ public:
      * @return int The number in stock.
      */
     int checkStock(std::string plantType);
+
+    void addItemToInventory(std::string name, double price);
 
 private:
     Inventory* inventory; ///< Subsystem 1
