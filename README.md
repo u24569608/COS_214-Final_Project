@@ -38,12 +38,6 @@ Follow these instructions to compile and run the simulation on your local machin
 `Coming Soon`
 
 
-
-
-git clone https://github.com/your-username/plant-nursery-simulator.git
-cd plant-nursery-simulator
-
-
 <h2>🔧 Technologies</h2>
 <p align="center">
   <a href="https://skillicons.dev">
