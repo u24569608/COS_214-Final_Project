@@ -2,9 +2,9 @@ name: Unit Tests
 
 on:
   push:
-    branches: [ "main", "developer", "feat/*" ]
+    branches: [ "main", "developer", "feat/*" ] # Kept your branches
   pull_request:
-    branches: [ "main", "developer" ]
+    branches: [ "main", "developer" ] # Kept your branches
 
 jobs:
   build-and-test:
@@ -13,10 +13,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Build Directories
-        working-directory: plant-nursery-simulator
-        run: make mediator_test
-
-      - name: Build and Run Mediator Targets + Unit Test
-        working-directory: plant-nursery-simulator
-        run: make mediator_test
+      # This one step now builds AND runs ALL tests
+      # (mediator_test AND iterator_unit_test)
+      - name: Build and Run All Unit Tests
+        working-directory: plant-nursery-simulator # Kept your working dir
+        run: make test # Changed this from 'mediator_test' to 'test'
