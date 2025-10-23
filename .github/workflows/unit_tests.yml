@@ -1,0 +1,22 @@
+name: Unit Tests
+
+on:
+  push:
+    branches: [ "main", "developer", "feat/*" ]
+  pull_request:
+    branches: [ "main", "developer" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Build Directories
+        working-directory: plant-nursery-simulator
+        run: make mediator_test
+
+      - name: Build and Run Mediator Targets + Unit Test
+        working-directory: plant-nursery-simulator
+        run: make mediator_test
