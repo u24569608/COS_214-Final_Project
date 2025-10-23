@@ -75,15 +75,15 @@ Follow these instructions to compile and run the simulation on your local machin
     <td><img src="plant-nursery-simulator/docs/images/johan.jpg" width="120" height="140" /></td>
     <td>Johan</td>
     <td>Lead Developer, Diagrams & Code Implementation</td>
-    <td><a href="https://github.com/johan-github">GitHub</a></td>
-    <td><a href="https://linkedin.com/in/johan-linkedin">LinkedIn</a></td>
+    <td><a href="https://github.com/FJNel">GitHub</a></td>
+    <td><a href="https://linkedin.com/in/johan-nel-03baa0306/">LinkedIn</a></td>
   </tr>
   <tr>
     <td><img src="plant-nursery-simulator/docs/images/connor.jpg" width="120" height="150" /></td>
     <td>Connor</td>
     <td>Lead Developer, UI/UX & Code Implementation</td>
-    <td><a href="https://github.com/connor-github">GitHub</a></td>
-    <td><a href="https://linkedin.com/in/connor-linkedin">LinkedIn</a></td>
+    <td><a href="https://github.com/u24569608">GitHub</a></td>
+    <td><a href="https://linkedin.com/in/connorbellUP/">LinkedIn</a></td>
   </tr>
   <tr>
     <td><img src="plant-nursery-simulator/docs/images/bulelani.jpg" width="120" height="140" /></td>
