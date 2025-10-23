@@ -12,7 +12,7 @@ class Colleague;
  */
 class FloorMediator {
 public:
-    virtual ~FloorMediator();
+    virtual ~FloorMediator() = default;
     virtual void addColleague(Colleague* colleague) = 0;
     virtual void distribute(std::string message, int senderID, int recipientID) = 0;
 };
