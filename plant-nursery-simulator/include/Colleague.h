@@ -20,10 +20,20 @@ public:
     virtual void receive(std::string message) = 0;
     virtual int getID() const = 0;
 
-private:
+protected:
     FloorMediator* mediator; ///< Pointer to the Mediator.
-    Inventory* inventory; ///< Pointer to the inventory.
 
+/* NOTE 
+
+    Customer cannot reach the mediator pointer
+    But Customer::send(...) must call the mediator (e.g., mediator->distribute(...)). 
+    Because mediator is private, the derived class (Customer) cannot access it, 
+    and there’s no getter.
+    CHANGED FROM PRIVATE TO PROTECTED
+*/
+
+private: 
+    Inventory* inventory; ///< Pointer to the inventory.
 };
 
 #endif // COLLEAGUE_H
