@@ -21,7 +21,7 @@ public:
     virtual int getID() const = 0;
 
 protected:
-    FloorMediator* mediator; // Pointer to the Mediator.
+    FloorMediator* mediator; ///< Pointer to the Mediator.
 
 /* NOTE 
 
@@ -33,8 +33,7 @@ protected:
 */
 
 private: 
-    Inventory* inventory; // Pointer to the inventory.
-
+    Inventory* inventory; ///< Pointer to the inventory.
 };
 
 #endif // COLLEAGUE_H
