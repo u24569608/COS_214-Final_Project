@@ -20,7 +20,7 @@ class FertilizeStrategy;
  * - Context (Strategy Pattern) - FR5, FR6, FR7
  * - Receiver (Command Pattern) - FR18
  */
-class PlantInstance : public Subject, public GreenhouseComponent {
+class PlantInstance /*: public Subject, public GreenhouseComponent*/ {
 public:
     PlantInstance(Plant* plantType);
     ~PlantInstance();
@@ -57,7 +57,7 @@ public:
     bool needsFertilizing() const;
 
     // === Composite Pattern (Leaf method) ===
-    void performCare() override;
+    //void performCare() override;
 
     // === Creative Functions (Getters/Setters) ===
     int getHealth() const;
