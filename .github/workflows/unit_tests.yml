@@ -17,4 +17,5 @@ jobs:
         run: mkdir -p build tests
 
       - name: Build and Run Mediator Targets + Unit Test
+        cd plant-nursery-simulator
         run: make mediator_test
