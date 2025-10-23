@@ -3,7 +3,7 @@
 
 #include "Colleague.h"
 #include <string>
-//
+
 // Forward declarations
 class InventoryIterator;
 class StockItem;
@@ -40,6 +40,12 @@ public:
 private:
     int id;
     std::string name;
+
+/* NOTE
+    
+    Customer has a name field but the constructor doesn’t take a name. 
+
+*/
     // std::vector<StockItem*> shoppingCart; // Example of creative addition
 };
 
