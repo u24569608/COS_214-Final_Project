@@ -1,0 +1,23 @@
+name: Unit Tests
+
+on:
+  push:
+    branches: [ "main", "developer", "feat/*" ]
+  pull_request:
+    branches: [ "main", "developer" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Build Directories
+        run: mkdir -p build tests
+
+      - name: Build Mediator Targets + Unit Test
+        run: make mediator_test
+
+      - name: Run Mediator Unit Test
+        run: ./build/mediator_unit_test
