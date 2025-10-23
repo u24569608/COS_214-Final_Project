@@ -40,7 +40,7 @@ mediator_test:
 # --- NEW Iterator Test Target ---
 # This target builds and runs your iterator test
 iterator_unit_test:
-	@echo "== Building and Running 'iterator_test.cpp' (UNIT TEST) =="
+	@echo "== Building and Running 'IteratorTest.cpp' (UNIT TEST) =="
 	@mkdir -p build
 	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude \
 		tests/iterator_test.cpp \
@@ -50,8 +50,6 @@ iterator_unit_test:
 		src/ConcreteInventoryIterator.cpp \
 		src/StockItem.cpp \
 		src/PlantInstance.cpp \
-		src/Subject.cpp \
-		src/GreenhouseComponent.cpp \
 		-o build/iterator_unit_test
 	./build/iterator_unit_test
 
