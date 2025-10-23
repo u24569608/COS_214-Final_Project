@@ -1,8 +1,15 @@
-# COS 214 Final Project — "Plant Palace"
+<div align="center">
+<h1>Plant Palace</h1></div>
 
-A sophisticated C++ simulation of a plant nursery management system, developed for the **COS 214 Final Project** at the **University of Pretoria**. This project demonstrates the practical application of various **software design patterns** to build a flexible, maintainable, and scalable system.
 
----
+
+A sophisticated `C++` simulation of a plant nursery management system, developed for the **COS 214 Final Project** at the **University of Pretoria**. This project demonstrates the practical application of various **GoF Software Design Patterns** to build a flexible, maintainable, and scalable system.
+
+<h2>Badges</h2>
+
+![GitHub Issues](https://img.shields.io/github/issues/u24569608/COS_214-Final_Project)
+![GitHub Pull Requests](https://img.shields.io/github/issues-pr/u24569608/COS_214-Final_Project)
+![GitHub Repo Size](https://img.shields.io/github/repo-size/u24569608/COS_214-Final_Project)
 
 ## Key Features
 
@@ -20,26 +27,25 @@ A sophisticated C++ simulation of a plant nursery management system, developed f
 
 - **Flexible Data Loading** – Load inventory from various file formats (TXT, CSV) using the **Adapter** pattern.
 
----
-
 ## Getting Started
-
-Follow these instructions to compile and run the simulation on your local machine.
 
 `Coming Soon`
 
-### Prerequisites
+## Prerequisites
 
-- C++ compiler that supports **C++17** (e.g., GCC, Clang)  
-
-- `make` build automation tool
+`Coming Soon`
 
 
-git clone https://github.com/your-username/plant-nursery-simulator.git
-cd plant-nursery-simulator
+<h2>Technologies</h2>
+<p align="center">
+  <a href="https://skillicons.dev">
+    <img src="https://skillicons.dev/icons?i=cpp,git,github,vscode" />
+  </a>
+</p>
 
 
-## Team
+
+<h2>Team</h2>
 
 <table>
   <tr>
@@ -67,15 +73,15 @@ cd plant-nursery-simulator
     <td><img src="plant-nursery-simulator/docs/images/johan.jpg" width="120" height="140" /></td>
     <td>Johan</td>
     <td>Lead Developer, Diagrams & Code Implementation</td>
-    <td><a href="https://github.com/johan-github">GitHub</a></td>
-    <td><a href="https://linkedin.com/in/johan-linkedin">LinkedIn</a></td>
+    <td><a href="https://github.com/FJNel">GitHub</a></td>
+    <td><a href="https://linkedin.com/in/johan-nel-03baa0306/">LinkedIn</a></td>
   </tr>
   <tr>
     <td><img src="plant-nursery-simulator/docs/images/connor.jpg" width="120" height="150" /></td>
     <td>Connor</td>
     <td>Lead Developer, UI/UX & Code Implementation</td>
-    <td><a href="https://github.com/connor-github">GitHub</a></td>
-    <td><a href="https://linkedin.com/in/connor-linkedin">LinkedIn</a></td>
+    <td><a href="https://github.com/u24569608">GitHub</a></td>
+    <td><a href="https://linkedin.com/in/connorbellUP/">LinkedIn</a></td>
   </tr>
   <tr>
     <td><img src="plant-nursery-simulator/docs/images/bulelani.jpg" width="120" height="140" /></td>
