@@ -1,6 +1,6 @@
 #include "../include/ConcreteInventoryIterator.h"
-#include "Inventory.h" // Needs the full definition of Inventory
-#include "StockItem.h"
+#include "../include/Inventory.h" // Needs the full definition of Inventory
+#include "../include/StockItem.h"
 
 /**
  * @brief Constructor.

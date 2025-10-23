@@ -1,6 +1,6 @@
-#include "Inventory.h"
-#include "ConcreteInventoryIterator.h" // For createIterator()
-#include "StockItem.h"                 // For item definitions
+#include "../include/Inventory.h"
+#include "../include/ConcreteInventoryIterator.h" // For createIterator()
+#include "../include/StockItem.h"                 // For item definitions
 #include <algorithm>                   // For std::find_if, std::remove_if
 
 Inventory::Inventory() {
