@@ -10,6 +10,7 @@ A sophisticated `C++` simulation of a plant nursery management system, developed
 ![GitHub Issues](https://img.shields.io/github/issues/u24569608/COS_214-Final_Project)
 ![GitHub Pull Requests](https://img.shields.io/github/issues-pr/u24569608/COS_214-Final_Project)
 ![GitHub Repo Size](https://img.shields.io/github/repo-size/u24569608/COS_214-Final_Project)
+![Unit Tests](https://github.com/u24569608/COS_214-Final_Project/actions/workflows/unit-tests.yml/badge.svg?branch=developer)
 
 ## Key Features
 
