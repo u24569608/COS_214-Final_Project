@@ -29,8 +29,6 @@ A sophisticated `C++` simulation of a plant nursery management system, developed
 
 ## Getting Started
 
-Follow these instructions to compile and run the simulation on your local machine.
-
 `Coming Soon`
 
 ## Prerequisites
