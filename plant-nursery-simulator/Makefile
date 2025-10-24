@@ -1,9 +1,6 @@
-# This new 'test' target runs ALL unit tests
-# THIS IS WHAT YOUR CI SHOULD RUN
 test: iterator_unit_test mediator_unit_test
 	@echo "==== ALL PROJECT TESTS DONE ===="
 
-# --- Original Mediator Targets ---
 mediator_colleague_test: 
 	@echo "== Testing 'Colleague.cpp' =="
 	@mkdir -p build
@@ -37,8 +34,6 @@ mediator_test:
 	$(MAKE) mediator_nursery_test
 	$(MAKE) mediator_unit_test
 
-# --- NEW Iterator Test Target ---
-# This target builds and runs your iterator test
 iterator_unit_test:
 	@echo "== Building and Running 'iterator_test.cpp' (UNIT TEST) =="
 	@mkdir -p build
