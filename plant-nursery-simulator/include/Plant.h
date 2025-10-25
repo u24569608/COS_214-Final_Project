@@ -2,6 +2,8 @@
 #define PLANT_H
 
 #include <string>
+
+// Forward declarations
 #include "WaterStrategy.h"
 #include "FertilizeStrategy.h"
 
@@ -12,15 +14,30 @@
  */
 class Plant {
 public:
+
+    /**
+     * @brief Virtual destructor.
+     * @details Cleans up the default strategy objects owned by the prototype.
+     */
     virtual ~Plant();
 
     /**
-     * @brief Creates a deep copy of this plant prototype.
+     * @brief Pure virtual clone method. 
+     * @details Creates a deep copy of this plant prototype.
      * @return Plant* A pointer to the newly cloned plant.
      */
-     Plant* clone() const ;
+     virtual Plant* clone() const = 0;
 
+     /**
+      * @brief Gets the plant's common name.
+      * @return std::string 
+      */
      std::string getName() const ;
+
+     /**
+      * @brief Gets the plant's type (e.g., "Flower", "Cactus").
+      * @return std::string 
+      */
      std::string getType() const ;
 
     /**
@@ -36,12 +53,25 @@ public:
      FertilizeStrategy* getDefaultFertStrat() const;
 
 protected:
+    /**
+     * @brief Protected constructor for derived classes.
+     * @param name The common name of the plant.
+     * @param type The type/category of the plant.
+     * @param ws The default water strategy instance.
+     * @param fs The default fertilize strategy instance.
+     */
+    Plant(std::string name, std::string type, WaterStrategy* ws, FertilizeStrategy* fs);
+    
     std::string name;
     std::string type;
-private:
     WaterStrategy* defaultWaterStrat;
     FertilizeStrategy* defaultFertilizerStrat;
 
+private:
+   /**
+      * @brief Default constructor is disallowed.
+      */
+     Plant();
 };
 
 #endif // PLANT_H
