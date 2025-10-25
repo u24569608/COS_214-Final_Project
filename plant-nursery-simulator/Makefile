@@ -81,3 +81,19 @@ command_unit_test: command
 		tests/command_test.cpp \
 		-o build/command_unit_test
 	./build/command_unit_test
+
+chain_of_responsibility:
+	@mkdir -p build
+	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude -c src/CareRequestHandler.cpp   -o build/CareRequestHandler.o
+	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude -c src/WateringHandler.cpp      -o build/WateringHandler.o
+	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude -c src/FertilizingHandler.cpp   -o build/FertilizingHandler.o
+	# PlantInstance is the CoR receiver; reuse your existing implementation
+	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude -c src/PlantInstance.cpp        -o build/PlantInstance.o
+
+chain_of_responsibility_unit_test: chain_of_responsibility
+	@echo "== Building and Running 'chain_of_responsibility_test.cpp' (UNIT TEST) =="
+	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude \
+		build/CareRequestHandler.o build/WateringHandler.o build/FertilizingHandler.o build/PlantInstance.o \
+		tests/chain_of_responsibility_test.cpp \
+		-o build/cor_unit_test
+	./build/cor_unit_test
