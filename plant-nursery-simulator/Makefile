@@ -1,6 +1,4 @@
-# This new 'test' target runs ALL unit tests
-# THIS IS WHAT YOUR CI SHOULD RUN
-test: iterator_unit_test mediator_unit_test command_unit_test builder_unit_test
+test: iterator_unit_test mediator_unit_test command_unit_test builder_unit_test chain_of_responsibility_unit_test facade_unit_test
 	@echo "==== ALL PROJECT TESTS DONE ===="
 
 clean:
@@ -83,3 +81,38 @@ command_unit_test: command
 		tests/command_test.cpp \
 		-o build/command_unit_test
 	./build/command_unit_test
+
+chain_of_responsibility:
+	@mkdir -p build
+	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude -c src/CareRequestHandler.cpp   -o build/CareRequestHandler.o
+	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude -c src/WateringHandler.cpp      -o build/WateringHandler.o
+	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude -c src/FertilizingHandler.cpp   -o build/FertilizingHandler.o
+	# PlantInstance is the CoR receiver; reuse your existing implementation
+	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude -c src/PlantInstance.cpp        -o build/PlantInstance.o
+
+chain_of_responsibility_unit_test: chain_of_responsibility
+	@echo "== Building and Running 'chain_of_responsibility_test.cpp' (UNIT TEST) =="
+	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude \
+		build/CareRequestHandler.o build/WateringHandler.o build/FertilizingHandler.o build/PlantInstance.o \
+		tests/chain_of_responsibility_test.cpp \
+		-o build/cor_unit_test
+	./build/cor_unit_test
+
+facade_unit_test:
+	@echo "== Building and Running 'facade_test.cpp' (UNIT TEST) =="
+	@mkdir -p build
+	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude \
+		tests/facade_test.cpp \
+		src/SalesFacade.cpp \
+		src/PaymentProcessor.cpp \
+		src/Inventory.cpp \
+		src/OrderBuilder.cpp \
+		src/CustomOrderBuilder.cpp \
+		src/Order.cpp \
+		src/StockItem.cpp \
+		src/PlantInstance.cpp \
+		src/InventoryCollection.cpp \
+		src/InventoryIterator.cpp \
+		src/ConcreteInventoryIterator.cpp \
+		-o build/facade_unit_test
+	./build/facade_unit_test
