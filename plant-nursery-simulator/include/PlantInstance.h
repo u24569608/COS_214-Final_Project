@@ -1,7 +1,6 @@
 #ifndef PLANT_INSTANCE_H
 #define PLANT_INSTANCE_H
 
-#include "Subject.h" // Is-a Subject (Observer)
 #include "GreenhouseComponent.h" // Is-a Component 'Leaf' (Composite)
 #include <string>
 #include "PlantState.h"
@@ -16,11 +15,11 @@ class FertilizeStrategy;
  * @brief Represents a single, physical plant in the nursery.
  * @details This is a central class that links many patterns:
  * - Leaf (Composite Pattern) - FR11
- * - ConcreteSubject (Observer Pattern) - FR12
+ * - ConcreteSubject (Observer Pattern) - FR12 (TODO: reintroduce when observer is implemented)
  * - Context (Strategy Pattern) - FR5, FR6, FR7
  * - Receiver (Command Pattern) - FR18
  */
-class PlantInstance /*: public Subject, public GreenhouseComponent*/ {
+class PlantInstance : public GreenhouseComponent {
 public:
     PlantInstance(Plant* plantType);
     ~PlantInstance();
@@ -57,7 +56,10 @@ public:
     bool needsFertilizing() const;
 
     // === Composite Pattern (Leaf method) ===
-    //void performCare() override;
+    /**
+     * @brief Performs care actions for this leaf component.
+     */
+    void performCare() override;
 
     // === Creative Functions (Getters/Setters) ===
     int getHealth() const;

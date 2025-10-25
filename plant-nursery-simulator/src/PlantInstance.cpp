@@ -6,7 +6,8 @@
 
 // --- Constructor & Destructor ---
 PlantInstance::PlantInstance(Plant* plantType) 
-    : plantType(plantType), 
+    : GreenhouseComponent(plantType ? "Prototype Plant" : "Unnamed Plant"),
+      plantType(plantType), 
       wStrategy(nullptr), 
       fStrategy(nullptr), 
       plantState(nullptr), 
@@ -32,16 +33,20 @@ void PlantInstance::setFertilizeStrategy(FertilizeStrategy* fs) {
 
 // --- Command Pattern (Receiver methods) ---
 void PlantInstance::performWater() {
-    // Stub
+    if (wStrategy) {
+        wStrategy->water(*this);
+    }
 }
 
 void PlantInstance::performFertilize() {
-    // Stub
+    if (fStrategy) {
+        fStrategy->fertilize(*this);
+    }
 }
 
 // --- Observer Pattern (Subject methods) ---
 void PlantInstance::applyGrowthTick() {
-    // Stub
+    // TODO(FR12): Implement growth tick and notify observers once the observer subsystem is available.
 }
 
 bool PlantInstance::isThirsty() const {
@@ -53,9 +58,14 @@ bool PlantInstance::needsFertilizing() const {
 }
 
 // --- Composite Pattern (Leaf method) ---
-//void PlantInstance::performCare() {
-    // Stub
-//}
+void PlantInstance::performCare() {
+    if (isThirsty()) {
+        performWater();
+    }
+    if (needsFertilizing()) {
+        performFertilize();
+    }
+}
 
 // --- Getters/Setters ---
 int PlantInstance::getHealth() const {
@@ -71,11 +81,6 @@ int PlantInstance::getWaterLevel() const {
 }
 
 std::string PlantInstance::getPlantTypeName() const {
-    // This is a guess. Assumes Plant.h has a getName()
-    // If Plant.h doesn't exist, just: return "Stub Plant";
-    if (plantType) {
-        // return plantType->getName(); // <-- This is probably the real code
-        return "Stub Plant"; // <-- This will work for now
-    }
-    return "Unknown Plant";
+    // TODO(FR12): Replace stub once Plant exposes a concrete getName().
+    return plantType ? "Stub Plant" : "Unknown Plant";
 }
