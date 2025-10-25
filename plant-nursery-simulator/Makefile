@@ -66,7 +66,6 @@ builder_unit_test:
 		src/OrderDirector.cpp \
 		src/StockItem.cpp \
 		src/PlantInstance.cpp \
-		src/Subject.cpp \
 		-o build/builder_unit_test
 	./build/builder_unit_test
 
