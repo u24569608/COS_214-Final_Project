@@ -14,8 +14,8 @@ class WaterStrategy;
 class StockItem {
 public:
     StockItem(std::string n, double p, PlantInstance* pl);
-    std::string getname();
-    int getPrice();
+    std::string getname() const;
+    int getPrice() const;
     PlantInstance* getplant();
     void setPrice(double price);
     bool isPlant();

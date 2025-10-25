@@ -12,14 +12,14 @@ StockItem::StockItem(std::string n, double p, PlantInstance* pl)
 /**
  * @brief Returns the name of the item
  */
-std::string StockItem::getname() {
+std::string StockItem::getname() const{
     return this->name;
 }
 
 /**
  * @brief Returns the price as an integer (matches header)
  */
-int StockItem::getPrice() {
+int StockItem::getPrice() const{
     // The header file specified 'int' return type.
     // We cast our 'double' member variable to an 'int'.
     return (int)this->price;
