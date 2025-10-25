@@ -1,4 +1,6 @@
-test: iterator_unit_test mediator_unit_test command_unit_test
+# This new 'test' target runs ALL unit tests
+# THIS IS WHAT YOUR CI SHOULD RUN
+test: iterator_unit_test mediator_unit_test command_unit_test builder_unit_test
 	@echo "==== ALL PROJECT TESTS DONE ===="
 
 clean:
@@ -52,6 +54,20 @@ iterator_unit_test:
 		-o build/iterator_unit_test
 	./build/iterator_unit_test
 
+
+builder_unit_test:
+	@echo "== Building and Running 'builder_test.cpp' (UNIT TEST) =="
+	@mkdir -p build
+	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude \
+		tests/builder_test.cpp \
+		src/Order.cpp \
+		src/OrderBuilder.cpp \
+		src/CustomOrderBuilder.cpp \
+		src/OrderDirector.cpp \
+		src/StockItem.cpp \
+		src/PlantInstance.cpp \
+		-o build/builder_unit_test
+	./build/builder_unit_test
 
 command:
 	@mkdir -p build
