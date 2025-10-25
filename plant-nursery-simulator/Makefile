@@ -1,5 +1,3 @@
-# This new 'test' target runs ALL unit tests
-# THIS IS WHAT YOUR CI SHOULD RUN
 test: iterator_unit_test mediator_unit_test command_unit_test builder_unit_test
 	@echo "==== ALL PROJECT TESTS DONE ===="
 
