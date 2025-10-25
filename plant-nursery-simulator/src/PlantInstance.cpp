@@ -2,6 +2,7 @@
 #include "../include/Plant.h" // We need this for the getPlantTypeName()
 #include "../include/WaterStrategy.h"
 #include "../include/FertilizeStrategy.h"
+#include <iostream>
 
 // --- Constructor & Destructor ---
 PlantInstance::PlantInstance(Plant* plantType) 

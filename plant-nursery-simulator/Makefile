@@ -1,9 +1,10 @@
-# This new 'test' target runs ALL unit tests
-# THIS IS WHAT YOUR CI SHOULD RUN
-test: iterator_unit_test mediator_unit_test
+test: iterator_unit_test mediator_unit_test command_unit_test
 	@echo "==== ALL PROJECT TESTS DONE ===="
 
-# --- Original Mediator Targets ---
+clean:
+	@echo "==== CLEANING BUILD DIRECTORY ===="
+	rm -rf build
+
 mediator_colleague_test: 
 	@echo "== Testing 'Colleague.cpp' =="
 	@mkdir -p build
@@ -37,8 +38,6 @@ mediator_test:
 	$(MAKE) mediator_nursery_test
 	$(MAKE) mediator_unit_test
 
-# --- NEW Iterator Test Target ---
-# This target builds and runs your iterator test
 iterator_unit_test:
 	@echo "== Building and Running 'iterator_test.cpp' (UNIT TEST) =="
 	@mkdir -p build
@@ -54,6 +53,17 @@ iterator_unit_test:
 	./build/iterator_unit_test
 
 
-clean:
-	@echo "==== CLEANING BUILD DIRECTORY ===="
-	rm -rf build
+command:
+	@mkdir -p build
+	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude -c src/PlantCommand.cpp    -o build/PlantCommand.o
+	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude -c src/WaterPlant.cpp       -o build/WaterPlant.o
+	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude -c src/FertilizePlant.cpp   -o build/FertilizePlant.o
+	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude -c src/PlantInstance.cpp    -o build/PlantInstance.o
+
+command_unit_test: command
+	@echo "== Building and Running 'command_test.cpp' (UNIT TEST) =="
+	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude \
+		build/PlantCommand.o build/WaterPlant.o build/FertilizePlant.o build/PlantInstance.o \
+		tests/command_test.cpp \
+		-o build/command_unit_test
+	./build/command_unit_test
