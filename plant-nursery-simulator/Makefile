@@ -111,8 +111,6 @@ facade_unit_test:
 		src/Order.cpp \
 		src/StockItem.cpp \
 		src/PlantInstance.cpp \
-		src/Subject.cpp \
-		src/GreenhouseComponent.cpp \
 		src/InventoryCollection.cpp \
 		src/InventoryIterator.cpp \
 		src/ConcreteInventoryIterator.cpp \

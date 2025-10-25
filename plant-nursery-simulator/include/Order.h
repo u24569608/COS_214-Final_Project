@@ -35,7 +35,7 @@ public:
     void setOrderStatus(std::string newStatus);
 
     
-    const std::vector<StockItem>& Order::getItems() const;
+    const std::vector<StockItem>& getItems() const;
 
 private:
     std::vector<StockItem> items; ///< The parts of the complex object.
