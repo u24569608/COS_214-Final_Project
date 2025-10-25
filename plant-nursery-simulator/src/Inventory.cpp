@@ -1,7 +1,9 @@
 #include "../include/Inventory.h"
 #include "../include/ConcreteInventoryIterator.h" // For createIterator()
 #include "../include/StockItem.h"                 // For item definitions
+#include "../include/FileAdapter.h"
 #include <algorithm>                   // For std::find_if, std::remove_if
+#include <iostream>
 
 Inventory::Inventory() {
     // Constructor
@@ -69,14 +71,36 @@ StockItem* Inventory::findItem(std::string name) {
     return nullptr; // Not found
 }
 
-// --- Stubbed Adapter Methods ---
-// These are for a different pattern.I'll leave them empty for bulelani to implament.
-// they are here so the program can compile.
 
+/**
+ * @brief Delegates loading to the provided adapter.
+ */
 void Inventory::loadFromFile(FileAdapter* adapter, std::string filePath) {
-    // Logic for the Adapter pattern will go here later
+    if (adapter == nullptr) {
+        std::cerr << "[Inventory] Error: FileAdapter is null." << std::endl;
+        return;
+    }
+    // Clear current inventory before loading
+    std::cout << "[Inventory] Clearing current inventory before loading..." << std::endl;
+    for (StockItem* item : items) {
+        delete item;
+    }
+    items.clear();
+
+    std::cout << "[Inventory] Loading from file: " << filePath << std::endl;
+    adapter->loadInventory(filePath, this);
+    std::cout << "[Inventory] Load complete. Current stock count: " << items.size() << std::endl;
 }
 
+/**
+ * @brief Delegates saving to the provided adapter.
+ */
 void Inventory::saveToFile(FileAdapter* adapter, std::string filePath) {
-    // Logic for the Adapter pattern will go here later
+     if (adapter == nullptr) {
+        std::cerr << "[Inventory] Error: FileAdapter is null." << std::endl;
+        return;
+    }
+    std::cout << "[Inventory] Saving current inventory (" << items.size() << " items) to file: " << filePath << std::endl;
+    adapter->saveInventory(filePath, this);
+    std::cout << "[Inventory] Save complete." << std::endl;
 }
