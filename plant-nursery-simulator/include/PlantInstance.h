@@ -21,7 +21,12 @@ class FertilizeStrategy;
  */
 class PlantInstance : public GreenhouseComponent {
 public:
-    PlantInstance(Plant* plantType);
+    /**
+     * @brief Constructs an instance bound to a plant prototype.
+     * @param plantType Pointer to the plant used to configure defaults.
+     * @param instanceName Optional override for the instance name; defaults to the prototype name.
+     */
+    PlantInstance(Plant* plantType, std::string instanceName = "");
     ~PlantInstance();
 
     // === Strategy Pattern ===
@@ -39,7 +44,8 @@ public:
     // === Observer Pattern (Subject methods) ===
     /**
      * @brief Creative Function: Simulates a tick of time passing.
-     * @details Lowers water, nutrients, and triggers notify() if needed.
+     * @details Lowers water and nutrient levels, then defers to the current state for reactions.
+     * @note TODO(FR12): Replace the fixed consumption values once balancing rules are decided.
      */
     void applyGrowthTick();
 
@@ -65,10 +71,22 @@ public:
     int getHealth() const;
     void setHealth(int newHealth);
     int getWaterLevel() const;
+    /**
+     * @brief Retrieves the current nutrient saturation level.
+     * @return Integer nutrient level in arbitrary units.
+     */
+    int getNutrientLevel() const;
     std::string getPlantTypeName() const;
+    /**
+     * @brief Updates the human-readable name of this plant instance.
+     * @param newName The new name to assign; ignored when empty.
+     */
+    void rename(const std::string& newName);
 
 private:
-    Plant* plantType; ///< The prototype
+    static std::string deriveInstanceName(Plant* plantType, const std::string& instanceName);
+
+    Plant* plantType; 
     WaterStrategy* wStrategy; ///< Current water strategy
     FertilizeStrategy* fStrategy; ///< Current fertilize strategy
     PlantState* plantState;

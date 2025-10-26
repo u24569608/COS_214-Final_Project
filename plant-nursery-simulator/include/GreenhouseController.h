@@ -23,7 +23,7 @@ public:
 
     /**
      * @brief Triggers a growth tick for every plant and performs follow-up care.
-     * @details The method iterates over all plants, applying growth and invoking care actions.
+     * @details Creates a fresh iterator from the current root bed and dispatches growth ticks.
      */
     void runGrowthTick();
 

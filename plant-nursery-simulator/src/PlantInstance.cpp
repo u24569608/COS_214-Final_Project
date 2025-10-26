@@ -2,11 +2,12 @@
 #include "../include/Plant.h" // We need this for the getPlantTypeName()
 #include "../include/WaterStrategy.h"
 #include "../include/FertilizeStrategy.h"
+#include <algorithm>
 #include <iostream>
 
 // --- Constructor & Destructor ---
-PlantInstance::PlantInstance(Plant* plantType) 
-    : GreenhouseComponent(plantType ? "Prototype Plant" : "Unnamed Plant"),
+PlantInstance::PlantInstance(Plant* plantType, std::string instanceName) 
+    : GreenhouseComponent(deriveInstanceName(plantType, instanceName)),
       plantType(plantType), 
       wStrategy(nullptr), 
       fStrategy(nullptr), 
@@ -46,7 +47,15 @@ void PlantInstance::performFertilize() {
 
 // --- Observer Pattern (Subject methods) ---
 void PlantInstance::applyGrowthTick() {
-    // TODO(FR12): Implement growth tick and notify observers once the observer subsystem is available.
+    constexpr int kDefaultWaterConsumption = 5;
+    constexpr int kDefaultNutrientConsumption = 3;
+    // TODO(FR12): Allow tuning of consumption rates when balancing rules are available.
+    waterLevel = std::max(0, waterLevel - kDefaultWaterConsumption);
+    nutrientLevel = std::max(0, nutrientLevel - kDefaultNutrientConsumption);
+
+    if (plantState) {
+        plantState->onTick(*this);
+    }
 }
 
 bool PlantInstance::isThirsty() const {
@@ -80,7 +89,27 @@ int PlantInstance::getWaterLevel() const {
     return this->waterLevel;
 }
 
+int PlantInstance::getNutrientLevel() const {
+    return this->nutrientLevel;
+}
+
 std::string PlantInstance::getPlantTypeName() const {
-    // TODO(FR12): Replace stub once Plant exposes a concrete getName().
-    return plantType ? "Stub Plant" : "Unknown Plant";
+    return plantType ? plantType->getName() : "Unknown Plant";
+}
+
+void PlantInstance::rename(const std::string& newName) {
+    if (newName.empty()) {
+        return;
+    }
+    name = newName;
+}
+
+std::string PlantInstance::deriveInstanceName(Plant* plantPrototype, const std::string& instanceName) {
+    if (!instanceName.empty()) {
+        return instanceName;
+    }
+    if (plantPrototype) {
+        return plantPrototype->getName();
+    }
+    return "Unnamed Plant";
 }

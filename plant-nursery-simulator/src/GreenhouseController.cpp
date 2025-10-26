@@ -25,7 +25,5 @@ void GreenhouseController::runGrowthTick() {
 
     for (PlantInstance* plant = iterator->first(); plant != nullptr; plant = iterator->next()) {
         plant->applyGrowthTick();
-        // plant->performCare(); //TODO: Where is the care action supposed to be invoked?
     }
 }
-
