@@ -1,4 +1,4 @@
-test: iterator_unit_test mediator_unit_test command_unit_test builder_unit_test chain_of_responsibility_unit_test facade_unit_test adapter_unit_test
+test: iterator_unit_test mediator_unit_test command_unit_test builder_unit_test chain_of_responsibility_unit_test facade_unit_test adapter_unit_test composite_unit_test
 	@echo "==== ALL PROJECT TESTS DONE ===="
 
 clean:
