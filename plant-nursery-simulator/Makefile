@@ -156,6 +156,8 @@ composite_unit_test:
 		tests/composite_test.cpp \
 		src/GreenhouseComponent.cpp \
 		src/GreenhouseBed.cpp \
+		src/ConcreteGreenhouseIterator.cpp \
+		src/GreenhouseController.cpp \
 		src/PlantInstance.cpp \
 		-o build/composite_unit_test
 	./build/composite_unit_test

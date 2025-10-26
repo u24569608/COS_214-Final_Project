@@ -6,6 +6,8 @@
 #include <string>
 #include <memory>
 
+class ConcreteGreenhouseIterator;
+
 /**
  * @file GreenhouseBed.h
  * @brief The 'Composite' class. Holds other components (beds or plants). (FR10)
@@ -55,11 +57,12 @@ public:
 
     /**
      * @brief Creates an iterator spanning every plant in this bed.
-     * @return Unique pointer to a greenhouse iterator, or nullptr until provided.
+     * @return Unique pointer to a greenhouse iterator traversing the composite hierarchy.
      */
     std::unique_ptr<GreenhouseIterator> createIterator() override;
 
 private:
+    friend class ConcreteGreenhouseIterator; ///< Allows iterator to traverse private children.
     std::vector<GreenhouseComponent*> children; ///< Child components.
 };
 

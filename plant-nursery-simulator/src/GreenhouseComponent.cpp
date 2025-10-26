@@ -17,7 +17,7 @@ std::string GreenhouseComponent::getName() const {
 }//getName
 
 std::unique_ptr<GreenhouseIterator> GreenhouseComponent::createIterator() {
-	// TODO(FR10): Return a concrete iterator implementation once available.
+	// Leaf components do not expose iteration by default.
 	return nullptr;
 }//createIterator
 

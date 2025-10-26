@@ -53,8 +53,8 @@ public:
 
     /**
      * @brief Creates an iterator over the plants held by this component.
-     * @note The iterator implementation is provided separately.
-     * @return A unique pointer to a greenhouse iterator or nullptr until implemented.
+     * @note Leaf components return nullptr; composites override to provide iterators.
+     * @return A unique pointer to a greenhouse iterator when available, otherwise nullptr.
      */
     virtual std::unique_ptr<GreenhouseIterator> createIterator();
 

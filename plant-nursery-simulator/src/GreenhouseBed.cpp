@@ -1,8 +1,10 @@
 #include "../include/GreenhouseBed.h"
 #include "../include/GreenhouseComponent.h"
 #include "../include/GreenhouseIterator.h"
+#include "../include/ConcreteGreenhouseIterator.h"
 
 #include <algorithm>
+#include <memory>
 #include <utility>
 
 GreenhouseBed::GreenhouseBed()
@@ -65,6 +67,5 @@ int GreenhouseBed::getSize() const {
 }
 
 std::unique_ptr<GreenhouseIterator> GreenhouseBed::createIterator() {
-    // TODO(FR10): Supply a composite-aware iterator implementation.
-    return nullptr;
+    return std::make_unique<ConcreteGreenhouseIterator>(this);
 }
