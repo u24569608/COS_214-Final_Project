@@ -38,6 +38,7 @@ void SalesFacade::addItemToInventory(std::string name, double price) {
  * This is the "happy path" (browse->add->pay).
  */
 bool SalesFacade::purchaseItem(Customer* customer, StockItem* item) {
+    (void)customer; // <-- ADD THIS LINE to silence the unused parameter warning
     if (item == nullptr) {
         return false;
     }
@@ -52,9 +53,11 @@ bool SalesFacade::purchaseItem(Customer* customer, StockItem* item) {
     }
 
     // 2. Process Payment
+    // Using const getter now
     double price = itemInStock->getPrice();
     // In a real app, we'd get customer details from the Customer object
-    bool paid = paymentProcessor->processPayment("MockCustomer", price);
+    // For now, using a mock string since 'customer' is unused
+    bool paid = paymentProcessor->processPayment("MockCustomerDetails", price);
 
     // 3. Update Inventory
     if (paid) {
@@ -72,13 +75,14 @@ bool SalesFacade::purchaseItem(Customer* customer, StockItem* item) {
  * @brief Simplifies building a complex order.
  */
 Order* SalesFacade::buildAndFinalizeOrder(Customer* customer, std::vector<StockItem> items) {
+    (void)customer; // <-- ADD THIS LINE to silence the unused parameter warning
     // 1. Build the order
     orderBuilder->createNewOrder();
     for (StockItem& item : items) {
         // We pass the address of the item in our local vector copy
         orderBuilder->addItem(&item);
     }
-    
+
     Order* order = orderBuilder->getOrder();
     if (order == nullptr) {
         return nullptr; // Builder failed
@@ -86,13 +90,15 @@ Order* SalesFacade::buildAndFinalizeOrder(Customer* customer, std::vector<StockI
 
     // 2. Process Payment
     double total = order->calculateTotal();
-    bool paid = paymentProcessor->processPayment("MockCustomer", total);
+     // Using a mock string since 'customer' is unused
+    bool paid = paymentProcessor->processPayment("MockCustomerDetails", total);
 
     // 3. Finalize and update inventory
     if (paid) {
         order->setOrderStatus("Paid");
         // Remove all items from inventory
         for (StockItem& item : items) {
+            // Using const getter now
             inventory->removeItem(item.getname());
         }
         std::cout << "[SalesFacade] Custom order finalized and paid." << std::endl;
@@ -128,25 +134,25 @@ bool SalesFacade::processReturn(Order* order) {
     double amount = order->calculateTotal();
     std::cout << "[SalesFacade] Processing refund of $" << amount << "..." << std::endl;
     // In a real app, we'd call paymentProcessor->issueRefund(amount)
-    
+
     // 2. Update order status
     order->setOrderStatus("Refunded");
-    
+
     // 3. Return items to stock
     std::cout << "[SalesFacade] Restocking items..." << std::endl;
-    
+
     // Iterate over the COPIES of items in the order
     for (const StockItem& itemCopy : order->getItems()) {
-        
+
         // Create a NEW item on the heap (a "new plant")
         // We must do this because Inventory expects to OWN its pointers.
         StockItem* newItem = new StockItem(
-            itemCopy.getname(), 
-            itemCopy.getPrice(), 
+            itemCopy.getname(),
+            itemCopy.getPrice(),
             nullptr // We lose the specific PlantInstance,
                     // but the item (e.g., "Rose") is back in stock.
         );
-        
+
         // Give the new item to the inventory
         inventory->additem(newItem);
     }

@@ -1,6 +1,7 @@
 #include "../include/ConcreteInventoryIterator.h"
 #include "../include/Inventory.h" // Needs the full definition of Inventory
 #include "../include/StockItem.h"
+#include <vector> // Needed for size_t
 
 /**
  * @brief Constructor.
@@ -25,30 +26,35 @@ StockItem* ConcreteInventoryIterator::first() {
  */
 StockItem* ConcreteInventoryIterator::next() {
     // Only increment if there's a next item to move to
+    // We use hasNext() which already does the check
     if (hasNext()) {
-        currentIndex++;
+         currentIndex++;
+         // Return the item *after* incrementing
+         return currentItem();
     }
-    return currentItem();
+    // If there is no next, return nullptr without incrementing
+    return nullptr;
 }
 
 /**
  * @brief Checks if there are more items to iterate over.
  */
 bool ConcreteInventoryIterator::hasNext() const {
-    // We can access 'items' directly because we are a 'friend'
-    // [see: Inventory.h]
-    return currentIndex < inventory->items.size();
+    // Cast currentIndex to size_t (the type of vector::size())
+    // to fix the signed/unsigned comparison warning.
+    // This is safe because currentIndex should never be negative here.
+    return static_cast<size_t>(currentIndex) < inventory->items.size();
 }
 
 /**
  * @brief Gets the item at the current position.
  */
 StockItem* ConcreteInventoryIterator::currentItem() const {
-    if (hasNext()) {
-        // We can access 'items' directly
+    // Check bounds *before* accessing the vector element
+    if (static_cast<size_t>(currentIndex) >= 0 && static_cast<size_t>(currentIndex) < inventory->items.size()) {
         return inventory->items[currentIndex];
     }
-    return nullptr; // We are at the end of the collection
+    return nullptr; // We are at the end or index is invalid
 }
 
 /**
