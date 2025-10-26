@@ -1,21 +1,34 @@
 #ifndef GREENHOUSE_CONTROLLER_H
 #define GREENHOUSE_CONTROLLER_H
 
-/**
- * @file GreenhouseController.h
- * @brief The 'controller' class. Preforms the growthTick opertion.
- */
-
 #include "GreenhouseBed.h"
 
-class GreenhouseController{
-    public:
+/**
+ * @file GreenhouseController.h
+ * @brief The controller responsible for applying periodic care to the nursery.
+ */
+class GreenhouseController {
+public:
+    /**
+     * @brief Constructs a controller optionally bound to an existing bed hierarchy.
+     * @param root Optional pointer to the greenhouse composite that should be managed.
+     */
+    explicit GreenhouseController(GreenhouseBed* root = nullptr);
+
+    /**
+     * @brief Updates the controller to operate on a different root bed.
+     * @param root Pointer to the new composite hierarchy (may be nullptr to detach).
+     */
+    void setRootBed(GreenhouseBed* root);
+
+    /**
+     * @brief Triggers a growth tick for every plant and performs follow-up care.
+     * @details Creates a fresh iterator from the current root bed and dispatches growth ticks.
+     */
     void runGrowthTick();
 
-
-    private:
-    GreenhouseBed* rootBed;
-
+private:
+    GreenhouseBed* rootBed; ///< Entry point into the composite structure under management.
 };
 
 #endif
