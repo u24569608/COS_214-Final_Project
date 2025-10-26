@@ -4,6 +4,7 @@
 #include "../include/FertilizeStrategy.h"
 #include <algorithm>
 #include <iostream>
+#include <unordered_map>
 
 // --- Constructor & Destructor ---
 PlantInstance::PlantInstance(Plant* plantType, std::string instanceName) 
@@ -108,8 +109,15 @@ std::string PlantInstance::deriveInstanceName(Plant* plantPrototype, const std::
     if (!instanceName.empty()) {
         return instanceName;
     }
+    static std::unordered_map<std::string, int> nameCounters;
     if (plantPrototype) {
-        return plantPrototype->getName();
+        const std::string baseName = plantPrototype->getName();
+        int& counter = nameCounters[baseName];
+        ++counter;
+        return baseName + std::to_string(counter);
     }
-    return "Unnamed Plant";
+    const std::string baseName = "Unnamed Plant";
+    int& counter = nameCounters[baseName];
+    ++counter;
+    return baseName + std::to_string(counter);
 }

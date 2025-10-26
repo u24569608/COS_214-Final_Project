@@ -24,7 +24,7 @@ public:
     /**
      * @brief Constructs an instance bound to a plant prototype.
      * @param plantType Pointer to the plant used to configure defaults.
-     * @param instanceName Optional override for the instance name; defaults to the prototype name.
+     * @param instanceName Optional override for the instance name; defaults to an auto-numbered prototype name (e.g. Rose1).
      */
     PlantInstance(Plant* plantType, std::string instanceName = "");
     ~PlantInstance();

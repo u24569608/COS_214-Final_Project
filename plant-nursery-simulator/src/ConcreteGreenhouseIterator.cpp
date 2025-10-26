@@ -8,12 +8,14 @@ ConcreteGreenhouseIterator::ConcreteGreenhouseIterator(GreenhouseBed* root)
     : rootBed(root),
       traversalOrder(),
       currentIndex(0U) {
-    collectPlants(rootBed);
 }
 
 PlantInstance* ConcreteGreenhouseIterator::first() {
+    traversalOrder.clear();
     currentIndex = 0U;
+    collectPlants(rootBed);
     if (traversalOrder.empty()) {
+        currentIndex = 0U;
         return nullptr;
     }
     return traversalOrder[currentIndex];

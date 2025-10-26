@@ -114,6 +114,42 @@ bool testNestedBedDepthFirstOrder() {
     return passed;
 }
 
+bool testIteratorRefreshesOnFirst() {
+    std::cout << "Running test: testIteratorRefreshesOnFirst..." << std::endl;
+    bool passed = true;
+
+    GreenhouseBed bed("Dynamic Bed");
+    TestPlant initial("Initial Plant");
+    TestPlant lateArrival("Late Arrival");
+
+    bed.add(&initial);
+
+    std::unique_ptr<GreenhouseIterator> iterator = bed.createIterator();
+    passed &= reportFailure(static_cast<bool>(iterator), "Iterator should not be null");
+
+    std::vector<PlantInstance*> initialOrder;
+    for (PlantInstance* plant = iterator->first(); plant != nullptr; plant = iterator->next()) {
+        initialOrder.push_back(plant);
+    }
+
+    passed &= reportFailure(initialOrder.size() == 1, "Iterator should recognise the single existing plant");
+    passed &= reportFailure(initialOrder.front() == &initial, "Initial traversal should contain the first plant");
+
+    bed.add(&lateArrival);
+
+    bool foundLateArrival = false;
+    for (PlantInstance* plant = iterator->first(); plant != nullptr; plant = iterator->next()) {
+        if (plant == &lateArrival) {
+            foundLateArrival = true;
+            break;
+        }
+    }
+
+    passed &= reportFailure(foundLateArrival, "Iterator::first should rebuild traversal after structure changes");
+
+    return passed;
+}
+
 int main() {
     int passed = 0;
     int total = 0;
@@ -129,6 +165,11 @@ int main() {
     ++total;
 
     if (testNestedBedDepthFirstOrder()) {
+        ++passed;
+    }
+    ++total;
+
+    if (testIteratorRefreshesOnFirst()) {
         ++passed;
     }
     ++total;

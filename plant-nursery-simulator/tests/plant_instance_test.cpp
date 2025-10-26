@@ -39,7 +39,7 @@ void testPrototypeNameMirrorsInstance() {
     DummyPlant prototype("Prototype Rose");
     PlantInstance instance(&prototype);
 
-    assertEqStr(instance.getName(), "Prototype Rose", "PlantInstance should mirror prototype name by default");
+    assertEqStr(instance.getName(), "Prototype Rose1", "PlantInstance should auto-number prototype name by default");
     assertEqStr(instance.getPlantTypeName(), "Prototype Rose", "getPlantTypeName should mirror prototype name");
 }
 
@@ -74,14 +74,40 @@ void testGrowthTickLowersResources() {
     assertTrue(instance.getNutrientLevel() >= 0, "Nutrient level should not go below zero");
 }
 
+void testAutoIncrementedNamesAreUnique() {
+    std::cout << "Running test: testAutoIncrementedNamesAreUnique..." << std::endl;
+
+    DummyPlant prototype("Prototype Tulip");
+    PlantInstance first(&prototype);
+    PlantInstance second(&prototype);
+
+    assertEqStr(first.getName(), "Prototype Tulip1", "First instance should receive suffix 1");
+    assertEqStr(second.getName(), "Prototype Tulip2", "Second instance should receive suffix 2");
+    assertTrue(first.getName() != second.getName(), "Instances should not share identical default names");
+}
+
 int main() {
+    int testsPassed = 0;
+    int baseline = failures;
+
     testPrototypeNameMirrorsInstance();
+    if (failures == baseline) { ++testsPassed; }
+    baseline = failures;
+
     testRenameUpdatesInstanceName();
+    if (failures == baseline) { ++testsPassed; }
+    baseline = failures;
+
     testGrowthTickLowersResources();
+    if (failures == baseline) { ++testsPassed; }
+    baseline = failures;
+
+    testAutoIncrementedNamesAreUnique();
+    if (failures == baseline) { ++testsPassed; }
 
     std::cout << "\n---------------------------\n";
     std::cout << "     TEST SUMMARY          \n";
-    std::cout << " Tests Passed: " << (3 - failures) << " / 3" << std::endl;
+    std::cout << " Tests Passed: " << testsPassed << " / 4" << std::endl;
     std::cout << "---------------------------\n";
 
     if (failures == 0) {
