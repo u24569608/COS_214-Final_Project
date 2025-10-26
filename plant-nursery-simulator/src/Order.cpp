@@ -47,3 +47,7 @@ void Order::printOrder() const {
     std::cout << "  Total: $" << calculateTotal() << std::endl;
     std::cout << "-------------------------" << std::endl;
 }
+
+const std::vector<StockItem>& Order::getItems() const {
+    return this->items;
+}

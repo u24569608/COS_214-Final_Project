@@ -32,18 +32,18 @@ void Inventory::additem(StockItem* item) {
 }
 
 void Inventory::removeItem(std::string name) {
-    auto it = std::remove_if(items.begin(), items.end(), 
+    // 1. Find the first item that matches the name
+    auto it = std::find_if(items.begin(), items.end(), 
         [&name](StockItem* item) {
-            // This relies on the corrected StockItem.h (getname() returning string)
-            if (item->getname() == name) {
-                delete item; // Free the memory
-                return true; // Mark for removal
-            }
-            return false;
+            return item->getname() == name;
         });
-    
-    // std::remove_if just shuffles elements, 'erase' actually removes them
-    items.erase(it, items.end());
+
+    // 2. If we found it, delete and erase
+    if (it != items.end()) {
+        StockItem* itemToDelete = *it; // Get the pointer
+        items.erase(it);               // Erase the pointer from the vector
+        delete itemToDelete;           // Delete the object from memory
+    }
 }
 
 int Inventory::getStockCount(std::string plantType) const {
