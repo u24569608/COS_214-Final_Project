@@ -1,81 +1,111 @@
-#include "../include/PlantInstance.h"
-#include "../include/Plant.h" // We need this for the getPlantTypeName()
-#include "../include/WaterStrategy.h"
-#include "../include/FertilizeStrategy.h"
-#include <iostream>
+/**
+ * @file PlantInstance.cpp
+ * @brief Combined implementation of the PlantInstance class.
+ */
+#include "PlantInstance.h"
+#include "Plant.h"
+#include "WaterStrategy.h"
+#include "FertilizeStrategy.h"
+#include "SeedState.h" // Assuming SeedState is the default
+#include <iostream>    // Included from the second file
 
-// --- Constructor & Destructor ---
-PlantInstance::PlantInstance(Plant* plantType) 
-    : plantType(plantType), 
-      wStrategy(nullptr), 
-      fStrategy(nullptr), 
-      plantState(nullptr), 
-      health(100), 
-      waterLevel(100), 
-      nutrientLevel(100) {
-    // Constructor body
+/**
+ * @brief Constructor
+ * @param proto A *cloned* plant prototype.
+ */
+PlantInstance::PlantInstance(Plant* proto) : plantType(proto) {
+    // Set initial state
+    this->plantState = new SeedState(); 
+    
+    // Use the prototype to set the *initial* strategies
+    // These pointers are *owned* by the prototype.
+    this->wStrategy = plantType->getDefaultWaterStrat();
+    this->fStrategy = plantType->getDefaultFertStrat();
+
+    // Set initial levels
+    this->health = 100;
+    this->waterLevel = 100;
+    this->nutrientLevel = 100;
 }
 
+/**
+ * @brief Destructor
+ */
 PlantInstance::~PlantInstance() {
-    // Destructor body
-    // (We'll worry about deleting pointers later)
+    // The instance owns its cloned prototype and must delete it
+    delete plantType;
+    // The instance owns its state object
+    delete plantState;
+    
+    // The instance does NOT own the strategy pointers (wStrategy, fStrategy).
+    // They are owned by the prototype and will be deleted when 'delete plantType'
+    // calls the Plant base class destructor.
 }
 
-// --- Strategy Pattern ---
+// === Strategy Pattern ===
 void PlantInstance::setWaterStrategy(WaterStrategy* ws) {
     this->wStrategy = ws;
+}
+
+WaterStrategy* PlantInstance::getWaterStrategy() const {
+    return wStrategy;
 }
 
 void PlantInstance::setFertilizeStrategy(FertilizeStrategy* fs) {
     this->fStrategy = fs;
 }
 
-// --- Command Pattern (Receiver methods) ---
+FertilizeStrategy* PlantInstance::getFertilizeStrategy() const {
+    return fStrategy;
+}
+
+// === Command Pattern (Receiver methods) ===
 void PlantInstance::performWater() {
-    // Stub
+    if (wStrategy) {
+        wStrategy->water(this); // Pass 'this' as the Context
+    }
 }
 
 void PlantInstance::performFertilize() {
-    // Stub
+    if (fStrategy) {
+        fStrategy->fertilize(this); // Pass 'this' as the Context
+    }
 }
 
-// --- Observer Pattern (Subject methods) ---
-void PlantInstance::applyGrowthTick() {
-    // Stub
+// === Observer / State methods ===
+void PlantInstance::applyGrowthTick() { 
+    /* ... Stub ... */ 
+    // This is where you would update health, water, nutrients
+    // and potentially change the plantState.
 }
 
-bool PlantInstance::isThirsty() const {
-    return waterLevel < 50; // Stub logic
+bool PlantInstance::isThirsty() const { 
+    return waterLevel < 50; 
 }
 
-bool PlantInstance::needsFertilizing() const {
-    return nutrientLevel < 50; // Stub logic
+bool PlantInstance::needsFertilizing() const { 
+    return nutrientLevel < 50; 
 }
 
-// --- Composite Pattern (Leaf method) ---
+// === Composite Pattern (Leaf method) ---
 //void PlantInstance::performCare() {
-    // Stub
+    // Stub from second file
 //}
 
-// --- Getters/Setters ---
-int PlantInstance::getHealth() const {
-    return this->health;
-}
-
-void PlantInstance::setHealth(int newHealth) {
-    this->health = newHealth;
-}
-
-int PlantInstance::getWaterLevel() const {
-    return this->waterLevel;
-}
-
+// === Getters / Setters ===
 std::string PlantInstance::getPlantTypeName() const {
-    // This is a guess. Assumes Plant.h has a getName()
-    // If Plant.h doesn't exist, just: return "Stub Plant";
-    if (plantType) {
-        // return plantType->getName(); // <-- This is probably the real code
-        return "Stub Plant"; // <-- This will work for now
-    }
-    return "Unknown Plant";
+    // Get name from the prototype
+    return plantType ? plantType->getName() : "Unknown";
+}
+
+int PlantInstance::getHealth() const { 
+    return health; 
+}
+
+void PlantInstance::setHealth(int newHealth) { 
+    health = newHealth; 
+}
+
+int PlantInstance::getWaterLevel() const { 
+    return waterLevel; 
 }

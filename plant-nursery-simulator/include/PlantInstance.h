@@ -22,7 +22,16 @@ class FertilizeStrategy;
  */
 class PlantInstance /*: public Subject, public GreenhouseComponent*/ {
 public:
+    
+    /**
+     * @brief Constructor that takes a cloned prototype.
+     * @param plantType A pointer to a *cloned* Plant object.
+     */
     PlantInstance(Plant* plantType);
+
+    /**
+     * @brief Destructor.
+     */
     ~PlantInstance();
 
     // === Strategy Pattern ===
@@ -32,6 +41,18 @@ public:
      */
     void setWaterStrategy(WaterStrategy* ws);
     void setFertilizeStrategy(FertilizeStrategy* fs);
+
+    /**
+     * @brief Gets the current water strategy.
+     * @return WaterStrategy*
+     */
+    WaterStrategy* getWaterStrategy() const;
+
+    /**
+     * @brief Gets the current fertilize strategy.
+     * @return FertilizeStrategy*
+     */
+    FertilizeStrategy* getFertilizeStrategy() const;
 
     // === Command Pattern (Receiver methods) ===
     void performWater();
