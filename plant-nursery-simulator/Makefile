@@ -80,11 +80,14 @@ command:
 command_unit_test: command
 	@echo "== Building and Running 'command_test.cpp' (UNIT TEST) =="
 	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude \
-		build/PlantCommand.o build/WaterPlant.o build/FertilizePlant.o build/PlantInstance.o \
+		build/PlantCommand.o \
+		build/WaterPlant.o \
+		build/FertilizePlant.o \
+		build/PlantInstance.o \
+		build/GreenhouseComponent.o \
 		tests/command_test.cpp \
 		-o build/command_unit_test
 	./build/command_unit_test
-
 chain_of_responsibility:
 	@mkdir -p build
 	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude -c src/CareRequestHandler.cpp   -o build/CareRequestHandler.o
@@ -96,10 +99,15 @@ chain_of_responsibility:
 chain_of_responsibility_unit_test: chain_of_responsibility
 	@echo "== Building and Running 'chain_of_responsibility_test.cpp' (UNIT TEST) =="
 	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude \
-		build/CareRequestHandler.o build/WateringHandler.o build/FertilizingHandler.o build/PlantInstance.o \
+		build/CareRequestHandler.o \
+		build/WateringHandler.o \
+		build/FertilizingHandler.o \
+		build/PlantInstance.o \
+		build/GreenhouseComponent.o \
 		tests/chain_of_responsibility_test.cpp \
 		-o build/cor_unit_test
 	./build/cor_unit_test
+
 
 facade_unit_test:
 	@echo "== Building and Running 'facade_test.cpp' (UNIT TEST) =="
@@ -117,6 +125,7 @@ facade_unit_test:
 		src/InventoryCollection.cpp \
 		src/InventoryIterator.cpp \
 		src/ConcreteInventoryIterator.cpp \
+		build/GreenhouseComponent.o \
 		-o build/facade_unit_test
 	./build/facade_unit_test
 
@@ -136,6 +145,7 @@ adapter_unit_test:
 		src/InventoryCollection.cpp \
 		src/InventoryIterator.cpp \
 		src/ConcreteInventoryIterator.cpp \
+		build/GreenhouseComponent.o \
 		-o build/adapter_unit_test
 	./build/adapter_unit_test
 
