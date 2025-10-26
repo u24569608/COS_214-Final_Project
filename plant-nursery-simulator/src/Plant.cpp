@@ -1,25 +1,27 @@
-#include "../include/Plant.h"
+/**
+ * @file Plant.cpp
+ * @brief Implementation of the abstract Plant base class.
+ */
+#include "Plant.h"
+#include "WaterStrategy.h"
+#include "FertilizeStrategy.h"
 
-Plant::~Plant() = default;
-
-Plant* Plant::clone() const {
-    // TODO(FR3): Provide deep copy logic when prototype catalogue is implemented.
-    return nullptr;
+// Protected constructor implementation
+Plant::Plant(std::string n, std::string t, WaterStrategy* ws, FertilizeStrategy* fs)
+    : name(n), type(t), defaultWaterStrat(ws), defaultFertilizerStrat(fs) {
 }
 
-std::string Plant::getName() const {
-    return name;
+// Virtual destructor
+Plant::~Plant() {
+    // The prototype owns its default strategies.
+    // When the prototype is destroyed (by the registry's unique_ptr),
+    // it cleans up its strategy objects.
+    delete defaultWaterStrat;
+    delete defaultFertilizerStrat;
 }
 
-std::string Plant::getType() const {
-    return type;
-}
-
-WaterStrategy* Plant::getDefaultWaterStrat() const {
-    return defaultWaterStrat;
-}
-
-FertilizeStrategy* Plant::getDefaultFertStrat() const {
-    return defaultFertilizerStrat;
-}
-
+// Getter implementations
+std::string Plant::getName() const { return name; }
+std::string Plant::getType() const { return type; }
+WaterStrategy* Plant::getDefaultWaterStrat() const { return defaultWaterStrat; }
+FertilizeStrategy* Plant::getDefaultFertStrat() const { return defaultFertilizerStrat; }

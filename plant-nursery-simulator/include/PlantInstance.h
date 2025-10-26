@@ -37,6 +37,18 @@ public:
     void setWaterStrategy(WaterStrategy* ws);
     void setFertilizeStrategy(FertilizeStrategy* fs);
 
+    /**
+     * @brief Gets the current water strategy.
+     * @return WaterStrategy*
+     */
+    WaterStrategy* getWaterStrategy() const;
+
+    /**
+     * @brief Gets the current fertilize strategy.
+     * @return FertilizeStrategy*
+     */
+    FertilizeStrategy* getFertilizeStrategy() const;
+
     // === Command Pattern (Receiver methods) ===
     void performWater();
     void performFertilize();

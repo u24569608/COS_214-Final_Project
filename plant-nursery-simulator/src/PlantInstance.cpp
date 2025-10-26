@@ -19,21 +19,38 @@ PlantInstance::PlantInstance(Plant* plantType, std::string instanceName)
     // Constructor body
 }
 
+/**
+ * @brief Destructor
+ */
 PlantInstance::~PlantInstance() {
-    // Destructor body
-    // (We'll worry about deleting pointers later)
+    // The instance owns its cloned prototype and must delete it
+    delete plantType;
+    // The instance owns its state object
+    delete plantState;
+    
+    // The instance does NOT own the strategy pointers (wStrategy, fStrategy).
+    // They are owned by the prototype and will be deleted when 'delete plantType'
+    // calls the Plant base class destructor.
 }
 
-// --- Strategy Pattern ---
+// === Strategy Pattern ===
 void PlantInstance::setWaterStrategy(WaterStrategy* ws) {
     this->wStrategy = ws;
+}
+
+WaterStrategy* PlantInstance::getWaterStrategy() const {
+    return wStrategy;
 }
 
 void PlantInstance::setFertilizeStrategy(FertilizeStrategy* fs) {
     this->fStrategy = fs;
 }
 
-// --- Command Pattern (Receiver methods) ---
+FertilizeStrategy* PlantInstance::getFertilizeStrategy() const {
+    return fStrategy;
+}
+
+// === Command Pattern (Receiver methods) ===
 void PlantInstance::performWater() {
     if (wStrategy) {
         wStrategy->water(*this);
@@ -59,12 +76,12 @@ void PlantInstance::applyGrowthTick() {
     }
 }
 
-bool PlantInstance::isThirsty() const {
-    return waterLevel < 50; // Stub logic
+bool PlantInstance::isThirsty() const { 
+    return waterLevel < 50; 
 }
 
-bool PlantInstance::needsFertilizing() const {
-    return nutrientLevel < 50; // Stub logic
+bool PlantInstance::needsFertilizing() const { 
+    return nutrientLevel < 50; 
 }
 
 // --- Composite Pattern (Leaf method) ---
@@ -77,17 +94,18 @@ void PlantInstance::performCare() {
     }
 }
 
-// --- Getters/Setters ---
-int PlantInstance::getHealth() const {
-    return this->health;
+// === Getters / Setters ===
+std::string PlantInstance::getPlantTypeName() const {
+    // Get name from the prototype
+    return plantType ? plantType->getName() : "Unknown";
 }
 
-void PlantInstance::setHealth(int newHealth) {
-    this->health = newHealth;
+int PlantInstance::getHealth() const { 
+    return health; 
 }
 
-int PlantInstance::getWaterLevel() const {
-    return this->waterLevel;
+void PlantInstance::setHealth(int newHealth) { 
+    health = newHealth; 
 }
 
 int PlantInstance::getNutrientLevel() const {
