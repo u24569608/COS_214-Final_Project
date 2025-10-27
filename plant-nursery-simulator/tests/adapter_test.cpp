@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include <cmath> // For std::abs in ASSERT_NEAR
+#include <memory>
 
 // --- Include the code we want to test ---
 #include "../include/Inventory.h"
@@ -10,6 +11,9 @@
 #include "../include/FileAdapter.h"
 #include "../include/TXTAdapter.h"
 #include "../include/CSVAdapter.h"
+#include "../include/GreenhouseBed.h"
+#include "../include/PlantPrototypeRegistry.h"
+#include "../include/Plant.h"
 // Include necessary stubs for linking
 #include "../include/InventoryCollection.h"
 #include "../include/InventoryIterator.h"
@@ -60,6 +64,24 @@ const std::string invalidPath = "data/non_existent_file.bad";
 const std::string badCsvPath = "data/bad_data.csv";
 const std::string badTxtPath = "data/bad_data.txt";
 
+// --- Test helpers ---
+class StubPlant : public Plant {
+public:
+    StubPlant() = default;
+    explicit StubPlant(const std::string& displayName) {
+        setName(displayName);
+    }
+    Plant* clone() const override {
+        return new StubPlant(*this);
+    }
+};
+
+void registerPrototypes(PlantPrototypeRegistry& registry, const std::vector<std::string>& names) {
+    for (const std::string& name : names) {
+        auto plant = std::make_unique<StubPlant>(name);
+        registry.addPrototype(name, std::move(plant));
+    }
+}
 
 // --- Test Cases ---
 
@@ -87,8 +109,13 @@ void testCSVSaveLoadRoundTrip() {
     ASSERT_EQ_STR(line1, "Rose,10", "CSV Line 1 content"); // Price is int in StockItem
     ASSERT_EQ_STR(line2, "Tulip,5", "CSV Line 2 content"); // Price is int in StockItem
 
-    // ARRANGE 2: Create a second, empty inventory
+    // ARRANGE 2: Prepare import context with greenhouse and prototypes
+    PlantPrototypeRegistry registry;
+    registerPrototypes(registry, {"Rose", "Tulip"});
+    GreenhouseBed importBed("CSV Import Bed");
     Inventory inv2;
+    inv2.setGreenhouseRoot(&importBed);
+    inv2.setPlantRegistry(&registry);
     ASSERT_EQ_INT(inv2.getStockCount("Rose"), 0, "Inv2 Rose count before load");
 
     // ACT 2: Load using CSV Adapter
@@ -101,9 +128,18 @@ void testCSVSaveLoadRoundTrip() {
     ASSERT_TRUE(loadedRose != nullptr, "Loaded Rose should exist");
     // StockItem getPrice returns int
     ASSERT_EQ_INT(loadedRose->getPrice(), 10, "Loaded Rose price");
-     StockItem* loadedTulip = inv2.findItem("Tulip");
+    StockItem* loadedTulip = inv2.findItem("Tulip");
     ASSERT_TRUE(loadedTulip != nullptr, "Loaded Tulip should exist");
     ASSERT_EQ_INT(loadedTulip->getPrice(), 5, "Loaded Tulip price");
+
+    // ASSERT 3: Greenhouse received live plant instances
+    ASSERT_EQ_INT(importBed.getSize(), 2, "Greenhouse should contain two plants");
+    ASSERT_TRUE(loadedRose->getplant() != nullptr, "Loaded Rose should have a PlantInstance");
+    ASSERT_TRUE(importBed.findPlantInBed(loadedRose->getplant()->getName()) != nullptr,
+                "Greenhouse should track the Rose plant");
+    ASSERT_TRUE(loadedTulip->getplant() != nullptr, "Loaded Tulip should have a PlantInstance");
+    ASSERT_TRUE(importBed.findPlantInBed(loadedTulip->getplant()->getName()) != nullptr,
+                "Greenhouse should track the Tulip plant");
 }
 
 void testTXTSaveLoadRoundTrip() {
@@ -131,6 +167,8 @@ void testTXTSaveLoadRoundTrip() {
 
     // ARRANGE 2
     Inventory inv2;
+    GreenhouseBed toolBed("TXT Import Bed");
+    inv2.setGreenhouseRoot(&toolBed);
 
     // ACT 2: Load
     inv2.loadFromFile(&txtAdapter, testTxtPath);
@@ -144,11 +182,17 @@ void testTXTSaveLoadRoundTrip() {
     StockItem* loadedGloves = inv2.findItem("Gloves");
     ASSERT_TRUE(loadedGloves != nullptr, "Loaded Gloves should exist");
     ASSERT_EQ_INT(loadedGloves->getPrice(), 15, "Loaded Gloves price");
+    ASSERT_EQ_INT(toolBed.getSize(), 0, "No plants should be imported for tool stock");
 }
 
 void testLoadInvalidFile() {
      std::cout << "Running test: testLoadInvalidFile..." << std::endl;
+     PlantPrototypeRegistry registry;
+     registerPrototypes(registry, {"Orchid"});
+     GreenhouseBed validationBed("Validation Bed");
      Inventory inv;
+     inv.setPlantRegistry(&registry);
+     inv.setGreenhouseRoot(&validationBed);
      CSVAdapter csvAdapter;
      TXTAdapter txtAdapter;
 
@@ -157,9 +201,11 @@ void testLoadInvalidFile() {
      inv.loadFromFile(&csvAdapter, invalidPath);
      // ASSERT: Inventory should still be empty
      ASSERT_TRUE(inv.findItem("Anything") == nullptr, "Inventory empty after loading bad CSV path");
+     ASSERT_EQ_INT(validationBed.getSize(), 0, "Greenhouse remains empty after failed load");
 
      inv.loadFromFile(&txtAdapter, invalidPath);
      ASSERT_TRUE(inv.findItem("Anything") == nullptr, "Inventory empty after loading bad TXT path");
+     ASSERT_EQ_INT(validationBed.getSize(), 0, "Greenhouse still empty after failed TXT load");
      std::cout << "--- Done testing non-existent files ---" << std::endl;
 
 
@@ -186,12 +232,14 @@ void testLoadInvalidFile() {
      ASSERT_EQ_INT(inv.getStockCount("Tulip"), 0, "Bad CSV: Tulip not loaded");
      ASSERT_EQ_INT(inv.getStockCount("Orchid"), 1, "Bad CSV: Orchid loaded");
      ASSERT_EQ_INT(inv.findItem("Orchid")->getPrice(), 25, "Bad CSV: Orchid price"); // Price is int
+     ASSERT_EQ_INT(validationBed.getSize(), 1, "Greenhouse tracks Orchid plant");
      std::cout << "--- Done testing bad CSV file ---" << std::endl;
 
 
      // Clear inventory by loading non-existent file again
      inv.loadFromFile(&csvAdapter, invalidPath);
      ASSERT_EQ_INT(inv.getStockCount("Orchid"), 0, "Inventory cleared");
+     ASSERT_EQ_INT(validationBed.getSize(), 0, "Greenhouse cleared after invalid load");
 
 
      std::cout << "--- Testing bad TXT file (expect warnings) ---" << std::endl;
@@ -202,6 +250,7 @@ void testLoadInvalidFile() {
      ASSERT_EQ_INT(inv.findItem("Gloves")->getPrice(), 15, "Bad TXT: Gloves price"); // Price is int
      ASSERT_EQ_INT(inv.getStockCount("Shears"), 1, "Bad TXT: Shears loaded");
      ASSERT_EQ_INT(inv.findItem("Shears")->getPrice(), 20, "Bad TXT: Shears price");
+     ASSERT_EQ_INT(validationBed.getSize(), 0, "TXT load should not add plants");
      std::cout << "--- Done testing bad TXT file ---" << std::endl;
 }
 
@@ -228,4 +277,3 @@ int main() {
         return 1; // FAILURE
     }
 }
-
