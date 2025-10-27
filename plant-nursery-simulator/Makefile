@@ -51,12 +51,14 @@ iterator_unit_test:
 	@echo "== Building and Running 'iterator_test.cpp' (UNIT TEST) =="
 	@mkdir -p build
 	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude \
-		tests/iterator_test.cpp \
-		src/GreenhouseComponent.cpp \
-		src/Inventory.cpp \
-		src/InventoryCollection.cpp \
-		src/InventoryIterator.cpp \
-		src/ConcreteInventoryIterator.cpp \
+	tests/iterator_test.cpp \
+	src/GreenhouseComponent.cpp \
+	src/GreenhouseBed.cpp \
+	src/ConcreteGreenhouseIterator.cpp \
+	src/Inventory.cpp \
+	src/InventoryCollection.cpp \
+	src/InventoryIterator.cpp \
+	src/ConcreteInventoryIterator.cpp \
 		src/StockItem.cpp \
 		src/PlantInstance.cpp \
 		src/Subject.cpp \

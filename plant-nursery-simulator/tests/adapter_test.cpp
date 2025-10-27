@@ -14,6 +14,7 @@
 #include "../include/GreenhouseBed.h"
 #include "../include/PlantPrototypeRegistry.h"
 #include "../include/Plant.h"
+#include "../include/MatureState.h"
 // Include necessary stubs for linking
 #include "../include/InventoryCollection.h"
 #include "../include/InventoryIterator.h"
@@ -98,7 +99,9 @@ void testCSVSaveLoadRoundTrip() {
     inv1.registerPlantType("Rose");
     inv1.registerPlantType("Tulip");
     PlantInstance* roseInstance = inv1.createPlantInstance("Rose");
+    roseInstance->setState(std::make_unique<MatureState>());
     PlantInstance* tulipInstance = inv1.createPlantInstance("Tulip");
+    tulipInstance->setState(std::make_unique<MatureState>());
     inv1.additem(std::make_unique<StockItem>("Rose", 10.0, roseInstance));
     inv1.additem(std::make_unique<StockItem>("Tulip", 6.0, tulipInstance));
     inv1.additem(std::make_unique<StockItem>("Spade", 12.0, nullptr));
@@ -172,6 +175,7 @@ void testTXTSaveLoadRoundTrip() {
     inv1.setPlantRegistry(&exportRegistry);
     inv1.registerPlantType("Succulent");
     PlantInstance* succulentInstance = inv1.createPlantInstance("Succulent");
+    succulentInstance->setState(std::make_unique<MatureState>());
     inv1.additem(std::make_unique<StockItem>("Succulent", 18.0, succulentInstance));
     inv1.additem(std::make_unique<StockItem>("Pot", 7.0, nullptr));
 
