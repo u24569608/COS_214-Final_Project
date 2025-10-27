@@ -2,9 +2,23 @@
 #include "../include/Plant.h" // We need this for the getPlantTypeName()
 #include "../include/WaterStrategy.h"
 #include "../include/FertilizeStrategy.h"
+#include "../include/PlantStateThresholds.h"
+#include "../include/SeedState.h"
 #include <algorithm>
-#include <iostream>
+#include <memory>
+#include <optional>
 #include <unordered_map>
+
+namespace {
+constexpr int kStatMin = 0;
+constexpr int kStatMax = 100;
+constexpr int kDefaultWaterConsumption = 5;
+constexpr int kDefaultNutrientConsumption = 3;
+
+int clampStat(int value) {
+    return std::max(kStatMin, std::min(kStatMax, value));
+}
+} // namespace
 
 // --- Constructor & Destructor ---
 PlantInstance::PlantInstance(Plant* plantType, std::string instanceName) 
@@ -12,16 +26,15 @@ PlantInstance::PlantInstance(Plant* plantType, std::string instanceName)
       plantType(plantType), 
       wStrategy(nullptr), 
       fStrategy(nullptr), 
-      plantState(nullptr), 
+      plantState(std::make_unique<SeedState>()), 
       health(100), 
       waterLevel(100), 
-      nutrientLevel(100) {
-    // Constructor body
+      nutrientLevel(100),
+      replayingAction(false),
+      careAlertActive(false) {
 }
 
 PlantInstance::~PlantInstance() {
-    // Destructor body
-    // (We'll worry about deleting pointers later)
 }
 
 // --- Strategy Pattern ---
@@ -35,36 +48,118 @@ void PlantInstance::setFertilizeStrategy(FertilizeStrategy* fs) {
 
 // --- Command Pattern (Receiver methods) ---
 void PlantInstance::performWater() {
-    if (wStrategy) {
-        wStrategy->water(*this);
+    if (!plantState) {
+        applyWaterStrategy();
+        return;
     }
+
+    setReplayingAction(false);
+    PlantState* before = plantState.get();
+    before->onWater(*this);
+
+    if (!plantState) {
+        setReplayingAction(false);
+        return;
+    }
+
+    PlantState* after = plantState.get();
+    if (after != before) {
+        setReplayingAction(true);
+        after->onWater(*this);
+    }
+
+    setReplayingAction(false);
+    requestCareIfNeeded();
 }
 
 void PlantInstance::performFertilize() {
-    if (fStrategy) {
-        fStrategy->fertilize(*this);
+    if (!plantState) {
+        applyFertilizeStrategy();
+        return;
     }
+
+    setReplayingAction(false);
+    PlantState* before = plantState.get();
+    before->onFertilize(*this);
+
+    if (!plantState) {
+        setReplayingAction(false);
+        return;
+    }
+
+    PlantState* after = plantState.get();
+    if (after != before) {
+        setReplayingAction(true);
+        after->onFertilize(*this);
+    }
+
+    setReplayingAction(false);
+    requestCareIfNeeded();
+}
+
+void PlantInstance::setState(std::unique_ptr<PlantState> nextState) {
+    const bool wasAvailable = isAvailableForSale();
+    const std::string previousName = plantState ? plantState->getName() : "";
+    if (!nextState) {
+        return;
+    }
+
+    plantState = std::move(nextState);
+    const std::string currentName = plantState ? plantState->getName() : "";
+    const bool isAvailable = isAvailableForSale();
+    const bool enteredWithering = plantState && currentName == "Withering";
+
+    if (currentName != previousName) {
+        if (wasAvailable != isAvailable) {
+            ObserverEvent availabilityEvent{
+                ObserverEventType::AvailabilityChanged,
+                this,
+                isAvailable ? "Plant ready for sale" : "Plant unavailable for sale",
+                std::optional<bool>(isAvailable)};
+            notify(availabilityEvent);
+        }
+
+        if (enteredWithering) {
+            careAlertActive = true;
+            const ObserverEvent careEvent{
+                ObserverEventType::CareRequired,
+                this,
+                "Plant entered Withering state and needs attention",
+                std::nullopt};
+            notify(careEvent);
+        } else if (!isThirsty() && !needsFertilizing()) {
+            careAlertActive = false;
+        }
+    }
+}
+
+const PlantState* PlantInstance::getState() const {
+    return plantState.get();
 }
 
 // --- Observer Pattern (Subject methods) ---
 void PlantInstance::applyGrowthTick() {
-    constexpr int kDefaultWaterConsumption = 5;
-    constexpr int kDefaultNutrientConsumption = 3;
     // TODO(FR12): Allow tuning of consumption rates when balancing rules are available.
-    waterLevel = std::max(0, waterLevel - kDefaultWaterConsumption);
-    nutrientLevel = std::max(0, nutrientLevel - kDefaultNutrientConsumption);
+    changeWaterLevel(-kDefaultWaterConsumption);
+    changeNutrientLevel(-kDefaultNutrientConsumption);
 
     if (plantState) {
         plantState->onTick(*this);
     }
+
+    requestCareIfNeeded();
 }
 
 bool PlantInstance::isThirsty() const {
-    return waterLevel < 50; // Stub logic
+    return waterLevel < PlantStateThresholds::kSeedToGrowingWater;
 }
 
 bool PlantInstance::needsFertilizing() const {
-    return nutrientLevel < 50; // Stub logic
+    return nutrientLevel < PlantStateThresholds::kSeedToGrowingNutrients;
+}
+
+bool PlantInstance::isAvailableForSale() const {
+    return plantState && plantState->isMarketReady();
 }
 
 // --- Composite Pattern (Leaf method) ---
@@ -83,24 +178,35 @@ int PlantInstance::getHealth() const {
 }
 
 void PlantInstance::setHealth(int newHealth) {
-    this->health = newHealth;
+    this->health = clampStat(newHealth);
 }
 
-void PlantInstance::setWaterLevel(int newWater) {
-    this->waterLevel = newWater;
+void PlantInstance::changeHealth(int delta) {
+    setHealth(health + delta);
 }
-
-void PlantInstance::setNutrientLevel(int newNutrient) {
-    this->nutrientLevel = newNutrient;
-}
-
 
 int PlantInstance::getWaterLevel() const {
     return this->waterLevel;
 }
 
+void PlantInstance::setWaterLevel(int newLevel) {
+    waterLevel = clampStat(newLevel);
+}
+
+void PlantInstance::changeWaterLevel(int delta) {
+    setWaterLevel(waterLevel + delta);
+}
+
 int PlantInstance::getNutrientLevel() const {
     return this->nutrientLevel;
+}
+
+void PlantInstance::setNutrientLevel(int newLevel) {
+    nutrientLevel = clampStat(newLevel);
+}
+
+void PlantInstance::changeNutrientLevel(int delta) {
+    setNutrientLevel(nutrientLevel + delta);
 }
 
 std::string PlantInstance::getPlantTypeName() const {
@@ -112,6 +218,57 @@ void PlantInstance::rename(const std::string& newName) {
         return;
     }
     name = newName;
+}
+
+void PlantInstance::applyWaterStrategy() {
+    if (wStrategy) {
+        wStrategy->water(*this);
+    }
+}
+
+void PlantInstance::applyFertilizeStrategy() {
+    if (fStrategy) {
+        fStrategy->fertilize(*this);
+    }
+}
+
+bool PlantInstance::isReplayingAction() const {
+    return replayingAction;
+}
+
+void PlantInstance::setReplayingAction(bool value) {
+    replayingAction = value;
+}
+
+void PlantInstance::requestCareIfNeeded() {
+    const bool thirsty = isThirsty();
+    const bool hungry = needsFertilizing();
+    if (!thirsty && !hungry) {
+        careAlertActive = false;
+        return;
+    }
+
+    if (careAlertActive) {
+        return;
+    }
+
+    careAlertActive = true;
+
+    std::string message;
+    if (thirsty && hungry) {
+        message = "Plant requires watering and fertilising";
+    } else if (thirsty) {
+        message = "Plant requires watering";
+    } else {
+        message = "Plant requires fertilising";
+    }
+
+    const ObserverEvent event{
+        ObserverEventType::CareRequired,
+        this,
+        message,
+        std::nullopt};
+    notify(event);
 }
 
 std::string PlantInstance::deriveInstanceName(Plant* plantPrototype, const std::string& instanceName) {

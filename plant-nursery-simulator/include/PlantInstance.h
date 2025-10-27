@@ -2,8 +2,10 @@
 #define PLANT_INSTANCE_H
 
 #include "GreenhouseComponent.h" // Is-a Component 'Leaf' (Composite)
-#include <string>
 #include "PlantState.h"
+#include "Subject.h"
+#include <memory>
+#include <string>
 
 // Forward declarations for pointers (Strategy, Prototype)
 class Plant;
@@ -15,11 +17,11 @@ class FertilizeStrategy;
  * @brief Represents a single, physical plant in the nursery.
  * @details This is a central class that links many patterns:
  * - Leaf (Composite Pattern) - FR11
- * - ConcreteSubject (Observer Pattern) - FR12 (TODO: reintroduce when observer is implemented)
+ * - ConcreteSubject (Observer Pattern) - FR12
  * - Context (Strategy Pattern) - FR5, FR6, FR7
  * - Receiver (Command Pattern) - FR18
  */
-class PlantInstance : public GreenhouseComponent {
+class PlantInstance : public GreenhouseComponent, public Subject {
 public:
     /**
      * @brief Constructs an instance bound to a plant prototype.
@@ -40,11 +42,38 @@ public:
     // === Command Pattern (Receiver methods) ===
     void performWater();
     void performFertilize();
+    /**
+     * @brief Executes the configured watering strategy, if present.
+     */
+    void applyWaterStrategy();
+    /**
+     * @brief Executes the configured fertilising strategy, if present.
+     */
+    void applyFertilizeStrategy();
+     /**
+     * @brief Indicates whether the current care action is a replay triggered by a state transition.
+     * @return True when the active state should skip re-invoking strategies to avoid duplication.
+     */
+    bool isReplayingAction() const;
+
+    /**
+     * @brief Assigns a new lifecycle state to this plant.
+     * @param nextState Newly allocated state that becomes active immediately.
+     * @note Observers are notified when availability or care requirements change.
+     */
+    void setState(std::unique_ptr<PlantState> nextState);
+
+    /**
+     * @brief Inspects the currently active lifecycle state.
+     * @return Pointer to the active state, or nullptr if none.
+     */
+    const PlantState* getState() const;
 
     // === Observer Pattern (Subject methods) ===
     /**
      * @brief Creative Function: Simulates a tick of time passing.
-     * @details Lowers water and nutrient levels, then defers to the current state for reactions.
+     * @details Lowers water and nutrient levels, notifies observers when care is required,
+     * and defers to the current state for reactions.
      * @note TODO(FR12): Replace the fixed consumption values once balancing rules are decided.
      */
     void applyGrowthTick();
@@ -60,6 +89,11 @@ public:
      * @return bool True if nutrientLevel is below threshold.
      */
     bool needsFertilizing() const;
+    /**
+     * @brief Indicates whether the plant is ready for retail sale.
+     * @return True when the active state marks the plant as market-ready.
+     */
+    bool isAvailableForSale() const;
 
     // === Composite Pattern (Leaf method) ===
     /**
@@ -70,14 +104,37 @@ public:
     // === Creative Functions (Getters/Setters) ===
     int getHealth() const;
     void setHealth(int newHealth);
-    void setWaterLevel(int newWater);
-    void setNutrientLevel(int newNutrient);
+    /**
+     * @brief Applies a delta to the health and clamps it within valid bounds.
+     * @param delta Signed adjustment amount.
+     */
+    void changeHealth(int delta);
     int getWaterLevel() const;
+    /**
+     * @brief Overrides the stored water level, clamped to the valid range.
+     * @param newLevel Desired absolute water value.
+     */
+    void setWaterLevel(int newLevel);
+    /**
+     * @brief Applies a delta to the water level and clamps the result.
+     * @param delta Signed adjustment amount.
+     */
+    void changeWaterLevel(int delta);
     /**
      * @brief Retrieves the current nutrient saturation level.
      * @return Integer nutrient level in arbitrary units.
      */
     int getNutrientLevel() const;
+    /**
+     * @brief Overrides the stored nutrient level, clamped to the valid range.
+     * @param newLevel Desired nutrient value.
+     */
+    void setNutrientLevel(int newLevel);
+    /**
+     * @brief Applies a delta to the nutrient level and clamps the result.
+     * @param delta Signed adjustment amount.
+     */
+    void changeNutrientLevel(int delta);
     std::string getPlantTypeName() const;
     /**
      * @brief Updates the human-readable name of this plant instance.
@@ -91,11 +148,19 @@ private:
     Plant* plantType; 
     WaterStrategy* wStrategy; ///< Current water strategy
     FertilizeStrategy* fStrategy; ///< Current fertilize strategy
-    PlantState* plantState;
+    std::unique_ptr<PlantState> plantState;
     
     int health;
     int waterLevel;
     int nutrientLevel;
+    bool replayingAction;
+    bool careAlertActive; ///< Prevents duplicate care notifications while already flagged.
+
+    void setReplayingAction(bool value);
+    /**
+     * @brief Emits a care request notification if any critical resource is low.
+     */
+    void requestCareIfNeeded();
 };
 
 #endif // PLANT_INSTANCE_H

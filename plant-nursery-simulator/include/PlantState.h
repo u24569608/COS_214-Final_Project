@@ -3,59 +3,48 @@
 
 #include <string>
 
-// Forward declaration for the 'Context' class
-class PlantInstance; 
+class PlantInstance;
 
 /**
  * @file PlantState.h
- * @brief The abstract 'State' base class for the State pattern.
- * @details Defines the interface for all plant life-cycle states.
- * This version is updated based on the new function list.
+ * @brief Abstract base class describing the lifecycle state of a plant.
  */
 class PlantState {
 public:
     /**
-     * @brief Virtual destructor.
+     * @brief Virtual default destructor to permit safe polymorphic deletion.
      */
-    virtual ~PlantState();
+    virtual ~PlantState() = default;
 
     /**
-     * @brief Gets the friendly name of the current state.
-     * @return std::string The name (e.g., "Growing", "Mature").
+     * @brief Gets a human-readable name of the state.
+     * @return Friendly name such as "Seed" or "Mature".
      */
     virtual std::string getName() const = 0;
 
     /**
-     * @brief Public handle method for a water event.
-     * @param plant The context (the plant) to affect.
+     * @brief Handles watering performed on the owning plant instance.
+     * @param plant Context instance whose data should be mutated.
      */
     virtual void onWater(PlantInstance& plant) = 0;
 
     /**
-     * @brief Public handle method for a fertilize event.
-     * @param plant The context (the plant) to affect.
+     * @brief Handles fertilising performed on the owning plant instance.
+     * @param plant Context instance whose data should be mutated.
      */
     virtual void onFertilize(PlantInstance& plant) = 0;
 
     /**
-     * @brief Public handle method for a time 'tick' (e.g., a day passes).
-     * @param plant The context (the plant) to affect.
+     * @brief Handles the passage of time for the plant.
+     * @param plant Context instance whose state should update.
      */
     virtual void onTick(PlantInstance& plant) = 0;
 
-private:
     /**
-     * @brief Private helper to perform the actual watering logic.
-     * @param plant The context (the plant) to affect.
+     * @brief Indicates whether plants in this state are ready for sale.
+     * @return False by default; states can override to opt into retail readiness.
      */
-    virtual void performWater(PlantInstance& plant) = 0;
-
-    /**
-     * @brief Private helper to perform the actual fertilizing logic.
-     * @param plant The context (the plant) to affect.
-     */
-    virtual void performFertilize(PlantInstance& plant) = 0;
+    virtual bool isMarketReady() const { return false; }
 };
 
 #endif // PLANT_STATE_H
-
