@@ -40,20 +40,26 @@ void testRunGrowthTickAdvancesAllPlants() {
 
     DummyPlant prototype("TestPlant");
     GreenhouseBed bed("Controller Bed");
-    std::vector<std::unique_ptr<PlantInstance>> ownedPlants;
-    ownedPlants.emplace_back(std::make_unique<PlantInstance>(&prototype, "PlantAlpha"));
-    ownedPlants.emplace_back(std::make_unique<PlantInstance>(&prototype, "PlantBeta"));
+    std::vector<PlantInstance*> trackedPlants;
 
-    for (auto& plant : ownedPlants) {
-        plant->setWaterLevel(100);
-        plant->setNutrientLevel(100);
-        bed.add(plant.get());
-    }
+    auto plantAlpha = std::make_unique<PlantInstance>(&prototype, "PlantAlpha");
+    auto plantBeta = std::make_unique<PlantInstance>(&prototype, "PlantBeta");
+
+    plantAlpha->setWaterLevel(100);
+    plantAlpha->setNutrientLevel(100);
+    plantBeta->setWaterLevel(100);
+    plantBeta->setNutrientLevel(100);
+
+    trackedPlants.push_back(plantAlpha.get());
+    trackedPlants.push_back(plantBeta.get());
+
+    bed.add(std::move(plantAlpha));
+    bed.add(std::move(plantBeta));
 
     GreenhouseController controller(&bed);
     controller.runGrowthTick();
 
-    for (auto& plant : ownedPlants) {
+    for (PlantInstance* plant : trackedPlants) {
         ASSERT_EQ_INT(plant->getWaterLevel(), 95, "Growth tick should reduce water by 5");
         ASSERT_EQ_INT(plant->getNutrientLevel(), 97, "Growth tick should reduce nutrients by 3");
     }

@@ -166,6 +166,19 @@ void Inventory::saveToFile(FileAdapter* adapter, std::string filePath) {
 
 void Inventory::setGreenhouseRoot(GreenhouseBed* root) {
     greenhouseRoot = root;
+    if (greenhouseRoot == nullptr) {
+        return;
+    }
+
+    for (auto& plantPtr : pendingPlants) {
+        if (!plantPtr) {
+            continue;
+        }
+        PlantInstance* raw = plantPtr.get();
+        greenhouseRoot->add(std::move(plantPtr));
+        greenhousePlants.insert(raw);
+    }
+    pendingPlants.clear();
 }
 
 GreenhouseBed* Inventory::getGreenhouseRoot() const {
@@ -215,26 +228,28 @@ PlantInstance* Inventory::createPlantInstance(const std::string& plantName) {
         }
     }
 
-    PlantInstance* instance = new PlantInstance(prototype.get(), "");
+    std::unique_ptr<PlantInstance> instance = std::make_unique<PlantInstance>(prototype.get(), "");
+    PlantInstance* rawInstance = instance.get();
     if (prototype) {
         if (WaterStrategy* water = prototype->getDefaultWaterStrat()) {
-            instance->setWaterStrategy(water);
+            rawInstance->setWaterStrategy(water);
         }
         if (FertilizeStrategy* fertiliser = prototype->getDefaultFertStrat()) {
-            instance->setFertilizeStrategy(fertiliser);
+            rawInstance->setFertilizeStrategy(fertiliser);
         }
     }
     if (!prototype) {
         const std::string counterKey = plantCounterKey(plantName);
         const int counter = ++plantInstanceCounters[counterKey];
         const std::string baseName = plantCounterKey(plantName);
-        instance->rename(baseName + std::to_string(counter));
+        rawInstance->rename(baseName + std::to_string(counter));
     }
-    registerPlant(instance, true);
+
+    registerPlant(instance.release(), true);
     if (prototype) {
-        prototypeOwners.emplace(instance, std::move(prototype));
+        prototypeOwners.emplace(rawInstance, std::move(prototype));
     }
-    return instance;
+    return rawInstance;
 }
 
 void Inventory::registerPlant(PlantInstance* plant, bool takeOwnership) {
@@ -242,21 +257,18 @@ void Inventory::registerPlant(PlantInstance* plant, bool takeOwnership) {
         return;
     }
 
-    if (greenhouseRoot != nullptr) {
-        const bool inserted = greenhousePlants.insert(plant).second;
-        if (inserted) {
-            greenhouseRoot->add(plant);
+    if (takeOwnership) {
+        if (ownedPlantSet.insert(plant).second) {
+            std::unique_ptr<PlantInstance> owned(plant);
+            if (greenhouseRoot != nullptr) {
+                greenhouseRoot->add(std::move(owned));
+            } else {
+                pendingPlants.push_back(std::move(owned));
+            }
         }
-    } else {
-        greenhousePlants.insert(plant);
     }
 
-    if (takeOwnership) {
-        const bool inserted = ownedPlantSet.insert(plant).second;
-        if (inserted) {
-            ownedPlants.push_back(plant);
-        }
-    }
+    greenhousePlants.insert(plant);
 }
 
 void Inventory::unregisterPlant(PlantInstance* plant) {
@@ -264,32 +276,38 @@ void Inventory::unregisterPlant(PlantInstance* plant) {
         return;
     }
 
-    if (greenhousePlants.erase(plant) > 0U && greenhouseRoot != nullptr) {
-        greenhouseRoot->remove(plant);
-    }
+    greenhousePlants.erase(plant);
 
     if (ownedPlantSet.erase(plant) > 0U) {
-        auto it = std::remove(ownedPlants.begin(), ownedPlants.end(), plant);
-        if (it != ownedPlants.end()) {
-            ownedPlants.erase(it, ownedPlants.end());
-        }
         prototypeOwners.erase(plant);
-        delete plant;
+
+        if (greenhouseRoot != nullptr) {
+            greenhouseRoot->releasePlant(plant);
+        } else {
+            auto it = std::find_if(pendingPlants.begin(), pendingPlants.end(),
+                [plant](const std::unique_ptr<PlantInstance>& candidate) {
+                    return candidate.get() == plant;
+                });
+            if (it != pendingPlants.end()) {
+                pendingPlants.erase(it);
+            }
+        }
+        return;
+    }
+
+    if (greenhouseRoot != nullptr) {
+        greenhouseRoot->remove(plant);
     }
 }
 
 void Inventory::releaseManagedPlants() {
     if (greenhouseRoot != nullptr) {
-        for (PlantInstance* plant : greenhousePlants) {
-            greenhouseRoot->remove(plant);
+        for (PlantInstance* plant : ownedPlantSet) {
+            greenhouseRoot->releasePlant(plant);
         }
     }
+    pendingPlants.clear();
     greenhousePlants.clear();
-
-    for (PlantInstance* plant : ownedPlants) {
-        delete plant;
-    }
-    ownedPlants.clear();
     ownedPlantSet.clear();
     prototypeOwners.clear();
 }

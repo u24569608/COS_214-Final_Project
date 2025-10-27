@@ -57,38 +57,47 @@ void testAddOrphanedPlantDoesNotDuplicateCare() {
     std::cout << "Running test: testAddOrphanedPlantDoesNotDuplicateCare..." << std::endl;
 
     DummyPlant prototype;
-    TrackingPlant orphan(&prototype, "Orphan");
-
     GreenhouseBed outer("Outer");
-    GreenhouseBed inner("Inner");
+    auto inner = std::make_unique<GreenhouseBed>("Inner");
+    GreenhouseBed* innerPtr = inner.get();
 
-    inner.add(&orphan);
-    outer.add(&inner);
+    auto orphan = std::make_unique<TrackingPlant>(&prototype, "Orphan");
+    TrackingPlant* orphanPtr = orphan.get();
 
-    inner.remove(&orphan);
+    innerPtr->add(std::move(orphan));
+    outer.add(std::move(inner));
+
+    std::unique_ptr<PlantInstance> released = innerPtr->releasePlant(orphanPtr);
+    ASSERT_TRUE(static_cast<bool>(released), "Released plant should remain accessible to caller");
+    std::unique_ptr<TrackingPlant> reclaimed(static_cast<TrackingPlant*>(released.release()));
+
     outer.performCare();
 
-    ASSERT_EQ_INT(orphan.getCareCount(), 0, "Plant removed from bed should not receive care");
+    ASSERT_EQ_INT(reclaimed->getCareCount(), 0, "Plant removed from bed should not receive care");
 }
 
 void testNestedBedsCascadeCare() {
     std::cout << "Running test: testNestedBedsCascadeCare..." << std::endl;
 
     DummyPlant prototype;
-    TrackingPlant plantA(&prototype, "PlantA");
-    TrackingPlant plantB(&prototype, "PlantB");
-
     GreenhouseBed root("Root");
-    GreenhouseBed child("Child");
+    auto child = std::make_unique<GreenhouseBed>("Child");
+    GreenhouseBed* childPtr = child.get();
 
-    child.add(&plantA);
-    root.add(&child);
-    root.add(&plantB);
+    auto plantA = std::make_unique<TrackingPlant>(&prototype, "PlantA");
+    auto plantB = std::make_unique<TrackingPlant>(&prototype, "PlantB");
+
+    TrackingPlant* rawA = plantA.get();
+    TrackingPlant* rawB = plantB.get();
+
+    childPtr->add(std::move(plantA));
+    root.add(std::move(child));
+    root.add(std::move(plantB));
 
     root.performCare();
 
-    ASSERT_EQ_INT(plantA.getCareCount(), 1, "Nested plant should receive cascaded care");
-    ASSERT_EQ_INT(plantB.getCareCount(), 1, "Direct child plant should receive care exactly once");
+    ASSERT_EQ_INT(rawA->getCareCount(), 1, "Nested plant should receive cascaded care");
+    ASSERT_EQ_INT(rawB->getCareCount(), 1, "Direct child plant should receive care exactly once");
 }
 
 int main() {

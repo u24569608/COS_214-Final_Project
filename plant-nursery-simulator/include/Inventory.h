@@ -81,6 +81,7 @@ public:
 
     /**
      * @brief Sets the greenhouse root bed that should receive managed plants.
+     * @note Any pending plant instances owned by the inventory are transferred to the new bed immediately.
      */
     void setGreenhouseRoot(GreenhouseBed* root);
 
@@ -118,6 +119,7 @@ public:
     /**
      * @brief Creates and tracks a greenhouse-backed plant instance for a stock item.
      * @return Pointer to the new PlantInstance, or nullptr when no instance is needed.
+     * @note Ownership of the instance transfers to the greenhouse bed; the returned pointer is a borrowed view.
      */
     PlantInstance* createPlantInstance(const std::string& plantName);
 
@@ -131,7 +133,7 @@ private:
     std::unordered_set<std::string> registeredPlantTypes;
     std::unordered_set<PlantInstance*> greenhousePlants;
     std::unordered_set<PlantInstance*> ownedPlantSet;
-    std::vector<PlantInstance*> ownedPlants;
+    std::vector<std::unique_ptr<PlantInstance>> pendingPlants; ///< Plants waiting for a greenhouse root.
     std::unordered_map<PlantInstance*, std::unique_ptr<Plant>> prototypeOwners;
     std::unordered_map<std::string, int> plantInstanceCounters;
     std::unordered_map<std::string, StockItem*> itemsById;
