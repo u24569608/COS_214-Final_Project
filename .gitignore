@@ -50,6 +50,7 @@ __astcache/
 *.cbproj.local
 *.dproj.local
 *.groupproj.local
+.cbproj.local
 *.dsk
 *.bdsgroup
 *.dproj.user
