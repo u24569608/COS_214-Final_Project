@@ -14,7 +14,7 @@ public:
      * @brief Abstract method to execute the fertilizing strategy.
      */
     virtual void fertilize(PlantInstance& plant) const = 0;
-    virtual void clone() = 0 ;
+    virtual FertilizeStrategy* clone() const = 0;
 
 };
 
