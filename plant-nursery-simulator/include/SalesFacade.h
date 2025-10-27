@@ -62,6 +62,14 @@ public:
     bool purchaseItem(Customer* customer, StockItem* item);
 
     /**
+     * @brief Adds an inventory entry to the supplied customer's cart.
+     * @param customer Recipient of the cart entry.
+     * @param itemName Logical stock name to add.
+     * @return True when the item was found and tracked.
+     */
+    bool addItemToCart(Customer* customer, const std::string& itemName);
+
+    /**
      * @brief Creative Function: Processes a complex custom order.
      * @return Order* The finalized order, or nullptr if failed.
      */
@@ -90,9 +98,15 @@ public:
     void addItemToInventory(std::string name, double price, bool isPlant = true);
 
 private:
-    void notifyItemSold(const std::string& itemName);
+    /**
+     * @brief Notifies registered customers that a stock item has been sold.
+     * @param itemId Stable identifier of the removed stock entry (may be empty when unknown).
+     * @param itemName Human-readable name of the sold item.
+     */
+    void notifyItemSold(const std::string& itemId, const std::string& itemName);
     void syncInventoryContext();
     bool isPlantStock(const std::string& name) const;
+    void ensurePrototypeRegistered(const std::string& name);
 
     Inventory* inventory; ///< Subsystem 1
     PaymentProcessor* paymentProcessor; ///< Subsystem 2

@@ -7,8 +7,105 @@
 #include "../include/Customer.h" // Needed for method signatures
 #include "../include/GreenhouseBed.h"
 #include "../include/PlantPrototypeRegistry.h"
+#include "../include/Plant.h"
+#include "../include/FrequentWatering.h"
+#include "../include/SparseWatering.h"
+#include "../include/SeasonalWatering.h"
+#include "../include/OrganicFertilizer.h"
+#include "../include/LiquidFertilizer.h"
+#include "../include/SlowReleaseFertilizer.h"
 #include <algorithm>
+#include <cctype>
 #include <iostream>
+#include <memory>
+#include <string>
+
+namespace {
+std::string toLower(std::string value) {
+    std::transform(value.begin(), value.end(), value.begin(),
+                   [](unsigned char ch) { return static_cast<char>(std::tolower(ch)); });
+    return value;
+}
+
+WaterStrategy& frequentWatering() {
+    static FrequentWatering strategy;
+    return strategy;
+}
+
+WaterStrategy& sparseWatering() {
+    static SparseWatering strategy;
+    return strategy;
+}
+
+WaterStrategy& seasonalWatering() {
+    static SeasonalWatering strategy;
+    return strategy;
+}
+
+FertilizeStrategy& organicFertilizer() {
+    static OrganicFertilizer strategy;
+    return strategy;
+}
+
+FertilizeStrategy& slowReleaseFertilizer() {
+    static SlowReleaseFertilizer strategy;
+    return strategy;
+}
+
+FertilizeStrategy& liquidFertilizer() {
+    static LiquidFertilizer strategy;
+    return strategy;
+}
+
+WaterStrategy& selectWaterStrategy(const std::string& plantName) {
+    const std::string lowered = toLower(plantName);
+    if (lowered.find("cactus") != std::string::npos ||
+        lowered.find("succulent") != std::string::npos) {
+        return sparseWatering();
+    }
+    if (lowered.find("fern") != std::string::npos ||
+        lowered.find("orchid") != std::string::npos) {
+        return frequentWatering();
+    }
+    return seasonalWatering();
+}
+
+FertilizeStrategy& selectFertilizeStrategy(const std::string& plantName) {
+    const std::string lowered = toLower(plantName);
+    if (lowered.find("bonsai") != std::string::npos ||
+        lowered.find("orchid") != std::string::npos) {
+        return liquidFertilizer();
+    }
+    if (lowered.find("cactus") != std::string::npos ||
+        lowered.find("succulent") != std::string::npos) {
+        return slowReleaseFertilizer();
+    }
+    return organicFertilizer();
+}
+
+class DefaultPlantPrototype final : public Plant {
+public:
+    DefaultPlantPrototype(const std::string& displayName,
+                          WaterStrategy& waterStrategy,
+                          FertilizeStrategy& fertilizeStrategy) {
+        setName(displayName);
+        setType("Retail Plant");
+        setDefaultWaterStrat(&waterStrategy);
+        setDefaultFertStrat(&fertilizeStrategy);
+    }
+
+    Plant* clone() const override {
+        return new DefaultPlantPrototype(*this);
+    }
+};
+
+std::unique_ptr<Plant> makeDefaultPrototype(const std::string& plantName) {
+    return std::make_unique<DefaultPlantPrototype>(
+        plantName,
+        selectWaterStrategy(plantName),
+        selectFertilizeStrategy(plantName));
+}
+} // namespace
 
 /**
  * @brief Constructor that "wires" the facade to its subsystems.
@@ -57,6 +154,7 @@ void SalesFacade::registerPlantType(const std::string& name) {
         return;
     }
     registeredManualPlants.insert(name);
+    ensurePrototypeRegistered(name);
     inventory->registerPlantType(name);
 }
 
@@ -98,15 +196,19 @@ bool SalesFacade::purchaseItem(Customer* customer, StockItem* item) {
 
     // 1. Check stock (This also handles "insufficient stock" test)
     std::string itemName = item->getname();
-    StockItem* itemInStock = inventory->findItem(itemName);
+    StockItem* itemInStock = inventory->findItemById(item->getId());
+    if (itemInStock == nullptr) {
+        itemInStock = inventory->findItem(itemName);
+    }
 
     if (itemInStock == nullptr) {
         std::cout << "[SalesFacade] Purchase failed: " << itemName << " is out of stock." << std::endl;
         return false; // Insufficient stock
     }
+    const std::string itemId = itemInStock->getId();
 
     if (customer != nullptr) {
-        customer->removeFromCart(itemInStock);
+        customer->removeFromCartById(itemId);
     }
 
     // 2. Process Payment
@@ -117,15 +219,36 @@ bool SalesFacade::purchaseItem(Customer* customer, StockItem* item) {
 
     // 3. Update Inventory
     if (paid) {
-        // This removes ONE item of this name, per Inventory.h logic
-        inventory->removeItem(itemName);
-        notifyItemSold(itemName);
+        const bool removed = inventory->removeItemById(itemId);
+        if (!removed) {
+            std::cerr << "[SalesFacade] Purchase failed: Unable to remove " << itemName
+                      << " from inventory.\n";
+            return false;
+        }
+        notifyItemSold(itemId, itemName);
         std::cout << "[SalesFacade] Purchase of " << itemName << " complete." << std::endl;
         return true;
     }
 
     std::cout << "[SalesFacade] Purchase failed: Payment declined." << std::endl;
     return false;
+}
+
+bool SalesFacade::addItemToCart(Customer* customer, const std::string& itemName) {
+    if (customer == nullptr || inventory == nullptr) {
+        return false;
+    }
+
+    registerCustomer(customer);
+
+    StockItem* item = inventory->findItem(itemName);
+    if (item == nullptr) {
+        std::cout << "[SalesFacade] Cannot add '" << itemName << "' to cart: item not found.\n";
+        return false;
+    }
+
+    customer->addToCart(item);
+    return true;
 }
 
 /**
@@ -154,13 +277,33 @@ Order* SalesFacade::buildAndFinalizeOrder(Customer* customer, std::vector<StockI
         order->setOrderStatus("Paid");
         // Remove all items from inventory
         for (StockItem& item : items) {
-            // Using const getter now
-            if (customer != nullptr) {
-                customer->removeFromCart(item.getname());
-            }
             const std::string itemName = item.getname();
-            inventory->removeItem(item.getname());
-            notifyItemSold(itemName);
+            StockItem* itemInStock = inventory->findItem(itemName);
+            std::string itemId = itemInStock != nullptr ? itemInStock->getId() : "";
+
+            if (customer != nullptr) {
+                if (!itemId.empty()) {
+                    customer->removeFromCartById(itemId);
+                } else {
+                    customer->removeFromCart(itemName);
+                }
+            }
+
+            bool removed = false;
+            if (!itemId.empty()) {
+                removed = inventory->removeItemById(itemId);
+            } else {
+                const int countBefore = inventory->getStockCount(itemName);
+                inventory->removeItem(itemName);
+                removed = countBefore > inventory->getStockCount(itemName);
+            }
+
+            if (removed) {
+                notifyItemSold(itemId, itemName);
+            } else {
+                std::cerr << "[SalesFacade] Warning: Unable to retire '" << itemName
+                          << "' while finalising order.\n";
+            }
         }
         std::cout << "[SalesFacade] Custom order finalized and paid." << std::endl;
         return order;
@@ -218,10 +361,10 @@ bool SalesFacade::processReturn(Order* order) {
     return true;
 }
 
-void SalesFacade::notifyItemSold(const std::string& itemName) {
+void SalesFacade::notifyItemSold(const std::string& itemId, const std::string& itemName) {
     for (Customer* customer : customers) {
         if (customer != nullptr) {
-            customer->notifyItemSold(itemName);
+            customer->notifyItemSold(itemId, itemName);
         }
     }
 }
@@ -238,4 +381,14 @@ bool SalesFacade::isPlantStock(const std::string& name) const {
         return true;
     }
     return inventory != nullptr && inventory->isPlantType(name);
+}
+
+void SalesFacade::ensurePrototypeRegistered(const std::string& name) {
+    if (plantRegistry == nullptr || name.empty()) {
+        return;
+    }
+    if (plantRegistry->hasPrototype(name)) {
+        return;
+    }
+    plantRegistry->addPrototype(name, makeDefaultPrototype(name));
 }

@@ -41,15 +41,18 @@ void Customer::addToCart(StockItem* item) {
         std::cout << "[Customer " << id << "] cannot add null item to cart.\n";
         return;
     }
-    if (!item->getIsAvailible()) {
-        std::cout << "[Customer " << id << "] noted that '" << item->getname()
-                  << "' is currently unavailable, keeping it in cart for later.\n";
-    }
-    if (containsItem(item)) {
+    if (containsItemId(item->getId())) {
         std::cout << "[Customer " << id << "] already has '" << item->getname() << "' in the cart.\n";
         return;
     }
-    shoppingCart.push_back({item->getname(), item});
+    if (!item->getIsAvailible()) {
+        std::cout << "[Customer " << id << "] tracking '" << item->getname()
+                  << "' — currently unavailable, we'll remind you if it returns.\n";
+    }
+    shoppingCart.push_back({item->getname(),
+                            item->getId(),
+                            item->getIsAvailible(),
+                            item->getDisplayStatus()});
     std::cout << "[Customer " << id << "] added '" << item->getname() << "' to cart.\n";
 }
 
@@ -57,12 +60,7 @@ bool Customer::removeFromCart(StockItem* item) {
     if (item == nullptr) {
         return false;
     }
-    const auto oldSize = shoppingCart.size();
-    shoppingCart.erase(std::remove_if(shoppingCart.begin(),
-                                      shoppingCart.end(),
-                                      [item](const CartEntry& entry) { return entry.item == item; }),
-                       shoppingCart.end());
-    return shoppingCart.size() != oldSize;
+    return removeFromCartById(item->getId());
 }
 
 bool Customer::removeFromCart(const std::string& itemName) {
@@ -72,7 +70,19 @@ bool Customer::removeFromCart(const std::string& itemName) {
     const auto oldSize = shoppingCart.size();
     shoppingCart.erase(std::remove_if(shoppingCart.begin(),
                                       shoppingCart.end(),
-                                      [&itemName](const CartEntry& entry) { return entry.name == itemName; }),
+                                       [&itemName](const CartEntry& entry) { return entry.name == itemName; }),
+                       shoppingCart.end());
+    return shoppingCart.size() != oldSize;
+}
+
+bool Customer::removeFromCartById(const std::string& itemId) {
+    if (itemId.empty()) {
+        return false;
+    }
+    const auto oldSize = shoppingCart.size();
+    shoppingCart.erase(std::remove_if(shoppingCart.begin(),
+                                      shoppingCart.end(),
+                                      [&itemId](const CartEntry& entry) { return entry.itemId == itemId; }),
                        shoppingCart.end());
     return shoppingCart.size() != oldSize;
 }
@@ -82,7 +92,7 @@ void Customer::clearUnavailableItems() {
     shoppingCart.erase(std::remove_if(shoppingCart.begin(),
                                       shoppingCart.end(),
                                       [](const CartEntry& entry) {
-                                          return entry.item == nullptr || !entry.item->getIsAvailible();
+                                          return !entry.isAvailable;
                                       }),
                        shoppingCart.end());
     if (shoppingCart.size() != oldSize) {
@@ -90,9 +100,17 @@ void Customer::clearUnavailableItems() {
     }
 }
 
-void Customer::notifyItemSold(const std::string& itemName) {
-    if (removeFromCart(itemName)) {
-        std::cout << "[Customer " << id << "] removed sold-out '" << itemName << "' from cart.\n";
+void Customer::notifyItemSold(const std::string& itemId, const std::string& itemName) {
+    bool removed = false;
+    if (!itemId.empty()) {
+        removed = removeFromCartById(itemId);
+    }
+    if (!removed && !itemName.empty()) {
+        removed = removeFromCart(itemName);
+    }
+    if (removed) {
+        std::cout << "[Customer " << id << "] '" << itemName
+                  << "' sold out. We'll notify you when it returns or help you pick a substitute.\n";
     }
 }
 
@@ -105,13 +123,13 @@ std::vector<std::string> Customer::getCartSummary() const {
     return summary;
 }
 
-std::vector<StockItem*> Customer::getCartItems() const {
-    std::vector<StockItem*> items;
-    items.reserve(shoppingCart.size());
+std::vector<std::string> Customer::getCartItemIds() const {
+    std::vector<std::string> ids;
+    ids.reserve(shoppingCart.size());
     for (const CartEntry& entry : shoppingCart) {
-        items.push_back(entry.item);
+        ids.push_back(entry.itemId);
     }
-    return items;
+    return ids;
 }
 
 size_t Customer::getCartSize() const {
@@ -119,8 +137,15 @@ size_t Customer::getCartSize() const {
 }
 
 bool Customer::containsItem(StockItem* item) const {
+    return item != nullptr && containsItemId(item->getId());
+}
+
+bool Customer::containsItemId(const std::string& itemId) const {
+    if (itemId.empty()) {
+        return false;
+    }
     return std::any_of(shoppingCart.begin(), shoppingCart.end(),
-                       [item](const CartEntry& entry) { return entry.item == item; });
+                       [&itemId](const CartEntry& entry) { return entry.itemId == itemId; });
 }
 
 bool Customer::containsItem(const std::string& itemName) const {

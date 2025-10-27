@@ -36,6 +36,11 @@ public:
      * @brief Creative Function: Customer adds an item to their cart.
      * @param item The item to add.
      */
+    /**
+     * @brief Adds a stock entry to the cart using facade-provided metadata.
+     * @note Prefer using SalesFacade::addItemToCart so that notification hooks are registered.
+     * @param item Reference to the live stock record being tracked.
+     */
     void addToCart(StockItem* item);
 
     /**
@@ -51,6 +56,13 @@ public:
     bool removeFromCart(const std::string& itemName);
 
     /**
+     * @brief Removes the entry matching a specific stock identifier.
+     * @param itemId Stable identifier assigned by the inventory system.
+     * @return True when a matching entry was pruned.
+     */
+    bool removeFromCartById(const std::string& itemId);
+
+    /**
      * @brief Prunes entries that are no longer available for purchase.
      */
     void clearUnavailableItems();
@@ -58,7 +70,7 @@ public:
     /**
      * @brief Notification hook used by SalesFacade when stock is sold elsewhere.
      */
-    void notifyItemSold(const std::string& itemName);
+    void notifyItemSold(const std::string& itemId, const std::string& itemName);
 
     /**
      * @brief Summarises the current cart contents by stock name.
@@ -66,9 +78,9 @@ public:
     std::vector<std::string> getCartSummary() const;
 
     /**
-     * @brief Copies the active cart item pointers for advanced operations.
+     * @brief Copies the active cart item identifiers for advanced operations.
      */
-    std::vector<StockItem*> getCartItems() const;
+    std::vector<std::string> getCartItemIds() const;
 
     /**
      * @brief Returns the number of entries currently held in the cart.
@@ -78,10 +90,13 @@ public:
 private:
     struct CartEntry {
         std::string name;
-        StockItem* item;
+        std::string itemId;
+        bool isAvailable;
+        std::string displayStatus;
     };
 
     bool containsItem(StockItem* item) const;
+    bool containsItemId(const std::string& itemId) const;
     bool containsItem(const std::string& itemName) const;
 
     int id;

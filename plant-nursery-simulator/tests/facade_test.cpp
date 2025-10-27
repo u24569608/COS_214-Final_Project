@@ -194,11 +194,8 @@ void testCustomerCartSync() {
 
     Customer alice(1, nullptr);
     Customer bob(2, nullptr);
-    facade->registerCustomer(&alice);
-    facade->registerCustomer(&bob);
-
-    alice.addToCart(lily);
-    bob.addToCart(lily);
+    ASSERT_TRUE(facade->addItemToCart(&alice, "Lily"), "Facade should add Lily to Alice's cart");
+    ASSERT_TRUE(facade->addItemToCart(&bob, "Lily"), "Facade should add Lily to Bob's cart");
 
     bool success = facade->purchaseItem(&alice, lily);
     ASSERT_TRUE(success, "Customer purchase should succeed");
@@ -207,6 +204,24 @@ void testCustomerCartSync() {
 
     facade->unregisterCustomer(&alice);
     facade->unregisterCustomer(&bob);
+}
+
+void testDefaultPrototypeRegistration() {
+    std::cout << "Running test: testDefaultPrototypeRegistration..." << std::endl;
+    clearInventory();
+    const std::string newPlant = "Aloe";
+    ASSERT_TRUE(!registry->hasPrototype(newPlant), "Registry should not have Aloe before registration");
+
+    facade->registerPlantType(newPlant);
+    ASSERT_TRUE(registry->hasPrototype(newPlant), "Facade should register default prototype when none exists");
+
+    facade->addItemToInventory(newPlant, 22.0);
+    StockItem* aloe = inv->findItem(newPlant);
+    ASSERT_TRUE(aloe != nullptr && aloe->getplant() != nullptr, "Aloe stock should include a plant instance");
+
+    bool success = facade->purchaseItem(nullptr, aloe);
+    ASSERT_TRUE(success, "Anonymous purchase should succeed");
+    ASSERT_EQ_INT(facade->checkStock(newPlant), 0, "Purchasing Aloe should remove it from stock");
 }
 
 // --- Test Runner MAIN ---
@@ -232,6 +247,7 @@ int main() {
     testBuildAndFinalizeOrder();
     testProcessReturn();
     testCustomerCartSync();
+    testDefaultPrototypeRegistration();
 
     // --- CLEANUP ---
     delete facade;
