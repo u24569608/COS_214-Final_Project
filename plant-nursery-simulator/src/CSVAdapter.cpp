@@ -3,18 +3,17 @@
 #include "../include/Inventory.h"
 #include "../include/StockItem.h" // Needed to create items
 #include "../include/InventoryIterator.h" 
+#include "../include/PlantPrototypeRegistry.h"
 #include <iostream>
+#include <memory>
 
-CSVAdapter::CSVAdapter() {
-    csvReader = new CSVReaderWriter();
-}
-
-CSVAdapter::~CSVAdapter() {
-    delete csvReader;
+CSVAdapter::CSVAdapter()
+    : csvReader(std::make_unique<CSVReaderWriter>()) {
 }
 
 /**
  * @brief Loads inventory from a CSV file and recreates greenhouse-backed plant instances.
+ * @note Stock names with registered prototypes are promoted to plant stock so greenhouse beds stay in sync.
  */
 void CSVAdapter::loadInventory(std::string filePath, Inventory* inventory) {
     if (!inventory) {
@@ -25,8 +24,14 @@ void CSVAdapter::loadInventory(std::string filePath, Inventory* inventory) {
     std::vector<std::pair<std::string, double>> data = csvReader->readCsv(filePath);
 
     for (const auto& pair : data) {
-        PlantInstance* plant = inventory->createPlantInstance(pair.first);
-        inventory->additem(new StockItem(pair.first, pair.second, plant));
+        bool treatAsPlant = inventory->isPlantType(pair.first);
+        PlantPrototypeRegistry* registry = inventory->getPlantRegistry();
+        if (!treatAsPlant && registry != nullptr && registry->hasPrototype(pair.first)) {
+            inventory->registerPlantType(pair.first);
+            treatAsPlant = true;
+        }
+        PlantInstance* plant = treatAsPlant ? inventory->createPlantInstance(pair.first) : nullptr;
+        inventory->additem(std::make_unique<StockItem>(pair.first, pair.second, plant));
     }
      std::cout << "[CSVAdapter] Loaded data from " << filePath << std::endl;
 }

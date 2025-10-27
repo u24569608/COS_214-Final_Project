@@ -3,19 +3,18 @@
 #include "../include/Inventory.h"
 #include "../include/StockItem.h" // Needed to create items
 #include "../include/InventoryIterator.h" 
+#include "../include/PlantPrototypeRegistry.h"
 #include <sstream>
 #include <iostream>
+#include <memory>
 
-TXTAdapter::TXTAdapter() {
-    txtReader = new TXTReaderWriter();
-}
-
-TXTAdapter::~TXTAdapter() {
-    delete txtReader;
+TXTAdapter::TXTAdapter()
+    : txtReader(std::make_unique<TXTReaderWriter>()) {
 }
 
 /**
  * @brief Loads inventory from a TXT file and rebuilds greenhouse-linked plant instances.
+ * @note Stock names with registered prototypes are promoted to plant stock so greenhouse beds stay in sync.
  */
 void TXTAdapter::loadInventory(std::string filePath, Inventory* inventory) {
     if (!inventory) {
@@ -39,8 +38,14 @@ void TXTAdapter::loadInventory(std::string filePath, Inventory* inventory) {
                           << " in file " << filePath << ". Ignoring extra data: " << remaining << std::endl;
             }
             // Create a new StockItem and add it
-            PlantInstance* plant = inventory->createPlantInstance(name);
-            inventory->additem(new StockItem(name, price, plant));
+            bool treatAsPlant = inventory->isPlantType(name);
+            PlantPrototypeRegistry* registry = inventory->getPlantRegistry();
+            if (!treatAsPlant && registry != nullptr && registry->hasPrototype(name)) {
+                inventory->registerPlantType(name);
+                treatAsPlant = true;
+            }
+            PlantInstance* plant = treatAsPlant ? inventory->createPlantInstance(name) : nullptr;
+            inventory->additem(std::make_unique<StockItem>(name, price, plant));
             
         } else if (!lines[i].empty()) {
              std::cerr << "[TXTAdapter] Warning: Malformed line " << (i + 1)
