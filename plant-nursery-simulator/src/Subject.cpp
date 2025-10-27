@@ -8,7 +8,7 @@ Subject::~Subject() {
         const ObserverEvent destroyEvent{
             ObserverEventType::SubjectDestroyed,
             this,
-            "Subject shutting down",
+            "",
             std::nullopt};
         notify(destroyEvent);
     }

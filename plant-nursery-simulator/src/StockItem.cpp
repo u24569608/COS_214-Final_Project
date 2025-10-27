@@ -99,7 +99,8 @@ void StockItem::bindToPlant(PlantInstance* newPlant) {
     detachFromPlant();
 
     if (newPlant == nullptr) {
-        setIsAvailible(true);
+        setIsAvailible(false);
+        displayStatus = "Plant unavailable for sale";
         return;
     }
 
@@ -116,4 +117,6 @@ void StockItem::detachFromPlant() {
         plant->detach(this);
         plant = nullptr;
     }
+    setIsAvailible(false);
+    displayStatus = "Plant unavailable for sale";
 }
