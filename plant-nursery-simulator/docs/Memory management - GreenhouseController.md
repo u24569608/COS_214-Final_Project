@@ -1,4 +1,4 @@
-# Memory Management – Greenhouse Controller
+# Memory Management - Greenhouse Controller
 
 `GreenhouseController` orchestrates periodic care over the greenhouse composite. It holds a single `GreenhouseBed*`
 that is treated as a **non-owning** pointer:

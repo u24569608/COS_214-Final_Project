@@ -1,4 +1,4 @@
-# Memory Management – Greenhouse Iterator
+# Memory Management - Greenhouse Iterator
 
 The greenhouse composite exposes traversal through the `GreenhouseIterator` interface. Iterators **never own** the
 plants they return; instead they hand out raw `PlantInstance*` values that are guaranteed to remain valid only while

@@ -27,6 +27,7 @@ public:
      * @brief Constructs an instance bound to a plant prototype.
      * @param plantType Pointer to the plant used to configure defaults.
      * @param instanceName Optional override for the instance name; defaults to an auto-numbered prototype name (e.g. Rose1).
+     * @note `plantType` is non-owning; the prototype must outlive the instance.
      */
     PlantInstance(Plant* plantType, std::string instanceName = "");
     ~PlantInstance();
@@ -59,7 +60,8 @@ public:
     /**
      * @brief Assigns a new lifecycle state to this plant.
      * @param nextState Newly allocated state that becomes active immediately.
-     * @note Observers are notified when availability or care requirements change.
+     * @note Ownership transfers to the plant instance; the previous state is destroyed automatically.
+     *       Observers are notified when availability or care requirements change.
      */
     void setState(std::unique_ptr<PlantState> nextState);
 
