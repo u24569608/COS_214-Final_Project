@@ -59,6 +59,7 @@ public:
     /**
      * @brief Assigns a new lifecycle state to this plant.
      * @param nextState Newly allocated state that becomes active immediately.
+     * @note Observers are notified when availability or care requirements change.
      */
     void setState(std::unique_ptr<PlantState> nextState);
 
@@ -71,7 +72,8 @@ public:
     // === Observer Pattern (Subject methods) ===
     /**
      * @brief Creative Function: Simulates a tick of time passing.
-     * @details Lowers water and nutrient levels, then defers to the current state for reactions.
+     * @details Lowers water and nutrient levels, notifies observers when care is required,
+     * and defers to the current state for reactions.
      * @note TODO(FR12): Replace the fixed consumption values once balancing rules are decided.
      */
     void applyGrowthTick();
@@ -87,6 +89,11 @@ public:
      * @return bool True if nutrientLevel is below threshold.
      */
     bool needsFertilizing() const;
+    /**
+     * @brief Indicates whether the plant is ready for retail sale.
+     * @return True when the active state marks the plant as market-ready.
+     */
+    bool isAvailableForSale() const;
 
     // === Composite Pattern (Leaf method) ===
     /**

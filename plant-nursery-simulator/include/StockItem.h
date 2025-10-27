@@ -11,18 +11,36 @@ class WaterStrategy;
 
 /**
  * @file StockItem.h
- * @brief A complex class representing an item in an order.
+ * @brief Represents an inventory entry and observes plant availability.
  */
 class StockItem : public Observer {
 public:
+    /**
+     * @brief Constructs a stock record, optionally linked to a specific plant instance.
+     * @param n Human-readable name for display.
+     * @param p Unit price charged to customers.
+     * @param pl Optional plant instance backing this stock item.
+     */
     StockItem(std::string n, double p, PlantInstance* pl);
+
+    /**
+     * @brief Ensures the stock item detaches from any observed plant.
+     */
+    ~StockItem() override;
+
     std::string getname() const;
     int getPrice() const;
     PlantInstance* getplant();
     void setPrice(double price);
     bool isPlant();
     bool getIsAvailible();
+
+    /**
+     * @brief Updates the cached availability flag for display purposes.
+     * @param isAvailible New availability flag.
+     */
     void setIsAvailible(bool isAvailible);
+
     /**
      * @brief Retrieves the human-readable availability notice.
      * @return Status string shown for this stock item.
@@ -35,6 +53,11 @@ public:
      */
     void update(const ObserverEvent& event) override;
 
+    /**
+     * @brief Rebinds this stock item to a different plant instance.
+     * @param newPlant Plant instance to observe; nullptr detaches from any current plant.
+     */
+    void setPlant(PlantInstance* newPlant);
 
 private:
     std::string name;
@@ -42,6 +65,9 @@ private:
     PlantInstance* plant;
     bool isAvailable;
     std::string displayStatus;
+
+    void bindToPlant(PlantInstance* newPlant);
+    void detachFromPlant();
 };
 
 #endif // STOCK_ITEM_H

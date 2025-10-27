@@ -9,15 +9,16 @@
 StockItem::StockItem(std::string n, double p, PlantInstance* pl)
     : name(std::move(n)),
       price(p),
-      plant(pl),
+      plant(nullptr),
       isAvailable(true),
       displayStatus("Available") {
-    // Constructor body
+    bindToPlant(pl);
 }
 
-/**
- * @brief Returns the name of the item
- */
+StockItem::~StockItem() {
+    detachFromPlant();
+}
+
 std::string StockItem::getname() const{
     return this->name;
 }
@@ -67,4 +68,36 @@ void StockItem::update(const ObserverEvent& event) {
     const bool available = event.message.find("unavailable") == std::string::npos;
     setIsAvailible(available);
     displayStatus = event.message;
+}
+
+void StockItem::setPlant(PlantInstance* newPlant) {
+    bindToPlant(newPlant);
+}
+
+void StockItem::bindToPlant(PlantInstance* newPlant) {
+    if (plant == newPlant) {
+        return;
+    }
+
+    detachFromPlant();
+
+    if (newPlant == nullptr) {
+        isAvailable = true;
+        displayStatus = "Available";
+        return;
+    }
+
+    plant = newPlant;
+    plant->attach(this);
+
+    const bool available = plant->isAvailableForSale();
+    isAvailable = available;
+    displayStatus = available ? "Plant ready for sale" : "Plant unavailable for sale";
+}
+
+void StockItem::detachFromPlant() {
+    if (plant != nullptr) {
+        plant->detach(this);
+        plant = nullptr;
+    }
 }

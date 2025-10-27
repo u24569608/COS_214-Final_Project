@@ -94,6 +94,7 @@ void PlantInstance::performFertilize() {
 }
 
 void PlantInstance::setState(std::unique_ptr<PlantState> nextState) {
+    const bool wasAvailable = isAvailableForSale();
     const std::string previousName = plantState ? plantState->getName() : "";
     if (!nextState) {
         return;
@@ -101,10 +102,9 @@ void PlantInstance::setState(std::unique_ptr<PlantState> nextState) {
 
     plantState = std::move(nextState);
     const std::string currentName = plantState ? plantState->getName() : "";
+    const bool isAvailable = isAvailableForSale();
 
     if (currentName != previousName) {
-        const bool wasAvailable = previousName == "Mature";
-        const bool isAvailable = currentName == "Mature";
         if (wasAvailable != isAvailable) {
             const ObserverEvent availabilityEvent{
                 ObserverEventType::AvailabilityChanged,
@@ -146,6 +146,10 @@ bool PlantInstance::isThirsty() const {
 
 bool PlantInstance::needsFertilizing() const {
     return nutrientLevel < PlantStateThresholds::kSeedToGrowingNutrients;
+}
+
+bool PlantInstance::isAvailableForSale() const {
+    return plantState && plantState->getName() == "Mature";
 }
 
 // --- Composite Pattern (Leaf method) ---
