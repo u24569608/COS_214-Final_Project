@@ -257,7 +257,7 @@ plant_state_unit_test:
 strategy:
 	@echo "== Compiling Strategy Pattern Source Files =="
 	@mkdir -p build
-	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude -c src/WaterStrategy.cpp         -o build/WaterStrategy.o
+	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude -c src/waterStrategy.cpp        -o build/waterStrategy.o
 	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude -c src/FertilizeStrategy.cpp     -o build/FertilizeStrategy.o
 	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude -c src/FrequentWatering.cpp      -o build/FrequentWatering.o
 	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude -c src/SparseWatering.cpp        -o build/SparseWatering.o
@@ -278,7 +278,7 @@ strategy:
 strategy_unit_test: strategy
 	@echo "== Building and Running 'strategy_test.cpp' (UNIT TEST) =="
 	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude \
-		build/WaterStrategy.o \
+		build/waterStrategy.o \
 		build/FertilizeStrategy.o \
 		build/FrequentWatering.o \
 		build/SparseWatering.o \
