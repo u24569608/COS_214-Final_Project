@@ -3,37 +3,40 @@
 
 #include <list>
 
-// Forward declaration
-class Observer; 
+#include "Observer.h"
 
 /**
  * @file Subject.h
- * @brief The 'Subject' interface. (FR13)
+ * @brief Declares the Subject base that manages observer subscriptions. (FR13)
  */
 class Subject {
 public:
-    virtual ~Subject();
+    /**
+     * @brief Virtual default destructor for polymorphic cleanup.
+     */
+    virtual ~Subject() = default;
 
     /**
-     * @brief Attach (subscribe) an Observer.
-     * @param observer The observer to attach.
+     * @brief Registers an observer to receive future notifications.
+     * @param observer Instance interested in subject events.
      */
     virtual void attach(Observer* observer);
 
     /**
-     * @brief Detach (unsubscribe) an Observer.
-     * @param observer The observer to detach.
+     * @brief Unregisters an observer from receiving notifications.
+     * @param observer Instance that no longer requires updates.
      */
     virtual void detach(Observer* observer);
-    
+
 protected:
     /**
-     * @brief Notify all subscribed Observers of a change.
+     * @brief Dispatches an event to all registered observers.
+     * @param event Payload describing the change that occurred.
      */
-    virtual void notify();
+    virtual void notify(const ObserverEvent& event);
 
 private:
-    std::list<Observer*> observers; ///< List of subscribed Observers.
+    std::list<Observer*> observers; ///< Subscribers to this subject.
 };
 
 #endif // SUBJECT_H
