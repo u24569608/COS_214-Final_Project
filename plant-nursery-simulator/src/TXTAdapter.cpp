@@ -4,6 +4,13 @@
 #include "../include/StockItem.h" // Needed to create items
 #include "../include/InventoryIterator.h" 
 #include "../include/PlantPrototypeRegistry.h"
+#include "../include/PlantInstance.h"
+#include "../include/PlantState.h"
+#include "../include/SeedState.h"
+#include "../include/GrowingState.h"
+#include "../include/MatureState.h"
+#include "../include/WitheringState.h"
+#include "../include/DeadState.h"
 #include <sstream>
 #include <iostream>
 #include <memory>
@@ -12,9 +19,41 @@ TXTAdapter::TXTAdapter()
     : txtReader(std::make_unique<TXTReaderWriter>()) {
 }
 
+namespace {
+std::unique_ptr<PlantState> makeStateFromLabel(const std::string& label) {
+    if (label == "Seed") {
+        return std::make_unique<SeedState>();
+    }
+    if (label == "Growing") {
+        return std::make_unique<GrowingState>();
+    }
+    if (label == "Mature") {
+        return std::make_unique<MatureState>();
+    }
+    if (label == "Withering") {
+        return std::make_unique<WitheringState>();
+    }
+    if (label == "Dead") {
+        return std::make_unique<DeadState>();
+    }
+    return nullptr;
+}
+double parsePrice(const std::string& raw, size_t lineNumber, const std::string& filePath) {
+    try {
+        return std::stod(raw);
+    } catch (const std::exception&) {
+        std::cerr << "[TXTAdapter] Warning: Invalid price '" << raw << "' on line "
+                  << lineNumber << " of " << filePath << ". Defaulting to 0.\n";
+        return 0.0;
+    }
+}
+} // namespace
+
 /**
  * @brief Loads inventory from a TXT file and rebuilds greenhouse-linked plant instances.
- * @note Stock names with registered prototypes are promoted to plant stock so greenhouse beds stay in sync.
+ * @note Expected file format per line:
+ *       Item,<name>,<price>
+ *       Plant,<name>,<price>,<state>
  */
 void TXTAdapter::loadInventory(std::string filePath, Inventory* inventory) {
     if (!inventory) {
@@ -26,37 +65,73 @@ void TXTAdapter::loadInventory(std::string filePath, Inventory* inventory) {
 
     for (size_t i = 0; i < lines.size(); ++i) {
         std::stringstream ss(lines[i]);
-        std::string name;
-        double price;
-
-        // Try to parse "ItemName Price"
-        if (ss >> name >> price) {
-            // Check if there's extra data on the line
-            std::string remaining;
-            if (ss >> remaining) {
-                 std::cerr << "[TXTAdapter] Warning: Extra data on line " << (i + 1)
-                          << " in file " << filePath << ". Ignoring extra data: " << remaining << std::endl;
+        std::string token;
+        std::vector<std::string> parts;
+        while (std::getline(ss, token, ',')) {
+            if (!token.empty()) {
+                // trim whitespace
+                const auto first = token.find_first_not_of(" \t");
+                const auto last = token.find_last_not_of(" \t");
+                parts.push_back(first == std::string::npos ? std::string() : token.substr(first, last - first + 1));
+            } else {
+                parts.emplace_back();
             }
-            // Create a new StockItem and add it
-            bool treatAsPlant = inventory->isPlantType(name);
+        }
+
+        if (parts.empty()) {
+            continue;
+        }
+
+        const std::string& entryType = parts[0];
+        if (entryType == "Item") {
+            if (parts.size() < 3U) {
+                std::cerr << "[TXTAdapter] Warning: Malformed item row on line " << (i + 1)
+                          << ": '" << lines[i] << "'" << std::endl;
+                continue;
+            }
+            const std::string& name = parts[1];
+            const double price = parsePrice(parts[2], i + 1, filePath);
+            inventory->additem(std::make_unique<StockItem>(name, price, nullptr));
+            continue;
+        }
+
+        if (entryType == "Plant") {
+            if (parts.size() < 4U) {
+                std::cerr << "[TXTAdapter] Warning: Malformed plant row on line " << (i + 1)
+                          << ": '" << lines[i] << "'" << std::endl;
+                continue;
+            }
+            const std::string& name = parts[1];
+            const double price = parsePrice(parts[2], i + 1, filePath);
+            const std::string& stateLabel = parts[3];
+
+            bool treatAsPlant = true;
             PlantPrototypeRegistry* registry = inventory->getPlantRegistry();
-            if (!treatAsPlant && registry != nullptr && registry->hasPrototype(name)) {
+            if (registry != nullptr && !registry->hasPrototype(name)) {
+                treatAsPlant = false;
+            }
+            if (treatAsPlant) {
                 inventory->registerPlantType(name);
-                treatAsPlant = true;
             }
             PlantInstance* plant = treatAsPlant ? inventory->createPlantInstance(name) : nullptr;
+            if (plant != nullptr) {
+                if (std::unique_ptr<PlantState> desiredState = makeStateFromLabel(stateLabel)) {
+                    plant->setState(std::move(desiredState));
+                }
+            }
             inventory->additem(std::make_unique<StockItem>(name, price, plant));
-            
-        } else if (!lines[i].empty()) {
-             std::cerr << "[TXTAdapter] Warning: Malformed line " << (i + 1)
-                      << " in file " << filePath << ". Expected 'Name Price'. Skipping row: " << lines[i] << std::endl;
+            continue;
         }
+
+        std::cerr << "[TXTAdapter] Warning: Unknown entry type on line " << (i + 1)
+                  << ": '" << entryType << "'" << std::endl;
     }
      std::cout << "[TXTAdapter] Loaded data from " << filePath << std::endl;
 }
 
 /**
  * @brief Saves inventory to a TXT file using the TXTReaderWriter.
+ * @note Emits entries in the same Item/Plant format consumed by loadInventory.
  */
 void TXTAdapter::saveInventory(std::string filePath, Inventory* inventory) {
      if (!inventory) {
@@ -65,11 +140,10 @@ void TXTAdapter::saveInventory(std::string filePath, Inventory* inventory) {
     }
 
     std::vector<StockItem*> itemsToSave;
-    InventoryIterator* iter = inventory->createIterator();
-    for(StockItem* item = iter->first(); iter->hasNext(); item = iter->next()) {
+    std::unique_ptr<InventoryIterator> iter(inventory->createIterator());
+    for (StockItem* item = iter ? iter->first() : nullptr; item != nullptr; item = iter->next()) {
         itemsToSave.push_back(item);
     }
-    delete iter; // Clean up iterator
 
     if (txtReader->writeDataToTxt(filePath, itemsToSave)) {
         std::cout << "[TXTAdapter] Saved inventory to " << filePath << std::endl;

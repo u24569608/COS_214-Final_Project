@@ -194,8 +194,8 @@ void testTXTSaveLoadRoundTrip() {
     }
     testFile.close();
     ASSERT_EQ_INT(static_cast<int>(lines.size()), 2, "TXT should contain two rows");
-    ASSERT_EQ_STR(lines[0], "Succulent 18", "TXT Succulent row");
-    ASSERT_EQ_STR(lines[1], "Pot 7", "TXT Pot row");
+    ASSERT_EQ_STR(lines[0], "Plant,Succulent,18,Mature", "TXT Succulent row");
+    ASSERT_EQ_STR(lines[1], "Item,Pot,7", "TXT Pot row");
 
     // ARRANGE 2: Prepare import context
     PlantPrototypeRegistry importRegistry;
@@ -217,6 +217,9 @@ void testTXTSaveLoadRoundTrip() {
     ASSERT_TRUE(loadedPot != nullptr, "Loaded Pot should exist");
     ASSERT_EQ_INT(loadedSucculent->getPrice(), 18, "Loaded Succulent price");
     ASSERT_EQ_INT(loadedPot->getPrice(), 7, "Loaded Pot price");
+    const PlantState* succulentState = loadedSucculent->getplant() ? loadedSucculent->getplant()->getState() : nullptr;
+    ASSERT_TRUE(succulentState != nullptr, "Loaded Succulent should expose its state");
+    ASSERT_EQ_STR(succulentState->getName(), "Mature", "Succulent state should persist through TXT round-trip");
 
     // ASSERT 3: Only plant-backed items reach the greenhouse
     ASSERT_EQ_INT(importBed.getSize(), 1, "Greenhouse should contain one plant");
@@ -258,12 +261,12 @@ void testLoadInvalidFile() {
      badCsv << "Orchid,25.5\n"; // Good line
      badCsv.close();
 
-     std::ofstream badTxt(badTxtPath);
-     badTxt << "Spade Twelve\n"; // Bad price
-     badTxt << "Gloves 15.75 Extra\n"; // Extra data (TXTAdapter should handle)
-     badTxt << "\n"; // Empty line
-     badTxt << "Shears 20\n"; // Good line
-     badTxt.close();
+    std::ofstream badTxt(badTxtPath);
+    badTxt << "Plant,Spade,Twelve,Mature\n"; // Bad price
+    badTxt << "Item,Gloves,15.75,Extra\n"; // Too many fields
+    badTxt << "Unknown,Shears,20\n"; // Unknown entry type
+    badTxt << "Item,Shears,20\n"; // Only valid row
+    badTxt.close();
 
      // ACT: Load the bad files
      std::cout << "--- Testing bad CSV file (expect warnings) ---" << std::endl;
@@ -285,13 +288,14 @@ void testLoadInvalidFile() {
 
      std::cout << "--- Testing bad TXT file (expect warnings) ---" << std::endl;
      inv.loadFromFile(&txtAdapter, badTxtPath);
-      // ASSERT: Should load items with valid price format (Gloves, Shears)
-     ASSERT_EQ_INT(inv.getStockCount("Spade"), 0, "Bad TXT: Spade not loaded");
-     ASSERT_EQ_INT(inv.getStockCount("Gloves"), 1, "Bad TXT: Gloves loaded");
-     ASSERT_EQ_INT(inv.findItem("Gloves")->getPrice(), 15, "Bad TXT: Gloves price"); // Price is int
-     ASSERT_EQ_INT(inv.getStockCount("Shears"), 1, "Bad TXT: Shears loaded");
-     ASSERT_EQ_INT(inv.findItem("Shears")->getPrice(), 20, "Bad TXT: Shears price");
-     ASSERT_EQ_INT(validationBed.getSize(), 0, "TXT load should not add plants");
+     // ASSERT: Entries with recoverable issues should be normalised during load
+    ASSERT_EQ_INT(inv.getStockCount("Spade"), 1, "Bad TXT: Spade defaulted to zero price");
+    ASSERT_EQ_INT(inv.findItem("Spade")->getPrice(), 0, "Bad TXT: Spade price defaults to zero");
+    ASSERT_EQ_INT(inv.getStockCount("Gloves"), 1, "Bad TXT: Gloves entry retained");
+    ASSERT_EQ_INT(inv.findItem("Gloves")->getPrice(), 15, "Bad TXT: Gloves price truncated to int");
+    ASSERT_EQ_INT(inv.getStockCount("Shears"), 1, "Bad TXT: Shears loaded from final valid row");
+    ASSERT_EQ_INT(inv.findItem("Shears")->getPrice(), 20, "Bad TXT: Shears price");
+    ASSERT_EQ_INT(validationBed.getSize(), 0, "TXT load should not add plants for invalid input");
      std::cout << "--- Done testing bad TXT file ---" << std::endl;
 }
 

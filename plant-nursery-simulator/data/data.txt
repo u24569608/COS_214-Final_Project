@@ -1,4 +1,4 @@
-Rose 10.00
-Tulip 6.00
-Spade 12.00
-Pot 7.00
+Plant,Rose,10.00,Mature
+Plant,Tulip,6.00,Growing
+Item,Spade,12.00
+Item,Pot,7.00

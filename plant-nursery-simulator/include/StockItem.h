@@ -36,6 +36,7 @@ public:
     std::string getname() const;
     int getPrice() const;
     PlantInstance* getplant();
+    const PlantInstance* getplant() const;
     void setPrice(double price);
     bool isPlant();
     bool getIsAvailible();

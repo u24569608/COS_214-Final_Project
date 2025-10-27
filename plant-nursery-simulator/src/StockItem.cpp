@@ -57,6 +57,10 @@ PlantInstance* StockItem::getplant() {
     return this->plant;
 }
 
+const PlantInstance* StockItem::getplant() const{
+    return this->plant;
+}
+
 void StockItem::setPrice(double price) {
     this->price = price;
 }
