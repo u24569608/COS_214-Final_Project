@@ -148,18 +148,7 @@ prototype registry, and lifecycle management) is accessible to end users.
   - Detail drawer for each order with actions: "Mark Paid", "Mark Shipped",
     "Process Return".
 
-## 11. Reporting & Analytics
-- **Functionality**:
-  - Generate summaries such as best-selling items, current greenhouse capacity,
-    care workload per staff member, and import/export volume.
-  - Surface trends (e.g., daily sales, plant mortality) to support decision
-    making.
-- **Suggested UI**:
-  - Analytics page with charts (line graphs for sales, bar charts for stock
-    composition, heatmap of greenhouse occupancy).
-  - Downloadable reports (PDF/CSV) and scheduled email summaries.
-
-## 12. System Administration
+## 11. System Administration
 - **Functionality**:
   - Configure adapters (file paths, default formats), greenhouse roots, and
     prototype registries used by the facade.
@@ -172,7 +161,7 @@ prototype registry, and lifecycle management) is accessible to end users.
   - Diagnostic panel with status indicators and "Run Sync" buttons (e.g.,
     resync greenhouse with inventory, clear dangling observers).
 
-## 13. Error Handling & Notifications
+## 12. Error Handling & Notifications
 - **Functionality**:
   - Surface adapter parsing errors, payment failures, missing prototypes, and
     observer warnings.
@@ -182,18 +171,3 @@ prototype registry, and lifecycle management) is accessible to end users.
   - Global toast/alert system for transient messages.
   - Persistent notification center listing unresolved issues with suggested
     actions ("Register Prototype", "Retry Payment", "Detach Observer").
-
-## 14. Extensibility Hooks
-- **Functionality**:
-  - Expose hooks for future modules (e.g., greenhouse automation, loyalty
-    programs).
-  - Allow feature toggles controlling visibility of experimental screens.
-- **Suggested UI**:
-  - Feature toggle panel for administrators.
-  - Modular navigation that can reveal/hide sections without breaking layout.
-
----
-
-These requirements align the GUI with the simulator’s architectural patterns,
-ensuring each subsystem’s responsibilities are discoverable, actionable, and
-consistent with the underlying codebase.
