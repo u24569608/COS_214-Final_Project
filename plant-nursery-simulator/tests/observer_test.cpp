@@ -72,6 +72,9 @@ void testAttachDetachObservers() {
                 "Stock item should reflect availability change message");
     assertEqInt(staff.getCareReminderCount(), 1,
                 "Staff should receive an availability reminder when plant matures");
+    const auto& reminders = staff.getCareReminders();
+    assertTrue(reminders.back().type == StaffReminderType::Availability,
+               "Availability reminder should be categorised correctly");
 
     staff.stopObservingPlant(&plant);
     plant.setState(std::make_unique<WitheringState>());
@@ -101,7 +104,10 @@ void testCareNotificationsReachObservers() {
 
     assertEqInt(staff.getCareReminderCount(), 1,
                 "Care events should add a reminder for the assigned staff member");
-    assertTrue(staff.getCareReminders().back().find("CareCheck") != std::string::npos,
+    const auto& careReminders = staff.getCareReminders();
+    assertTrue(careReminders.back().type == StaffReminderType::Care,
+               "Care alert should be categorised as care reminder");
+    assertTrue(careReminders.back().message.find("CareCheck") != std::string::npos,
                "Reminder message should reference the plant type");
 
     // Ensure stock item ignores care notifications.

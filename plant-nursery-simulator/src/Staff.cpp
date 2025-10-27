@@ -41,6 +41,16 @@ Staff::~Staff() {
 }
 
 void Staff::update(const ObserverEvent& event) {
+    if (event.type == ObserverEventType::SubjectDestroyed) {
+        if (event.source != nullptr) {
+            observedPlants.erase(static_cast<PlantInstance*>(event.source));
+        }
+        if (!event.message.empty()) {
+            careReminders.push_back({StaffReminderType::Message, event.message});
+        }
+        return;
+    }
+
     PlantInstance* plant = event.source ? dynamic_cast<PlantInstance*>(event.source) : nullptr;
     const bool hasTrackedPlants = !observedPlants.empty();
 
@@ -53,31 +63,22 @@ void Staff::update(const ObserverEvent& event) {
         return;
     }
 
-    switch (event.type) {
-    case ObserverEventType::CareRequired: {
-        careReminders.push_back(buildReminderMessage(event));
-        break;
+    if (event.type == ObserverEventType::CareRequired) {
+        careReminders.push_back({StaffReminderType::Care, buildReminderMessage(event)});
+        return;
     }
-    case ObserverEventType::AvailabilityChanged: {
+
+    if (event.type == ObserverEventType::AvailabilityChanged) {
         std::string message = event.message;
         if (message.empty() && event.availability.has_value()) {
             message = *event.availability ? "Plant ready for sale" : "Plant unavailable for sale";
         }
-        careReminders.push_back(buildReminderMessage(
-            {ObserverEventType::CareRequired, event.source, message, event.availability}));
-        break;
-    }
-    case ObserverEventType::SubjectDestroyed: {
-        if (plant != nullptr) {
-            observedPlants.erase(plant);
-        }
-        if (!event.message.empty()) {
-            careReminders.push_back(event.message);
-        }
-        break;
-    }
-    default:
-        break;
+        careReminders.push_back({StaffReminderType::Availability,
+                                 buildReminderMessage({ObserverEventType::CareRequired,
+                                                       event.source,
+                                                       message,
+                                                       event.availability})});
+        return;
     }
 }
 
@@ -93,7 +94,7 @@ void Staff::send(std::string message, int colleagueID) {
 }
 
 void Staff::receive(std::string message) {
-    careReminders.push_back("Message: " + message);
+    careReminders.push_back({StaffReminderType::Message, "Message: " + message});
 }
 
 void Staff::addCommandToQueue(PlantCommand* cmd) {
@@ -122,7 +123,7 @@ int Staff::getCareReminderCount() const {
     return static_cast<int>(careReminders.size());
 }
 
-const std::vector<std::string>& Staff::getCareReminders() const {
+const std::vector<StaffReminder>& Staff::getCareReminders() const {
     return careReminders;
 }
 
@@ -155,7 +156,8 @@ void Staff::makeCareRequest(PlantInstance* plant, std::string requestType) {
     if (handler != nullptr) {
         handler->handleRequest(plant, std::move(requestType));
     } else {
-        careReminders.push_back("Unhandled care request: " + requestType);
+        careReminders.push_back({StaffReminderType::Message,
+                                 "Unhandled care request: " + requestType});
     }
 }
 

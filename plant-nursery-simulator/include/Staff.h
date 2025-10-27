@@ -23,6 +23,17 @@ class FloorMediator;
  * - Invoker (Command Pattern) - FR19
  * - Client (Chain of Responsibility) - FR21
  */
+enum class StaffReminderType {
+    Care,
+    Availability,
+    Message
+};
+
+struct StaffReminder {
+    StaffReminderType type; ///< Category of the reminder.
+    std::string message;    ///< Text shown to staff.
+};
+
 class Staff : public Observer, public Colleague {
 public:
     Staff(int id, FloorMediator* mediator);
@@ -54,15 +65,15 @@ public:
      */
     int getTaskQueueSize() const;
     /**
-     * @brief Creative Function: Number of outstanding care reminders generated via observer updates.
+     * @brief Creative Function: Number of outstanding reminders generated via observer updates.
      * @return Count of recorded reminders.
      */
     int getCareReminderCount() const;
     /**
-     * @brief Creative Function: Retrieve the stored reminder messages.
-     * @return Collection of reminder strings.
+     * @brief Creative Function: Retrieve the stored reminders.
+     * @return Collection of reminder records.
      */
-    const std::vector<std::string>& getCareReminders() const;
+    const std::vector<StaffReminder>& getCareReminders() const;
 
     /**
      * @brief Subscribes this staff member to a plant's observer feed.
@@ -98,7 +109,7 @@ private:
     std::vector<PlantCommand*> taskQueue; ///< Command queue
     CareRequestHandler* handler; ///< Start of the CoR chain
     GreenhouseBed* assignedBed; ///< Bed this staff is responsible for
-    std::vector<std::string> careReminders; ///< Observer-generated care reminders
+    std::vector<StaffReminder> careReminders; ///< Observer-generated reminders
     std::unordered_set<PlantInstance*> observedPlants; ///< Plants this staff keeps tabs on
 
     void stopObservingAll();
