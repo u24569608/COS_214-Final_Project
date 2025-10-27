@@ -157,6 +157,11 @@ facade_unit_test:
 		src/InventoryCollection.cpp \
 		src/InventoryIterator.cpp \
 		src/ConcreteInventoryIterator.cpp \
+		src/GreenhouseBed.cpp \
+		src/ConcreteGreenhouseIterator.cpp \
+		src/PlantPrototypeRegistry.cpp \
+		src/Customer.cpp \
+		src/Colleague.cpp \
 		build/GreenhouseComponent.o \
 		-o build/facade_unit_test
 	./build/facade_unit_test

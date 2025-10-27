@@ -5,14 +5,59 @@
 #include "../include/Order.h"
 #include "../include/StockItem.h"
 #include "../include/Customer.h" // Needed for method signatures
+#include "../include/GreenhouseBed.h"
+#include "../include/PlantPrototypeRegistry.h"
+#include <algorithm>
 #include <iostream>
 
 /**
  * @brief Constructor that "wires" the facade to its subsystems.
  */
-SalesFacade::SalesFacade(Inventory* inv, PaymentProcessor* pp, OrderBuilder* ob)
-    : inventory(inv), paymentProcessor(pp), orderBuilder(ob) {
-    // All subsystems are now linked
+SalesFacade::SalesFacade(Inventory* inv,
+                         PaymentProcessor* pp,
+                         OrderBuilder* ob,
+                         GreenhouseBed* greenhouse,
+                         PlantPrototypeRegistry* registry)
+    : inventory(inv),
+      paymentProcessor(pp),
+      orderBuilder(ob),
+      greenhouseRoot(greenhouse),
+      plantRegistry(registry) {
+    syncInventoryContext();
+}
+
+void SalesFacade::registerCustomer(Customer* customer) {
+    if (!customer) {
+        return;
+    }
+    if (std::find(customers.begin(), customers.end(), customer) == customers.end()) {
+        customers.push_back(customer);
+    }
+}
+
+void SalesFacade::unregisterCustomer(Customer* customer) {
+    if (!customer) {
+        return;
+    }
+    customers.erase(std::remove(customers.begin(), customers.end(), customer), customers.end());
+}
+
+void SalesFacade::setGreenhouseRoot(GreenhouseBed* root) {
+    greenhouseRoot = root;
+    syncInventoryContext();
+}
+
+void SalesFacade::setPlantRegistry(PlantPrototypeRegistry* registry) {
+    plantRegistry = registry;
+    syncInventoryContext();
+}
+
+void SalesFacade::registerPlantType(const std::string& name) {
+    if (!inventory || name.empty()) {
+        return;
+    }
+    registeredManualPlants.insert(name);
+    inventory->registerPlantType(name);
 }
 
 /**
@@ -26,10 +71,19 @@ int SalesFacade::checkStock(std::string plantType) {
 /**
  * @brief Simplifies adding a new item type to the inventory.
  */
-void SalesFacade::addItemToInventory(std::string name, double price) {
-    // We use the stub StockItem constructor
-    StockItem* newItem = new StockItem(name, price, nullptr);
-    inventory->additem(newItem);
+void SalesFacade::addItemToInventory(std::string name, double price, bool isPlant) {
+    if (!inventory) {
+        std::cerr << "[SalesFacade] Inventory subsystem unavailable.\n";
+        return;
+    }
+
+    if (isPlant) {
+        registerPlantType(name);
+        PlantInstance* plant = inventory->createPlantInstance(name);
+        inventory->additem(new StockItem(name, price, plant));
+    } else {
+        inventory->additem(new StockItem(name, price, nullptr));
+    }
     std::cout << "[SalesFacade] Added " << name << " to inventory." << std::endl;
 }
 
@@ -38,7 +92,6 @@ void SalesFacade::addItemToInventory(std::string name, double price) {
  * This is the "happy path" (browse->add->pay).
  */
 bool SalesFacade::purchaseItem(Customer* customer, StockItem* item) {
-    (void)customer; // <-- ADD THIS LINE to silence the unused parameter warning
     if (item == nullptr) {
         return false;
     }
@@ -52,17 +105,21 @@ bool SalesFacade::purchaseItem(Customer* customer, StockItem* item) {
         return false; // Insufficient stock
     }
 
+    if (customer != nullptr) {
+        customer->removeFromCart(itemInStock);
+    }
+
     // 2. Process Payment
     // Using const getter now
     double price = itemInStock->getPrice();
     // In a real app, we'd get customer details from the Customer object
-    // For now, using a mock string since 'customer' is unused
     bool paid = paymentProcessor->processPayment("MockCustomerDetails", price);
 
     // 3. Update Inventory
     if (paid) {
         // This removes ONE item of this name, per Inventory.h logic
         inventory->removeItem(itemName);
+        notifyItemSold(itemName);
         std::cout << "[SalesFacade] Purchase of " << itemName << " complete." << std::endl;
         return true;
     }
@@ -75,7 +132,6 @@ bool SalesFacade::purchaseItem(Customer* customer, StockItem* item) {
  * @brief Simplifies building a complex order.
  */
 Order* SalesFacade::buildAndFinalizeOrder(Customer* customer, std::vector<StockItem> items) {
-    (void)customer; // <-- ADD THIS LINE to silence the unused parameter warning
     // 1. Build the order
     orderBuilder->createNewOrder();
     for (StockItem& item : items) {
@@ -99,7 +155,12 @@ Order* SalesFacade::buildAndFinalizeOrder(Customer* customer, std::vector<StockI
         // Remove all items from inventory
         for (StockItem& item : items) {
             // Using const getter now
+            if (customer != nullptr) {
+                customer->removeFromCart(item.getname());
+            }
+            const std::string itemName = item.getname();
             inventory->removeItem(item.getname());
+            notifyItemSold(itemName);
         }
         std::cout << "[SalesFacade] Custom order finalized and paid." << std::endl;
         return order;
@@ -144,14 +205,10 @@ bool SalesFacade::processReturn(Order* order) {
     // Iterate over the COPIES of items in the order
     for (const StockItem& itemCopy : order->getItems()) {
 
-        // Create a NEW item on the heap (a "new plant")
-        // We must do this because Inventory expects to OWN its pointers.
-        StockItem* newItem = new StockItem(
-            itemCopy.getname(),
-            itemCopy.getPrice(),
-            nullptr // We lose the specific PlantInstance,
-                    // but the item (e.g., "Rose") is back in stock.
-        );
+        const std::string& itemName = itemCopy.getname();
+        const bool plantStock = isPlantStock(itemName);
+        PlantInstance* plant = plantStock ? inventory->createPlantInstance(itemName) : nullptr;
+        StockItem* newItem = new StockItem(itemName, itemCopy.getPrice(), plant);
 
         // Give the new item to the inventory
         inventory->additem(newItem);
@@ -159,4 +216,26 @@ bool SalesFacade::processReturn(Order* order) {
 
     std::cout << "[SalesFacade] Return processed and items restocked." << std::endl;
     return true;
+}
+
+void SalesFacade::notifyItemSold(const std::string& itemName) {
+    for (Customer* customer : customers) {
+        if (customer != nullptr) {
+            customer->notifyItemSold(itemName);
+        }
+    }
+}
+
+void SalesFacade::syncInventoryContext() {
+    if (inventory != nullptr) {
+        inventory->setGreenhouseRoot(greenhouseRoot);
+        inventory->setPlantRegistry(plantRegistry);
+    }
+}
+
+bool SalesFacade::isPlantStock(const std::string& name) const {
+    if (registeredManualPlants.count(name) > 0U) {
+        return true;
+    }
+    return inventory != nullptr && inventory->isPlantType(name);
 }
