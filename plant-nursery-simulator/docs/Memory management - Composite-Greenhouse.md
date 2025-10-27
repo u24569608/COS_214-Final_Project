@@ -1,0 +1,24 @@
+# Memory Management - Composite Greenhouse
+
+The greenhouse composite follows the classic Composite pattern: `GreenhouseBed` is the composite node and `PlantInstance`
+acts as the leaf. Ownership rules are intentionally simple:
+
+- `GreenhouseBed` stores raw `GreenhouseComponent*` pointers in its `children` vector. It **does not** own them. The
+  lifecycle of plants is managed by the inventory; beds merely reference the plants for traversal and care operations.
+- `GreenhouseIterator` (and its concrete implementation) caches plant pointers for iteration but never deletes them.
+- `GreenhouseController` keeps a non-owning pointer to the root bed and allocates iterators with `std::unique_ptr` during
+  each care cycle.
+
+Implications:
+
+1. **Inventory owns plants.** When a `PlantInstance` is added to a bed, the inventory (or whichever subsystem created the
+   plant) remains responsible for deleting it. Before destroying a bed, remove or detach its children to prevent dangling
+   pointers during subsequent iterations.
+2. **Beds do not delete children.** Removing a child simply erases the pointer from the container. Deleting a plant must
+   be done by the subsystem that allocated it.
+3. **Iterators and controllers are transient.** They acquire new iterators with `std::unique_ptr`, allowing automatic
+   cleanup once a traversal finishes.
+
+If ownership requirements change—for example, if beds need to manage plant lifetimes directly—replace the raw pointer
+containers with smart pointers (`std::unique_ptr` or `std::shared_ptr`) at the owning boundary. For now, keeping the
+composite non-owning avoids double-deletion and keeps responsibilities clear.
