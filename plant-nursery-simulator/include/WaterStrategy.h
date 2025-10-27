@@ -14,8 +14,7 @@ public:
      * @brief Abstract method to execute the watering strategy.
      */
     virtual void water(PlantInstance& plant) const = 0;
-    virtual void clone() = 0;
-    
+    virtual WaterStrategy* clone() const = 0;    
 };
 
 #endif // WATER_STRATEGY_H

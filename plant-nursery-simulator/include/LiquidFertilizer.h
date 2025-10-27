@@ -11,7 +11,7 @@ class LiquidFertilizer : public FertilizeStrategy {
 public:
     LiquidFertilizer();
     void fertilize(PlantInstance& plant) const override;
-    void clone();
+    FertilizeStrategy* clone() const override;
 };
 
 #endif // LIQUID_FERTILIZER_H
