@@ -15,24 +15,6 @@ object frmMain: TfrmMain
   WindowState = wsMaximized
   OnCreate = FormCreate
   TextHeight = 21
-  object sbarMain: TStatusBar
-    Left = 0
-    Top = 589
-    Width = 849
-    Height = 19
-    Panels = <
-      item
-        Width = 200
-      end
-      item
-        Width = 200
-      end
-      item
-        Width = 200
-      end>
-    ExplicitTop = 584
-    ExplicitWidth = 821
-  end
   object pnlTop: TPanel
     Left = 0
     Top = 0
@@ -40,18 +22,19 @@ object frmMain: TfrmMain
     Height = 49
     Align = alTop
     BevelOuter = bvNone
-    TabOrder = 1
+    TabOrder = 0
     ExplicitWidth = 827
   end
   object pgcBase: TPageControl
     Left = 0
-    Top = 328
+    Top = 347
     Width = 849
     Height = 261
     ActivePage = tsMessages
     Align = alBottom
     Images = vrtlmglstMain
-    TabOrder = 2
+    TabOrder = 1
+    ExplicitTop = 283
     object tsMessages: TTabSheet
       Caption = 'Messages'
       ImageName = 'Messages'
@@ -226,11 +209,12 @@ object frmMain: TfrmMain
     Left = 0
     Top = 49
     Width = 849
-    Height = 279
+    Height = 298
     ActivePage = tsGreenhouseManagement
     Align = alClient
     Images = vrtlmglstMain
-    TabOrder = 3
+    TabOrder = 2
+    ExplicitHeight = 279
     object tsGreenhouseManagement: TTabSheet
       Caption = 'Greenhouse Management   '
       ImageIndex = 3
@@ -239,16 +223,17 @@ object frmMain: TfrmMain
         Left = 0
         Top = 0
         Width = 177
-        Height = 243
+        Height = 262
         Align = alLeft
         Indent = 19
         TabOrder = 0
+        ExplicitHeight = 243
       end
       object scrlbxGreenhouseInformation: TScrollBox
         Left = 177
         Top = 0
         Width = 664
-        Height = 243
+        Height = 262
         VertScrollBar.Smooth = True
         VertScrollBar.Tracking = True
         Align = alClient
@@ -256,11 +241,12 @@ object frmMain: TfrmMain
         BevelOuter = bvNone
         TabOrder = 1
         UseWheelForScrolling = True
+        ExplicitHeight = 243
         inline frmGreenhouseInformation1: TfrmGreenhouseInformation
           Left = 0
           Top = 0
           Width = 634
-          Height = 279
+          Height = 323
           Align = alTop
           Color = clWhite
           Font.Charset = DEFAULT_CHARSET
@@ -272,8 +258,6 @@ object frmMain: TfrmMain
           ParentColor = False
           ParentFont = False
           TabOrder = 0
-          ExplicitLeft = 3
-          ExplicitTop = -1
           ExplicitWidth = 634
           inherited lbledtPlantName: TLabeledEdit
             EditLabel.ExplicitLeft = 0
@@ -296,11 +280,12 @@ object frmMain: TfrmMain
         Left = 0
         Top = 0
         Width = 841
-        Height = 243
+        Height = 262
         ActivePage = tsSales
         Align = alClient
         Images = vrtlmglstMain
         TabOrder = 0
+        ExplicitHeight = 243
         object tsInventory: TTabSheet
           Caption = 'Inventory   '
           ImageIndex = 1
@@ -309,7 +294,7 @@ object frmMain: TfrmMain
             Left = 0
             Top = 0
             Width = 792
-            Height = 207
+            Height = 226
             Align = alClient
             Columns = <>
             TabOrder = 0
@@ -322,7 +307,7 @@ object frmMain: TfrmMain
             Left = 792
             Top = 0
             Width = 41
-            Height = 207
+            Height = 226
             Align = alRight
             BevelOuter = bvNone
             TabOrder = 1
@@ -361,11 +346,12 @@ object frmMain: TfrmMain
             Left = 0
             Top = 0
             Width = 833
-            Height = 207
+            Height = 226
             VertScrollBar.Smooth = True
             Align = alClient
             TabOrder = 0
             UseWheelForScrolling = True
+            ExplicitHeight = 207
             inline frmSales1: TfrmSales
               Left = 0
               Top = 0
@@ -404,11 +390,12 @@ object frmMain: TfrmMain
         Left = 0
         Top = 0
         Width = 841
-        Height = 243
+        Height = 262
         ActivePage = tsInventoryManagement
         Align = alClient
         Images = vrtlmglstMain
         TabOrder = 0
+        ExplicitHeight = 243
         object tsInventoryManagement: TTabSheet
           Caption = 'Inventory Management   '
           ImageIndex = 5
@@ -417,13 +404,14 @@ object frmMain: TfrmMain
             Left = 0
             Top = 0
             Width = 833
-            Height = 207
+            Height = 226
             Align = alClient
             BevelOuter = bvNone
             Color = clWhite
             ParentBackground = False
             TabOrder = 0
             StyleElements = []
+            ExplicitHeight = 207
             object btnSaveInventory: TButton
               Left = 25
               Top = 64
@@ -456,7 +444,7 @@ object frmMain: TfrmMain
             Left = 0
             Top = 0
             Width = 833
-            Height = 207
+            Height = 226
             Align = alClient
             BevelOuter = bvNone
             Color = clWhite
@@ -508,7 +496,7 @@ object frmMain: TfrmMain
           ImageName = 'Staff'
           DesignSize = (
             833
-            207)
+            226)
           object lblStaffTaskQueueHeading: TLabel
             Left = 25
             Top = 16
@@ -527,11 +515,12 @@ object frmMain: TfrmMain
             Left = 0
             Top = 48
             Width = 833
-            Height = 159
+            Height = 178
             Align = alBottom
             Anchors = [akLeft, akTop, akRight, akBottom]
             Columns = <>
             TabOrder = 0
+            ExplicitHeight = 159
           end
           object btnProcessNextTask: TBitBtn
             Left = 632

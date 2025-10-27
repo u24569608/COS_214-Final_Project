@@ -52,8 +52,8 @@ void __fastcall TfrmMain::FormCreate(TObject *Sender)
 
 void __fastcall TfrmMain::tmrDateTimeTimer(TObject *Sender)
 {
-	sbarMain->Panels->Items[0]->Text = DateToStr(Date());
-    sbarMain->Panels->Items[1]->Text = TimeToStr(Time());
+	//sbarMain->Panels->Items[0]->Text = DateToStr(Date());
+    //sbarMain->Panels->Items[1]->Text = TimeToStr(Time());
 }
 //---------------------------------------------------------------------------
 

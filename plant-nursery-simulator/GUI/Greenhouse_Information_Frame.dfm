@@ -2,7 +2,7 @@ object frmGreenhouseInformation: TfrmGreenhouseInformation
   Left = 0
   Top = 0
   Width = 640
-  Height = 279
+  Height = 323
   Color = clWhite
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText

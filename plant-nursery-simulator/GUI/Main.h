@@ -25,7 +25,6 @@
 class TfrmMain : public TForm
 {
 __published:	// IDE-managed Components
-	TStatusBar *sbarMain;
 	TMainMenu *mmMain;
 	TPanel *pnlTop;
 	TPageControl *pgcBase;
