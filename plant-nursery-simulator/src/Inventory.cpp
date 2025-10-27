@@ -2,19 +2,24 @@
 #include "../include/ConcreteInventoryIterator.h" // For createIterator()
 #include "../include/StockItem.h"                 // For item definitions
 #include "../include/FileAdapter.h"
+#include "../include/GreenhouseBed.h"
+#include "../include/PlantPrototypeRegistry.h"
+#include "../include/PlantInstance.h"
+#include "../include/Plant.h"
 #include <algorithm>                   // For std::find_if, std::remove_if
 #include <iostream>
 
-Inventory::Inventory() {
-    // Constructor
+Inventory::Inventory()
+    : greenhouseRoot(nullptr),
+      plantRegistry(nullptr) {
 }
 
-// Destructor must clean up all the dynamically allocated StockItems
 Inventory::~Inventory() {
     for (StockItem* item : items) {
         delete item;
     }
     items.clear();
+    releaseManagedPlants();
 }
 
 /**
@@ -30,6 +35,7 @@ InventoryIterator* Inventory::createIterator() {
 void Inventory::additem(StockItem* item) {
     if (item != nullptr) {
         items.push_back(item);
+        registerPlant(item->getplant(), false);
     }
 }
 
@@ -43,8 +49,10 @@ void Inventory::removeItem(std::string name) {
     // 2. If we found it, delete and erase
     if (it != items.end()) {
         StockItem* itemToDelete = *it; // Get the pointer
+        PlantInstance* plant = itemToDelete->getplant();
         items.erase(it);               // Erase the pointer from the vector
         delete itemToDelete;           // Delete the object from memory
+        unregisterPlant(plant);
     }
 }
 
@@ -73,7 +81,7 @@ StockItem* Inventory::findItem(std::string name) {
 
 
 /**
- * @brief Delegates loading to the provided adapter.
+ * @brief Delegates loading to the provided adapter after clearing stock and managed greenhouse plants.
  */
 void Inventory::loadFromFile(FileAdapter* adapter, std::string filePath) {
     if (adapter == nullptr) {
@@ -86,6 +94,7 @@ void Inventory::loadFromFile(FileAdapter* adapter, std::string filePath) {
         delete item;
     }
     items.clear();
+    releaseManagedPlants();
 
     std::cout << "[Inventory] Loading from file: " << filePath << std::endl;
     adapter->loadInventory(filePath, this);
@@ -103,4 +112,120 @@ void Inventory::saveToFile(FileAdapter* adapter, std::string filePath) {
     std::cout << "[Inventory] Saving current inventory (" << items.size() << " items) to file: " << filePath << std::endl;
     adapter->saveInventory(filePath, this);
     std::cout << "[Inventory] Save complete." << std::endl;
+}
+
+void Inventory::setGreenhouseRoot(GreenhouseBed* root) {
+    greenhouseRoot = root;
+}
+
+GreenhouseBed* Inventory::getGreenhouseRoot() const {
+    return greenhouseRoot;
+}
+
+void Inventory::setPlantRegistry(PlantPrototypeRegistry* registry) {
+    plantRegistry = registry;
+}
+
+PlantPrototypeRegistry* Inventory::getPlantRegistry() const {
+    return plantRegistry;
+}
+
+void Inventory::registerPlantType(const std::string& plantName) {
+    if (!plantName.empty()) {
+        registeredPlantTypes.insert(plantName);
+    }
+}
+
+void Inventory::clearPlantTypes() {
+    registeredPlantTypes.clear();
+}
+
+bool Inventory::isPlantType(const std::string& plantName) const {
+    if (plantName.empty()) {
+        return false;
+    }
+    if (registeredPlantTypes.count(plantName) > 0U) {
+        return true;
+    }
+    if (plantRegistry != nullptr) {
+        return plantRegistry->hasPrototype(plantName);
+    }
+    return false;
+}
+
+PlantInstance* Inventory::createPlantInstance(const std::string& plantName) {
+    if (!isPlantType(plantName)) {
+        return nullptr;
+    }
+
+    std::unique_ptr<Plant> prototype;
+    if (plantRegistry != nullptr) {
+        if (Plant* clone = plantRegistry->createPlant(plantName, "")) {
+            prototype.reset(clone);
+        }
+    }
+
+    PlantInstance* instance = new PlantInstance(prototype.get(), plantName);
+    registerPlant(instance, true);
+    if (prototype) {
+        prototypeOwners.emplace(instance, std::move(prototype));
+    }
+    return instance;
+}
+
+void Inventory::registerPlant(PlantInstance* plant, bool takeOwnership) {
+    if (plant == nullptr) {
+        return;
+    }
+
+    if (greenhouseRoot != nullptr) {
+        const bool inserted = greenhousePlants.insert(plant).second;
+        if (inserted) {
+            greenhouseRoot->add(plant);
+        }
+    } else {
+        greenhousePlants.insert(plant);
+    }
+
+    if (takeOwnership) {
+        const bool inserted = ownedPlantSet.insert(plant).second;
+        if (inserted) {
+            ownedPlants.push_back(plant);
+        }
+    }
+}
+
+void Inventory::unregisterPlant(PlantInstance* plant) {
+    if (plant == nullptr) {
+        return;
+    }
+
+    if (greenhousePlants.erase(plant) > 0U && greenhouseRoot != nullptr) {
+        greenhouseRoot->remove(plant);
+    }
+
+    if (ownedPlantSet.erase(plant) > 0U) {
+        auto it = std::remove(ownedPlants.begin(), ownedPlants.end(), plant);
+        if (it != ownedPlants.end()) {
+            ownedPlants.erase(it, ownedPlants.end());
+        }
+        prototypeOwners.erase(plant);
+        delete plant;
+    }
+}
+
+void Inventory::releaseManagedPlants() {
+    if (greenhouseRoot != nullptr) {
+        for (PlantInstance* plant : greenhousePlants) {
+            greenhouseRoot->remove(plant);
+        }
+    }
+    greenhousePlants.clear();
+
+    for (PlantInstance* plant : ownedPlants) {
+        delete plant;
+    }
+    ownedPlants.clear();
+    ownedPlantSet.clear();
+    prototypeOwners.clear();
 }

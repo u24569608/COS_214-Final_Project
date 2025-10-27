@@ -32,6 +32,13 @@ public:
      */
     Plant* createPlant(const std::string& name, const std::string& type);
 
+    /**
+     * @brief Checks whether a prototype exists for the supplied plant name.
+     * @param name The lookup key.
+     * @return True if a prototype is registered and non-null.
+     */
+    bool hasPrototype(const std::string& name) const;
+
 private:
     std::map<std::string, std::unique_ptr<Plant>> prototypes;
 };

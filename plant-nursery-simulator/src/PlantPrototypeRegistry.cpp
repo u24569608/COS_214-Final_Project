@@ -32,3 +32,8 @@ Plant* PlantPrototypeRegistry::createPlant(const std::string& name, const std::s
 
     return clone;
 }
+
+bool PlantPrototypeRegistry::hasPrototype(const std::string& name) const {
+    auto it = prototypes.find(name);
+    return it != prototypes.end() && it->second != nullptr;
+}
