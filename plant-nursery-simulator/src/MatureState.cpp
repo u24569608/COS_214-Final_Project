@@ -51,3 +51,7 @@ void MatureState::onTick(PlantInstance& plant) {
     }
     transitionIfNecessary(plant);
 }
+
+bool MatureState::isMarketReady() const {
+    return true;
+}

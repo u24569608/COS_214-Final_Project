@@ -12,13 +12,17 @@
 class Subject {
 public:
     /**
-     * @brief Virtual default destructor for polymorphic cleanup.
+     * @brief Virtual destructor that notifies observers of shutdown.
+     * @details Emits a `SubjectDestroyed` event before clearing subscriptions.
+     * Observers must not assume the subject remains valid after the call.
      */
-    virtual ~Subject() = default;
+    virtual ~Subject();
 
     /**
      * @brief Registers an observer to receive future notifications.
      * @param observer Instance interested in subject events.
+     * @note Subjects own their lifetime; observers must detach or listen for
+     *       the `SubjectDestroyed` event before accessing the subject again.
      */
     virtual void attach(Observer* observer);
 
@@ -34,6 +38,11 @@ protected:
      * @param event Payload describing the change that occurred.
      */
     virtual void notify(const ObserverEvent& event);
+
+    /**
+     * @brief Removes every observer without generating additional events.
+     */
+    void clearObservers();
 
 private:
     std::list<Observer*> observers; ///< Subscribers to this subject.

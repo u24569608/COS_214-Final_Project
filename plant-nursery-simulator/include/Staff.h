@@ -4,6 +4,7 @@
 #include "Observer.h" // Is-a Observer
 #include "Colleague.h" // Is-a Colleague
 #include <string>
+#include <unordered_set>
 #include <vector>
 
 // Forward declarations
@@ -63,6 +64,18 @@ public:
      */
     const std::vector<std::string>& getCareReminders() const;
 
+    /**
+     * @brief Subscribes this staff member to a plant's observer feed.
+     * @param plant Plant instance to observe; ignored when nullptr.
+     */
+    void observePlant(PlantInstance* plant);
+
+    /**
+     * @brief Stops observing the specified plant.
+     * @param plant Plant instance to stop observing; ignored when nullptr.
+     */
+    void stopObservingPlant(PlantInstance* plant);
+
     // === Chain of Responsibility (Client) Methods ===
     void setCareHandler(CareRequestHandler* h);
     void makeCareRequest(PlantInstance* plant, std::string requestType);
@@ -86,6 +99,9 @@ private:
     CareRequestHandler* handler; ///< Start of the CoR chain
     GreenhouseBed* assignedBed; ///< Bed this staff is responsible for
     std::vector<std::string> careReminders; ///< Observer-generated care reminders
+    std::unordered_set<PlantInstance*> observedPlants; ///< Plants this staff keeps tabs on
+
+    void stopObservingAll();
 };
 
 #endif // STAFF_H//

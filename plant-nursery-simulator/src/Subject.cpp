@@ -1,6 +1,19 @@
 #include "../include/Subject.h"
 
 #include <algorithm>
+#include <optional>
+
+Subject::~Subject() {
+    if (!observers.empty()) {
+        const ObserverEvent destroyEvent{
+            ObserverEventType::SubjectDestroyed,
+            this,
+            "Subject shutting down",
+            std::nullopt};
+        notify(destroyEvent);
+    }
+    clearObservers();
+}
 
 void Subject::attach(Observer* observer) {
     if (!observer) {
@@ -24,4 +37,8 @@ void Subject::notify(const ObserverEvent& event) {
             observer->update(event);
         }
     }
+}
+
+void Subject::clearObservers() {
+    observers.clear();
 }

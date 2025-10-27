@@ -36,17 +36,44 @@ Staff::Staff(int id, FloorMediator* mediator)
       assignedBed(nullptr) {
 }
 
-Staff::~Staff() = default;
+Staff::~Staff() {
+    stopObservingAll();
+}
 
 void Staff::update(const ObserverEvent& event) {
+    PlantInstance* plant = event.source ? dynamic_cast<PlantInstance*>(event.source) : nullptr;
+    const bool hasTrackedPlants = !observedPlants.empty();
+
+    if (plant) {
+        if (hasTrackedPlants && observedPlants.count(plant) == 0) {
+            return;
+        }
+    } else if (hasTrackedPlants) {
+        // Ignore broadcasts unrelated to tracked plants.
+        return;
+    }
+
     switch (event.type) {
     case ObserverEventType::CareRequired: {
         careReminders.push_back(buildReminderMessage(event));
         break;
     }
     case ObserverEventType::AvailabilityChanged: {
-        // Availability changes trigger a lighter reminder to review tasks.
-        careReminders.push_back("Availability update: " + event.message);
+        std::string message = event.message;
+        if (message.empty() && event.availability.has_value()) {
+            message = *event.availability ? "Plant ready for sale" : "Plant unavailable for sale";
+        }
+        careReminders.push_back(buildReminderMessage(
+            {ObserverEventType::CareRequired, event.source, message, event.availability}));
+        break;
+    }
+    case ObserverEventType::SubjectDestroyed: {
+        if (plant != nullptr) {
+            observedPlants.erase(plant);
+        }
+        if (!event.message.empty()) {
+            careReminders.push_back(event.message);
+        }
         break;
     }
     default:
@@ -99,6 +126,27 @@ const std::vector<std::string>& Staff::getCareReminders() const {
     return careReminders;
 }
 
+void Staff::observePlant(PlantInstance* plant) {
+    if (plant == nullptr) {
+        return;
+    }
+    const bool inserted = observedPlants.insert(plant).second;
+    if (inserted) {
+        plant->attach(this);
+    }
+}
+
+void Staff::stopObservingPlant(PlantInstance* plant) {
+    if (plant == nullptr) {
+        return;
+    }
+    const auto it = observedPlants.find(plant);
+    if (it != observedPlants.end()) {
+        plant->detach(this);
+        observedPlants.erase(it);
+    }
+}
+
 void Staff::setCareHandler(CareRequestHandler* h) {
     handler = h;
 }
@@ -119,4 +167,17 @@ void Staff::checkOnPlants() {
     if (assignedBed != nullptr) {
         assignedBed->performCare();
     }
+}
+
+void Staff::stopObservingAll() {
+    if (observedPlants.empty()) {
+        return;
+    }
+    std::vector<PlantInstance*> snapshot(observedPlants.begin(), observedPlants.end());
+    for (PlantInstance* plant : snapshot) {
+        if (plant != nullptr) {
+            plant->detach(this);
+        }
+    }
+    observedPlants.clear();
 }

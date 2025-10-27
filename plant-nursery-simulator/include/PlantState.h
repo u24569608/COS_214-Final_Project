@@ -39,6 +39,12 @@ public:
      * @param plant Context instance whose state should update.
      */
     virtual void onTick(PlantInstance& plant) = 0;
+
+    /**
+     * @brief Indicates whether plants in this state are ready for sale.
+     * @return False by default; states can override to opt into retail readiness.
+     */
+    virtual bool isMarketReady() const { return false; }
 };
 
 #endif // PLANT_STATE_H

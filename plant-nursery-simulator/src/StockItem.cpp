@@ -61,13 +61,30 @@ std::string StockItem::getDisplayStatus() const {
 }
 
 void StockItem::update(const ObserverEvent& event) {
-    if (event.type != ObserverEventType::AvailabilityChanged) {
-        return;
+    switch (event.type) {
+    case ObserverEventType::AvailabilityChanged: {
+        if (event.availability.has_value()) {
+            setIsAvailible(*event.availability);
+        }
+        if (!event.message.empty()) {
+            displayStatus = event.message;
+        } else if (event.availability.has_value()) {
+            displayStatus = *event.availability ? "Available" : "Unavailable";
+        }
+        break;
     }
-
-    const bool available = event.message.find("unavailable") == std::string::npos;
-    setIsAvailible(available);
-    displayStatus = event.message;
+    case ObserverEventType::SubjectDestroyed: {
+        // Subject will remove this observer; ensure local pointer no longer used.
+        plant = nullptr;
+        setIsAvailible(false);
+        if (!event.message.empty()) {
+            displayStatus = event.message;
+        }
+        break;
+    }
+    default:
+        break;
+    }
 }
 
 void StockItem::setPlant(PlantInstance* newPlant) {
@@ -82,8 +99,7 @@ void StockItem::bindToPlant(PlantInstance* newPlant) {
     detachFromPlant();
 
     if (newPlant == nullptr) {
-        isAvailable = true;
-        displayStatus = "Available";
+        setIsAvailible(true);
         return;
     }
 
@@ -91,7 +107,7 @@ void StockItem::bindToPlant(PlantInstance* newPlant) {
     plant->attach(this);
 
     const bool available = plant->isAvailableForSale();
-    isAvailable = available;
+    setIsAvailible(available);
     displayStatus = available ? "Plant ready for sale" : "Plant unavailable for sale";
 }
 

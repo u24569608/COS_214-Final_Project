@@ -1,6 +1,7 @@
 #ifndef OBSERVER_H
 #define OBSERVER_H
 
+#include <optional>
 #include <string>
 
 // Forward declaration to break circular dependency
@@ -13,6 +14,7 @@ class Subject;
 enum class ObserverEventType {
     AvailabilityChanged, ///< Subject availability toggled.
     CareRequired,        ///< Subject requires human intervention.
+    SubjectDestroyed,    ///< Subject is shutting down; observers should detach.
     Generic              ///< Fallback event type for miscellaneous notices.
 };
 
@@ -23,6 +25,7 @@ struct ObserverEvent {
     ObserverEventType type; ///< Classifies the event for observers.
     Subject* source;        ///< Subject instance responsible for the notification.
     std::string message;    ///< Human-readable context about the event.
+    std::optional<bool> availability; ///< Availability flag when provided.
 };
 
 /**

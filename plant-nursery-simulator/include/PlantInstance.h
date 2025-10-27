@@ -154,6 +154,7 @@ private:
     int waterLevel;
     int nutrientLevel;
     bool replayingAction;
+    bool careAlertActive; ///< Prevents duplicate care notifications while already flagged.
 
     void setReplayingAction(bool value);
     /**
