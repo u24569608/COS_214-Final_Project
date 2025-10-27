@@ -1,7 +1,7 @@
 STATE_SRCS = src/SeedState.cpp src/GrowingState.cpp src/MatureState.cpp src/WitheringState.cpp src/DeadState.cpp
 STATE_OBJS = $(STATE_SRCS:src/%.cpp=build/%.o)
 
-test: iterator_unit_test mediator_unit_test command_unit_test builder_unit_test chain_of_responsibility_unit_test facade_unit_test adapter_unit_test greenhouse_iterator_unit_test plant_instance_unit_test plant_state_unit_test composite_unit_test observer_unit_test prototype_unit_test
+test: iterator_unit_test mediator_unit_test command_unit_test builder_unit_test chain_of_responsibility_unit_test facade_unit_test adapter_unit_test greenhouse_iterator_unit_test plant_instance_unit_test plant_state_unit_test strategy_unit_test composite_unit_test observer_unit_test prototype_unit_test
 	@echo "==== ALL PROJECT TESTS DONE ===="
 
 clean:
@@ -253,6 +253,47 @@ plant_state_unit_test:
 		src/Plant.cpp \
 		-o build/plant_state_unit_test
 	./build/plant_state_unit_test
+
+strategy:
+	@echo "== Compiling Strategy Pattern Source Files =="
+	@mkdir -p build
+	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude -c src/waterStrategy.cpp        -o build/waterStrategy.o
+	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude -c src/FertilizeStrategy.cpp     -o build/FertilizeStrategy.o
+	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude -c src/FrequentWatering.cpp      -o build/FrequentWatering.o
+	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude -c src/SparseWatering.cpp        -o build/SparseWatering.o
+	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude -c src/SeasonalWatering.cpp      -o build/SeasonalWatering.o
+	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude -c src/LiquidFertilizer.cpp      -o build/LiquidFertilizer.o
+	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude -c src/SlowReleaseFertilizer.cpp -o build/SlowReleaseFertilizer.o
+	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude -c src/OrganicFertilizer.cpp     -o build/OrganicFertilizer.o
+	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude -c src/PlantInstance.cpp         -o build/PlantInstance.o
+	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude -c src/Subject.cpp               -o build/Subject.o
+	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude -c src/SeedState.cpp             -o build/SeedState.o
+	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude -c src/GrowingState.cpp          -o build/GrowingState.o
+	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude -c src/MatureState.cpp           -o build/MatureState.o
+	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude -c src/WitheringState.cpp        -o build/WitheringState.o
+	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude -c src/DeadState.cpp             -o build/DeadState.o
+	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude -c src/Plant.cpp                 -o build/Plant.o
+	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude -c src/GreenhouseComponent.cpp   -o build/GreenhouseComponent.o
+
+strategy_unit_test: strategy
+	@echo "== Building and Running 'strategy_test.cpp' (UNIT TEST) =="
+	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude \
+		build/waterStrategy.o \
+		build/FertilizeStrategy.o \
+		build/FrequentWatering.o \
+		build/SparseWatering.o \
+		build/SeasonalWatering.o \
+		build/LiquidFertilizer.o \
+		build/SlowReleaseFertilizer.o \
+		build/OrganicFertilizer.o \
+		build/PlantInstance.o \
+		build/Subject.o \
+		$(STATE_OBJS) \
+		build/Plant.o \
+		build/GreenhouseComponent.o \
+		tests/strategy_test.cpp \
+		-o build/strategy_unit_test
+	./build/strategy_unit_test
 
 observer_unit_test:
 	@echo "== Building and Running 'observer_test.cpp' (UNIT TEST) =="
