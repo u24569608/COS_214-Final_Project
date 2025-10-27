@@ -94,8 +94,32 @@ void PlantInstance::performFertilize() {
 }
 
 void PlantInstance::setState(std::unique_ptr<PlantState> nextState) {
-    if (nextState) {
-        plantState = std::move(nextState);
+    const std::string previousName = plantState ? plantState->getName() : "";
+    if (!nextState) {
+        return;
+    }
+
+    plantState = std::move(nextState);
+    const std::string currentName = plantState ? plantState->getName() : "";
+
+    if (currentName != previousName) {
+        const bool wasAvailable = previousName == "Mature";
+        const bool isAvailable = currentName == "Mature";
+        if (wasAvailable != isAvailable) {
+            const ObserverEvent availabilityEvent{
+                ObserverEventType::AvailabilityChanged,
+                this,
+                isAvailable ? "Plant ready for sale" : "Plant unavailable for sale"};
+            notify(availabilityEvent);
+        }
+
+        if (currentName == "Withering") {
+            const ObserverEvent careEvent{
+                ObserverEventType::CareRequired,
+                this,
+                "Plant entered Withering state and needs attention"};
+            notify(careEvent);
+        }
     }
 }
 
@@ -112,6 +136,8 @@ void PlantInstance::applyGrowthTick() {
     if (plantState) {
         plantState->onTick(*this);
     }
+
+    requestCareIfNeeded();
 }
 
 bool PlantInstance::isThirsty() const {
@@ -198,6 +224,26 @@ bool PlantInstance::isReplayingAction() const {
 
 void PlantInstance::setReplayingAction(bool value) {
     replayingAction = value;
+}
+
+void PlantInstance::requestCareIfNeeded() {
+    const bool thirsty = isThirsty();
+    const bool hungry = needsFertilizing();
+    if (!thirsty && !hungry) {
+        return;
+    }
+
+    std::string message;
+    if (thirsty && hungry) {
+        message = "Plant requires watering and fertilising";
+    } else if (thirsty) {
+        message = "Plant requires watering";
+    } else {
+        message = "Plant requires fertilising";
+    }
+
+    const ObserverEvent event{ObserverEventType::CareRequired, this, message};
+    notify(event);
 }
 
 std::string PlantInstance::deriveInstanceName(Plant* plantPrototype, const std::string& instanceName) {
