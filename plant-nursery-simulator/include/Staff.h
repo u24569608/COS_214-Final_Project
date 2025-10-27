@@ -4,6 +4,7 @@
 #include "Observer.h" // Is-a Observer
 #include "Colleague.h" // Is-a Colleague
 #include <string>
+#include <unordered_set>
 #include <vector>
 
 // Forward declarations
@@ -22,13 +23,24 @@ class FloorMediator;
  * - Invoker (Command Pattern) - FR19
  * - Client (Chain of Responsibility) - FR21
  */
+enum class StaffReminderType {
+    Care,
+    Availability,
+    Message
+};
+
+struct StaffReminder {
+    StaffReminderType type; ///< Category of the reminder.
+    std::string message;    ///< Text shown to staff.
+};
+
 class Staff : public Observer, public Colleague {
 public:
     Staff(int id, FloorMediator* mediator);
     ~Staff();
 
     // === Observer Method ===
-    void update(Subject* subject) override;
+    void update(const ObserverEvent& event) override;
 
     // === Colleague Methods ===
     int getID() const override;
@@ -52,6 +64,28 @@ public:
      * @return int The size of the task queue.
      */
     int getTaskQueueSize() const;
+    /**
+     * @brief Creative Function: Number of outstanding reminders generated via observer updates.
+     * @return Count of recorded reminders.
+     */
+    int getCareReminderCount() const;
+    /**
+     * @brief Creative Function: Retrieve the stored reminders.
+     * @return Collection of reminder records.
+     */
+    const std::vector<StaffReminder>& getCareReminders() const;
+
+    /**
+     * @brief Subscribes this staff member to a plant's observer feed.
+     * @param plant Plant instance to observe; ignored when nullptr.
+     */
+    void observePlant(PlantInstance* plant);
+
+    /**
+     * @brief Stops observing the specified plant.
+     * @param plant Plant instance to stop observing; ignored when nullptr.
+     */
+    void stopObservingPlant(PlantInstance* plant);
 
     // === Chain of Responsibility (Client) Methods ===
     void setCareHandler(CareRequestHandler* h);
@@ -75,6 +109,10 @@ private:
     std::vector<PlantCommand*> taskQueue; ///< Command queue
     CareRequestHandler* handler; ///< Start of the CoR chain
     GreenhouseBed* assignedBed; ///< Bed this staff is responsible for
+    std::vector<StaffReminder> careReminders; ///< Observer-generated reminders
+    std::unordered_set<PlantInstance*> observedPlants; ///< Plants this staff keeps tabs on
+
+    void stopObservingAll();
 };
 
 #endif // STAFF_H//

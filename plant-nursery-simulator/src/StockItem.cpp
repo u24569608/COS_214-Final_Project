@@ -1,17 +1,24 @@
 #include "../include/StockItem.h"
 #include "../include/PlantInstance.h"
 
+#include <utility>
+
 /**
  * @brief Constructor implementation
  */
 StockItem::StockItem(std::string n, double p, PlantInstance* pl)
-    : name(n), price(p), plant(pl), isAvailable(true) {
-    // Constructor body
+    : name(std::move(n)),
+      price(p),
+      plant(nullptr),
+      isAvailable(true),
+      displayStatus("Available") {
+    bindToPlant(pl);
 }
 
-/**
- * @brief Returns the name of the item
- */
+StockItem::~StockItem() {
+    detachFromPlant();
+}
+
 std::string StockItem::getname() const{
     return this->name;
 }
@@ -46,4 +53,70 @@ bool StockItem::getIsAvailible() {
 
 void StockItem::setIsAvailible(bool isAvailible) {
     this->isAvailable = isAvailible;
+    this->displayStatus = isAvailible ? "Available" : "Unavailable";
+}
+
+std::string StockItem::getDisplayStatus() const {
+    return displayStatus;
+}
+
+void StockItem::update(const ObserverEvent& event) {
+    switch (event.type) {
+    case ObserverEventType::AvailabilityChanged: {
+        if (event.availability.has_value()) {
+            setIsAvailible(*event.availability);
+        }
+        if (!event.message.empty()) {
+            displayStatus = event.message;
+        } else if (event.availability.has_value()) {
+            displayStatus = *event.availability ? "Available" : "Unavailable";
+        }
+        break;
+    }
+    case ObserverEventType::SubjectDestroyed: {
+        // Subject will remove this observer; ensure local pointer no longer used.
+        plant = nullptr;
+        setIsAvailible(false);
+        if (!event.message.empty()) {
+            displayStatus = event.message;
+        }
+        break;
+    }
+    default:
+        break;
+    }
+}
+
+void StockItem::setPlant(PlantInstance* newPlant) {
+    bindToPlant(newPlant);
+}
+
+void StockItem::bindToPlant(PlantInstance* newPlant) {
+    if (plant == newPlant) {
+        return;
+    }
+
+    detachFromPlant();
+
+    if (newPlant == nullptr) {
+        setIsAvailible(false);
+        displayStatus = "Plant unavailable for sale";
+        return;
+    }
+
+    plant = newPlant;
+    plant->attach(this);
+
+    const bool available = plant->isAvailableForSale();
+    setIsAvailible(available);
+    displayStatus = available ? "Plant ready for sale" : "Plant unavailable for sale";
+}
+
+void StockItem::detachFromPlant() {
+    if (plant != nullptr) {
+        plant->detach(this);
+        plant = nullptr;
+    }
+    setIsAvailible(false);
+    displayStatus = "Plant unavailable for sale";
 }

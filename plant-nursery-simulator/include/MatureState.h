@@ -36,6 +36,11 @@ public:
      * @param plant Context plant instance being advanced.
      */
     void onTick(PlantInstance& plant) override;
+
+    /**
+     * @brief Mature plants are ready for sale.
+     */
+    bool isMarketReady() const override;
 };
 
 #endif // MATURE_STATE_H

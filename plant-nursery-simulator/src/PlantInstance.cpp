@@ -6,6 +6,7 @@
 #include "../include/SeedState.h"
 #include <algorithm>
 #include <memory>
+#include <optional>
 #include <unordered_map>
 
 namespace {
@@ -29,7 +30,8 @@ PlantInstance::PlantInstance(Plant* plantType, std::string instanceName)
       health(100), 
       waterLevel(100), 
       nutrientLevel(100),
-      replayingAction(false) {
+      replayingAction(false),
+      careAlertActive(false) {
 }
 
 PlantInstance::~PlantInstance() {
@@ -67,6 +69,7 @@ void PlantInstance::performWater() {
     }
 
     setReplayingAction(false);
+    requestCareIfNeeded();
 }
 
 void PlantInstance::performFertilize() {
@@ -91,11 +94,42 @@ void PlantInstance::performFertilize() {
     }
 
     setReplayingAction(false);
+    requestCareIfNeeded();
 }
 
 void PlantInstance::setState(std::unique_ptr<PlantState> nextState) {
-    if (nextState) {
-        plantState = std::move(nextState);
+    const bool wasAvailable = isAvailableForSale();
+    const std::string previousName = plantState ? plantState->getName() : "";
+    if (!nextState) {
+        return;
+    }
+
+    plantState = std::move(nextState);
+    const std::string currentName = plantState ? plantState->getName() : "";
+    const bool isAvailable = isAvailableForSale();
+    const bool enteredWithering = plantState && currentName == "Withering";
+
+    if (currentName != previousName) {
+        if (wasAvailable != isAvailable) {
+            ObserverEvent availabilityEvent{
+                ObserverEventType::AvailabilityChanged,
+                this,
+                isAvailable ? "Plant ready for sale" : "Plant unavailable for sale",
+                std::optional<bool>(isAvailable)};
+            notify(availabilityEvent);
+        }
+
+        if (enteredWithering) {
+            careAlertActive = true;
+            const ObserverEvent careEvent{
+                ObserverEventType::CareRequired,
+                this,
+                "Plant entered Withering state and needs attention",
+                std::nullopt};
+            notify(careEvent);
+        } else if (!isThirsty() && !needsFertilizing()) {
+            careAlertActive = false;
+        }
     }
 }
 
@@ -112,6 +146,8 @@ void PlantInstance::applyGrowthTick() {
     if (plantState) {
         plantState->onTick(*this);
     }
+
+    requestCareIfNeeded();
 }
 
 bool PlantInstance::isThirsty() const {
@@ -120,6 +156,10 @@ bool PlantInstance::isThirsty() const {
 
 bool PlantInstance::needsFertilizing() const {
     return nutrientLevel < PlantStateThresholds::kSeedToGrowingNutrients;
+}
+
+bool PlantInstance::isAvailableForSale() const {
+    return plantState && plantState->isMarketReady();
 }
 
 // --- Composite Pattern (Leaf method) ---
@@ -198,6 +238,37 @@ bool PlantInstance::isReplayingAction() const {
 
 void PlantInstance::setReplayingAction(bool value) {
     replayingAction = value;
+}
+
+void PlantInstance::requestCareIfNeeded() {
+    const bool thirsty = isThirsty();
+    const bool hungry = needsFertilizing();
+    if (!thirsty && !hungry) {
+        careAlertActive = false;
+        return;
+    }
+
+    if (careAlertActive) {
+        return;
+    }
+
+    careAlertActive = true;
+
+    std::string message;
+    if (thirsty && hungry) {
+        message = "Plant requires watering and fertilising";
+    } else if (thirsty) {
+        message = "Plant requires watering";
+    } else {
+        message = "Plant requires fertilising";
+    }
+
+    const ObserverEvent event{
+        ObserverEventType::CareRequired,
+        this,
+        message,
+        std::nullopt};
+    notify(event);
 }
 
 std::string PlantInstance::deriveInstanceName(Plant* plantPrototype, const std::string& instanceName) {

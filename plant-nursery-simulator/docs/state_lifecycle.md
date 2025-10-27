@@ -21,6 +21,7 @@ Transitions are driven by the plant's health, water and nutrient levels. Constan
 - **Water Strategy & Fertilize Strategy** - state methods call `PlantInstance::applyWaterStrategy()` and `PlantInstance::applyFertilizeStrategy()` to execute the currently configured strategies. When a state transition occurs during a care action, the action is replayed on the new state exactly once; the `PlantInstance::isReplayingAction()` guard prevents duplicate strategy invocations.
 - **Resource Stress** - water below `kWitheringWaterThreshold` or nutrients below `kWitheringNutrientThreshold` will push the plant towards the Withering track or reduce health during ticks.
 - **Recovery** - water and nutrients at or above the seed-to-growing thresholds, together with adequate health, allow the plant to recover from Withering.
+- **Observer Notifications** - `PlantInstance` inherits from `Subject` and issues observer events when availability changes (entering or leaving the Mature state) and when care is required (Withering transitions or resource depletion after ticks). Inventory items (`StockItem`) and staff subscribers react to these broadcasts to keep the UI and task queues in sync.
 
 Helper utilities in `include/PlantStateUtils.h` centralise checks such as `isDead`, `meetsSeedToGrowingRequirements`, `meetsGrowingToMatureRequirements`, and `hasRecoveredResources`.
 
@@ -93,4 +94,3 @@ When an action causes a state transition (for example, fertilising a healthy see
 - Recovery from Withering back to Growing/Mature with water and fertiliser.
 
 Running `make plant_state_unit_test` or the umbrella `make test` executes these checks.
-
