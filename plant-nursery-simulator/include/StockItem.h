@@ -28,6 +28,11 @@ public:
      */
     ~StockItem() override;
 
+    /**
+     * @brief Retrieves the unique identifier assigned to this stock entry.
+     * @return Stable identifier usable for cart tracking.
+     */
+    const std::string& getId() const;
     std::string getname() const;
     int getPrice() const;
     PlantInstance* getplant();
@@ -60,6 +65,7 @@ public:
     void setPlant(PlantInstance* newPlant);
 
 private:
+    std::string id;
     std::string name;
     double price;
     PlantInstance* plant;

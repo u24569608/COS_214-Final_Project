@@ -9,6 +9,12 @@
 #include <algorithm>                   // For std::find_if, std::remove_if
 #include <iostream>
 
+namespace {
+std::string plantCounterKey(const std::string& plantName) {
+    return plantName.empty() ? "Plant" : plantName;
+}
+} // namespace
+
 Inventory::Inventory()
     : greenhouseRoot(nullptr),
       plantRegistry(nullptr) {
@@ -19,6 +25,7 @@ Inventory::~Inventory() {
         delete item;
     }
     items.clear();
+    itemsById.clear();
     releaseManagedPlants();
     plantInstanceCounters.clear();
 }
@@ -36,6 +43,7 @@ InventoryIterator* Inventory::createIterator() {
 void Inventory::additem(StockItem* item) {
     if (item != nullptr) {
         items.push_back(item);
+        itemsById[item->getId()] = item;
         registerPlant(item->getplant(), false);
     }
 }
@@ -50,10 +58,7 @@ void Inventory::removeItem(std::string name) {
     // 2. If we found it, delete and erase
     if (it != items.end()) {
         StockItem* itemToDelete = *it; // Get the pointer
-        PlantInstance* plant = itemToDelete->getplant();
-        items.erase(it);               // Erase the pointer from the vector
-        delete itemToDelete;           // Delete the object from memory
-        unregisterPlant(plant);
+        removeItemById(itemToDelete->getId());
     }
 }
 
@@ -80,6 +85,49 @@ StockItem* Inventory::findItem(std::string name) {
     return nullptr; // Not found
 }
 
+StockItem* Inventory::findItemById(const std::string& id) const {
+    if (id.empty()) {
+        return nullptr;
+    }
+    auto it = itemsById.find(id);
+    if (it == itemsById.end()) {
+        return nullptr;
+    }
+    return it->second;
+}
+
+bool Inventory::removeItemById(const std::string& id) {
+    if (id.empty()) {
+        return false;
+    }
+    auto mapIt = itemsById.find(id);
+    if (mapIt == itemsById.end()) {
+        return false;
+    }
+
+    StockItem* itemToDelete = mapIt->second;
+    if (itemToDelete == nullptr) {
+        itemsById.erase(mapIt);
+        return false;
+    }
+
+    const std::string itemName = itemToDelete->getname();
+    PlantInstance* plant = itemToDelete->getplant();
+
+    auto vecIt = std::find(items.begin(), items.end(), itemToDelete);
+    if (vecIt != items.end()) {
+        items.erase(vecIt);
+    }
+
+    delete itemToDelete;
+    itemsById.erase(mapIt);
+    unregisterPlant(plant);
+    if (getStockCount(itemName) == 0) {
+        plantInstanceCounters.erase(plantCounterKey(itemName));
+    }
+    return true;
+}
+
 
 /**
  * @brief Delegates loading to the provided adapter after clearing stock and managed greenhouse plants.
@@ -95,7 +143,9 @@ void Inventory::loadFromFile(FileAdapter* adapter, std::string filePath) {
         delete item;
     }
     items.clear();
+    itemsById.clear();
     releaseManagedPlants();
+    plantInstanceCounters.clear();
 
     std::cout << "[Inventory] Loading from file: " << filePath << std::endl;
     adapter->loadInventory(filePath, this);
@@ -167,10 +217,18 @@ PlantInstance* Inventory::createPlantInstance(const std::string& plantName) {
     }
 
     PlantInstance* instance = new PlantInstance(prototype.get(), "");
+    if (prototype) {
+        if (WaterStrategy* water = prototype->getDefaultWaterStrat()) {
+            instance->setWaterStrategy(water);
+        }
+        if (FertilizeStrategy* fertiliser = prototype->getDefaultFertStrat()) {
+            instance->setFertilizeStrategy(fertiliser);
+        }
+    }
     if (!prototype) {
-        const std::string counterKey = plantName.empty() ? "Plant" : plantName;
+        const std::string counterKey = plantCounterKey(plantName);
         const int counter = ++plantInstanceCounters[counterKey];
-        const std::string baseName = plantName.empty() ? "Plant" : plantName;
+        const std::string baseName = plantCounterKey(plantName);
         instance->rename(baseName + std::to_string(counter));
     }
     registerPlant(instance, true);

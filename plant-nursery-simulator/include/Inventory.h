@@ -37,6 +37,13 @@ public:
     void removeItem(std::string name);
 
     /**
+     * @brief Removes a specific stock instance by its identifier.
+     * @param id Unique identifier of the item to remove.
+     * @return True when the item existed and was erased.
+     */
+    bool removeItemById(const std::string& id);
+
+    /**
      * @brief Creative Function: Gets total stock for a plant type.
      * @param plantType The name of the plant (e.g., "Rose").
      * @return int The number of that plant in stock.
@@ -49,6 +56,13 @@ public:
      * @return StockItem* The plant, or nullptr if not found.
      */
     StockItem* findItem(std::string name);
+
+    /**
+     * @brief Retrieves a stock entry by its unique identifier.
+     * @param id Stable identifier previously assigned to the item.
+     * @return Pointer to the stock item or nullptr when not tracked.
+     */
+    StockItem* findItemById(const std::string& id) const;
     
     /**
      * @brief Uses the Adapter to load inventory from a file.
@@ -114,6 +128,7 @@ private:
     std::vector<PlantInstance*> ownedPlants;
     std::unordered_map<PlantInstance*, std::unique_ptr<Plant>> prototypeOwners;
     std::unordered_map<std::string, int> plantInstanceCounters;
+    std::unordered_map<std::string, StockItem*> itemsById;
 
     void registerPlant(PlantInstance* plant, bool takeOwnership);
     void releaseManagedPlants();
