@@ -11,7 +11,7 @@ class FrequentWatering : public WaterStrategy {
 public:
     FrequentWatering();
     void water(PlantInstance& plant) const override;
-    void clone();
+   WaterStrategy* clone() const override;
 };
 
 #endif // FREQUENT_WATERING_H

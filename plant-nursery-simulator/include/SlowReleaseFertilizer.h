@@ -11,7 +11,8 @@ class SlowReleaseFertilizer : public FertilizeStrategy {
 public:
     SlowReleaseFertilizer();
     void fertilize(PlantInstance& plant) const override;
-    void clone();
+    FertilizeStrategy* clone() const override;
+
 };
 
 #endif // SLOW_RELEASE_FERTILIZER_H
