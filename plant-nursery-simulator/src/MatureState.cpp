@@ -2,24 +2,20 @@
 #include "../include/DeadState.h"
 #include "../include/PlantInstance.h"
 #include "../include/PlantStateThresholds.h"
+#include "../include/PlantStateUtils.h"
 #include "../include/WitheringState.h"
 #include <memory>
 
 namespace {
 using namespace PlantStateThresholds;
 
-bool isResourceStressed(const PlantInstance& plant) {
-    return plant.getWaterLevel() < kWitheringWaterThreshold ||
-           plant.getNutrientLevel() < kWitheringNutrientThreshold;
-}
-
 void transitionIfNecessary(PlantInstance& plant) {
-    if (plant.getHealth() <= kDeadHealthThreshold) {
+    if (PlantStateUtils::isDead(plant)) {
         plant.setState(std::make_unique<DeadState>());
         return;
     }
 
-    if (isResourceStressed(plant) || plant.getHealth() < kMatureHealthFloor) {
+    if (PlantStateUtils::isResourceStressed(plant) || plant.getHealth() < kMatureHealthFloor) {
         plant.setState(std::make_unique<WitheringState>());
     }
 }
@@ -30,21 +26,25 @@ std::string MatureState::getName() const {
 }
 
 void MatureState::onWater(PlantInstance& plant) {
-    plant.applyWaterStrategy();
+    if (!plant.isReplayingAction()) {
+        plant.applyWaterStrategy();
+    }
     plant.changeWaterLevel(12);
     plant.changeHealth(1);
     transitionIfNecessary(plant);
 }
 
 void MatureState::onFertilize(PlantInstance& plant) {
-    plant.applyFertilizeStrategy();
+    if (!plant.isReplayingAction()) {
+        plant.applyFertilizeStrategy();
+    }
     plant.changeNutrientLevel(12);
     plant.changeHealth(1);
     transitionIfNecessary(plant);
 }
 
 void MatureState::onTick(PlantInstance& plant) {
-    if (isResourceStressed(plant)) {
+    if (PlantStateUtils::isResourceStressed(plant)) {
         plant.changeHealth(-6);
     } else {
         plant.changeHealth(-1);

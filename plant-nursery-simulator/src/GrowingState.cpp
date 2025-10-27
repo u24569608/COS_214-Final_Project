@@ -3,31 +3,25 @@
 #include "../include/MatureState.h"
 #include "../include/PlantInstance.h"
 #include "../include/PlantStateThresholds.h"
+#include "../include/PlantStateUtils.h"
 #include "../include/WitheringState.h"
 #include <memory>
 
 namespace {
 using namespace PlantStateThresholds;
 
-bool isResourceStressed(const PlantInstance& plant) {
-    return plant.getWaterLevel() < kWitheringWaterThreshold ||
-           plant.getNutrientLevel() < kWitheringNutrientThreshold;
-}
-
 void transitionIfNecessary(PlantInstance& plant) {
-    if (plant.getHealth() <= kDeadHealthThreshold) {
+    if (PlantStateUtils::isDead(plant)) {
         plant.setState(std::make_unique<DeadState>());
         return;
     }
 
-    if (isResourceStressed(plant)) {
+    if (PlantStateUtils::isResourceStressed(plant)) {
         plant.setState(std::make_unique<WitheringState>());
         return;
     }
 
-    if (plant.getHealth() >= kGrowingToMatureHealth &&
-        plant.getWaterLevel() >= kGrowingToMatureWater &&
-        plant.getNutrientLevel() >= kGrowingToMatureNutrients) {
+    if (PlantStateUtils::meetsGrowingToMatureRequirements(plant)) {
         plant.setState(std::make_unique<MatureState>());
     }
 }
@@ -38,21 +32,25 @@ std::string GrowingState::getName() const {
 }
 
 void GrowingState::onWater(PlantInstance& plant) {
-    plant.applyWaterStrategy();
+    if (!plant.isReplayingAction()) {
+        plant.applyWaterStrategy();
+    }
     plant.changeWaterLevel(18);
     plant.changeHealth(3);
     transitionIfNecessary(plant);
 }
 
 void GrowingState::onFertilize(PlantInstance& plant) {
-    plant.applyFertilizeStrategy();
+    if (!plant.isReplayingAction()) {
+        plant.applyFertilizeStrategy();
+    }
     plant.changeNutrientLevel(18);
     plant.changeHealth(3);
     transitionIfNecessary(plant);
 }
 
 void GrowingState::onTick(PlantInstance& plant) {
-    if (isResourceStressed(plant)) {
+    if (PlantStateUtils::isResourceStressed(plant)) {
         plant.changeHealth(-7);
     } else {
         plant.changeHealth(2);

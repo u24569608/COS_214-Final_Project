@@ -28,7 +28,8 @@ PlantInstance::PlantInstance(Plant* plantType, std::string instanceName)
       plantState(std::make_unique<SeedState>()), 
       health(100), 
       waterLevel(100), 
-      nutrientLevel(100) {
+      nutrientLevel(100),
+      replayingAction(false) {
 }
 
 PlantInstance::~PlantInstance() {
@@ -45,19 +46,51 @@ void PlantInstance::setFertilizeStrategy(FertilizeStrategy* fs) {
 
 // --- Command Pattern (Receiver methods) ---
 void PlantInstance::performWater() {
-    if (plantState) {
-        plantState->onWater(*this);
-    } else {
+    if (!plantState) {
         applyWaterStrategy();
+        return;
     }
+
+    setReplayingAction(false);
+    PlantState* before = plantState.get();
+    before->onWater(*this);
+
+    if (!plantState) {
+        setReplayingAction(false);
+        return;
+    }
+
+    PlantState* after = plantState.get();
+    if (after != before) {
+        setReplayingAction(true);
+        after->onWater(*this);
+    }
+
+    setReplayingAction(false);
 }
 
 void PlantInstance::performFertilize() {
-    if (plantState) {
-        plantState->onFertilize(*this);
-    } else {
+    if (!plantState) {
         applyFertilizeStrategy();
+        return;
     }
+
+    setReplayingAction(false);
+    PlantState* before = plantState.get();
+    before->onFertilize(*this);
+
+    if (!plantState) {
+        setReplayingAction(false);
+        return;
+    }
+
+    PlantState* after = plantState.get();
+    if (after != before) {
+        setReplayingAction(true);
+        after->onFertilize(*this);
+    }
+
+    setReplayingAction(false);
 }
 
 void PlantInstance::setState(std::unique_ptr<PlantState> nextState) {
@@ -157,6 +190,14 @@ void PlantInstance::applyFertilizeStrategy() {
     if (fStrategy) {
         fStrategy->fertilize(*this);
     }
+}
+
+bool PlantInstance::isReplayingAction() const {
+    return replayingAction;
+}
+
+void PlantInstance::setReplayingAction(bool value) {
+    replayingAction = value;
 }
 
 std::string PlantInstance::deriveInstanceName(Plant* plantPrototype, const std::string& instanceName) {

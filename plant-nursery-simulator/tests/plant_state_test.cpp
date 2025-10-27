@@ -24,7 +24,8 @@ public:
     TrackingWaterStrategy() : callCount(0) {}
 
     void water(PlantInstance& plant) const override {
-        (void)plant;
+        plant.changeWaterLevel(35);
+        plant.changeHealth(2);
         ++callCount;
     }
 
@@ -49,7 +50,8 @@ public:
     TrackingFertilizeStrategy() : callCount(0) {}
 
     void fertilize(PlantInstance& plant) const override {
-        (void)plant;
+        plant.changeNutrientLevel(30);
+        plant.changeHealth(2);
         ++callCount;
     }
 
@@ -180,6 +182,61 @@ void testMatureStateIdempotency() {
                 "Fertilize strategy should be invoked for every fertilising request");
 }
 
+void testFertilizePromotionReplaysOnce() {
+    std::cout << "Running test: testFertilizePromotionReplaysOnce..." << std::endl;
+
+    DummyPlant prototype("Fertilize Daisy");
+    PlantInstance plant(&prototype);
+    TrackingWaterStrategy waterStrategy;
+    TrackingFertilizeStrategy fertilizeStrategy;
+    plant.setWaterStrategy(&waterStrategy);
+    plant.setFertilizeStrategy(&fertilizeStrategy);
+
+    assertEqStr(plant.getState()->getName(), "Seed", "Initial state should be Seed");
+
+    plant.performFertilize();
+
+    assertEqStr(plant.getState()->getName(), "Mature",
+                "Fertilizing a healthy seed should advance through the lifecycle");
+    assertEqInt(fertilizeStrategy.getCallCount(), 1,
+                "Fertilize strategy should execute once despite state promotion");
+}
+
+void testWitheringRecovery() {
+    std::cout << "Running test: testWitheringRecovery..." << std::endl;
+
+    DummyPlant prototype("Resilient Ivy");
+    PlantInstance plant(&prototype);
+    TrackingWaterStrategy waterStrategy;
+    TrackingFertilizeStrategy fertilizeStrategy;
+    plant.setWaterStrategy(&waterStrategy);
+    plant.setFertilizeStrategy(&fertilizeStrategy);
+
+    driveToMature(plant, waterStrategy, fertilizeStrategy);
+
+    // Induce withering by starving resources and letting a tick pass.
+    plant.setWaterLevel(10);
+    plant.setNutrientLevel(10);
+    plant.setHealth(80);
+    waterStrategy.reset();
+    fertilizeStrategy.reset();
+
+    plant.applyGrowthTick();
+    assertEqStr(plant.getState()->getName(), "Withering",
+                "Low resources should transition the plant to Withering");
+
+    plant.performWater();
+    plant.performFertilize();
+
+    const std::string finalState = plant.getState()->getName();
+    assertTrue(finalState == "Growing" || finalState == "Mature",
+               "Recovery actions should lift the plant out of Withering");
+    assertEqInt(waterStrategy.getCallCount(), 1,
+                "Water strategy should be invoked once during recovery");
+    assertEqInt(fertilizeStrategy.getCallCount(), 1,
+                "Fertilize strategy should be invoked once during recovery");
+}
+
 int main() {
     int testsPassed = 0;
     int baseline = failures;
@@ -190,10 +247,18 @@ int main() {
 
     testMatureStateIdempotency();
     if (failures == baseline) { ++testsPassed; }
+    baseline = failures;
+
+    testFertilizePromotionReplaysOnce();
+    if (failures == baseline) { ++testsPassed; }
+    baseline = failures;
+
+    testWitheringRecovery();
+    if (failures == baseline) { ++testsPassed; }
 
     std::cout << "\n---------------------------\n";
     std::cout << "     TEST SUMMARY          \n";
-    std::cout << " Tests Passed: " << testsPassed << " / 2" << std::endl;
+    std::cout << " Tests Passed: " << testsPassed << " / 4" << std::endl;
     std::cout << "---------------------------\n";
 
     if (failures == 0) {

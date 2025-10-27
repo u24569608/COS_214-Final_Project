@@ -4,33 +4,26 @@
 #include "../include/MatureState.h"
 #include "../include/PlantInstance.h"
 #include "../include/PlantStateThresholds.h"
+#include "../include/PlantStateUtils.h"
 #include <memory>
 
 namespace {
 using namespace PlantStateThresholds;
 
-bool hasRecoveredResources(const PlantInstance& plant) {
-    return plant.getWaterLevel() >= kSeedToGrowingWater &&
-           plant.getNutrientLevel() >= kSeedToGrowingNutrients;
-}
-
 void transitionIfNecessary(PlantInstance& plant) {
-    if (plant.getHealth() <= kDeadHealthThreshold ||
+    if (PlantStateUtils::isDead(plant) ||
         plant.getHealth() <= kWitheringCriticalHealth) {
         plant.setState(std::make_unique<DeadState>());
         return;
     }
 
-    if (!hasRecoveredResources(plant)) {
+    if (!PlantStateUtils::hasRecoveredResources(plant)) {
         return;
     }
 
-    if (plant.getHealth() >= kGrowingToMatureHealth &&
-        plant.getWaterLevel() >= kGrowingToMatureWater &&
-        plant.getNutrientLevel() >= kGrowingToMatureNutrients) {
+    if (PlantStateUtils::meetsGrowingToMatureRequirements(plant)) {
         plant.setState(std::make_unique<MatureState>());
-    } else if (plant.getHealth() >= kSeedToGrowingHealth &&
-               plant.getHealth() >= kWitheringRecoveryHealth) {
+    } else if (plant.getHealth() >= kWitheringRecoveryHealth) {
         plant.setState(std::make_unique<GrowingState>());
     }
 }
@@ -41,14 +34,18 @@ std::string WitheringState::getName() const {
 }
 
 void WitheringState::onWater(PlantInstance& plant) {
-    plant.applyWaterStrategy();
+    if (!plant.isReplayingAction()) {
+        plant.applyWaterStrategy();
+    }
     plant.changeWaterLevel(22);
     plant.changeHealth(5);
     transitionIfNecessary(plant);
 }
 
 void WitheringState::onFertilize(PlantInstance& plant) {
-    plant.applyFertilizeStrategy();
+    if (!plant.isReplayingAction()) {
+        plant.applyFertilizeStrategy();
+    }
     plant.changeNutrientLevel(22);
     plant.changeHealth(4);
     transitionIfNecessary(plant);

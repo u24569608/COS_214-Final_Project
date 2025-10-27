@@ -49,6 +49,11 @@ public:
      * @brief Executes the configured fertilising strategy, if present.
      */
     void applyFertilizeStrategy();
+     /**
+     * @brief Indicates whether the current care action is a replay triggered by a state transition.
+     * @return True when the active state should skip re-invoking strategies to avoid duplication.
+     */
+    bool isReplayingAction() const;
 
     /**
      * @brief Assigns a new lifecycle state to this plant.
@@ -140,6 +145,9 @@ private:
     int health;
     int waterLevel;
     int nutrientLevel;
+    bool replayingAction;
+
+    void setReplayingAction(bool value);
 };
 
 #endif // PLANT_INSTANCE_H
