@@ -13,17 +13,29 @@ class PlantInstance;
  */
 class GrowingState : public PlantState {
 public:
-    GrowingState();
-
+    /**
+     * @brief Retrieves the friendly state name.
+     * @return Constant string "Growing".
+     */
     std::string getName() const override;
-    void onWater(PlantInstance& plant) override;
-    void onFertilize(PlantInstance& plant) override;
-    void onTick(PlantInstance& plant) override;
 
-private:
-    void performWater(PlantInstance& plant) override;
-    void performFertilize(PlantInstance& plant) override;
+    /**
+     * @brief Handles watering while the plant is growing.
+     * @param plant Context plant instance receiving water.
+     */
+    void onWater(PlantInstance& plant) override;
+
+    /**
+     * @brief Handles fertilising while the plant is growing.
+     * @param plant Context plant instance receiving nutrients.
+     */
+    void onFertilize(PlantInstance& plant) override;
+
+    /**
+     * @brief Updates growth progress during a tick.
+     * @param plant Context plant instance being advanced.
+     */
+    void onTick(PlantInstance& plant) override;
 };
 
 #endif // GROWING_STATE_H
-

@@ -13,17 +13,29 @@ class PlantInstance;
  */
 class DeadState : public PlantState {
 public:
-    DeadState();
-
+    /**
+     * @brief Retrieves the friendly state name.
+     * @return Constant string "Dead".
+     */
     std::string getName() const override;
-    void onWater(PlantInstance& plant) override;
-    void onFertilize(PlantInstance& plant) override;
-    void onTick(PlantInstance& plant) override;
 
-private:
-    void performWater(PlantInstance& plant) override;
-    void performFertilize(PlantInstance& plant) override;
+    /**
+     * @brief Handles watering requests; no-op for dead plants.
+     * @param plant Context plant instance (unused).
+     */
+    void onWater(PlantInstance& plant) override;
+
+    /**
+     * @brief Handles fertilising requests; no-op for dead plants.
+     * @param plant Context plant instance (unused).
+     */
+    void onFertilize(PlantInstance& plant) override;
+
+    /**
+     * @brief Handles tick events; dead plants remain unchanged.
+     * @param plant Context plant instance (unused).
+     */
+    void onTick(PlantInstance& plant) override;
 };
 
 #endif // DEAD_STATE_H
-

@@ -1,4 +1,7 @@
-test: iterator_unit_test mediator_unit_test command_unit_test builder_unit_test chain_of_responsibility_unit_test facade_unit_test adapter_unit_test greenhouse_iterator_unit_test plant_instance_unit_test composite_unit_test prototype_unit_test
+STATE_SRCS = src/SeedState.cpp src/GrowingState.cpp src/MatureState.cpp src/WitheringState.cpp src/DeadState.cpp
+STATE_OBJS = $(STATE_SRCS:src/%.cpp=build/%.o)
+
+test: iterator_unit_test mediator_unit_test command_unit_test builder_unit_test chain_of_responsibility_unit_test facade_unit_test adapter_unit_test greenhouse_iterator_unit_test plant_instance_unit_test plant_state_unit_test composite_unit_test prototype_unit_test
 	@echo "==== ALL PROJECT TESTS DONE ===="
 
 clean:
@@ -50,6 +53,7 @@ iterator_unit_test:
 		src/ConcreteInventoryIterator.cpp \
 		src/StockItem.cpp \
 		src/PlantInstance.cpp \
+		$(STATE_SRCS) \
 		src/Plant.cpp \
 		-o build/iterator_unit_test
 	./build/iterator_unit_test
@@ -67,6 +71,7 @@ builder_unit_test:
 		src/OrderDirector.cpp \
 		src/StockItem.cpp \
 		src/PlantInstance.cpp \
+		$(STATE_SRCS) \
 		src/Plant.cpp \
 		-o build/builder_unit_test
 	./build/builder_unit_test
@@ -78,6 +83,11 @@ command:
 	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude -c src/FertilizePlant.cpp   -o build/FertilizePlant.o
 	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude -c src/GreenhouseComponent.cpp -o build/GreenhouseComponent.o
 	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude -c src/PlantInstance.cpp    -o build/PlantInstance.o
+	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude -c src/SeedState.cpp        -o build/SeedState.o
+	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude -c src/GrowingState.cpp     -o build/GrowingState.o
+	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude -c src/MatureState.cpp      -o build/MatureState.o
+	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude -c src/WitheringState.cpp   -o build/WitheringState.o
+	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude -c src/DeadState.cpp        -o build/DeadState.o
 	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude -c src/Plant.cpp            -o build/Plant.o
 
 command_unit_test: command
@@ -87,6 +97,7 @@ command_unit_test: command
 		build/WaterPlant.o \
 		build/FertilizePlant.o \
 		build/PlantInstance.o \
+		$(STATE_OBJS) \
 		build/Plant.o \
 		build/GreenhouseComponent.o \
 		tests/command_test.cpp \
@@ -99,6 +110,11 @@ chain_of_responsibility:
 	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude -c src/FertilizingHandler.cpp   -o build/FertilizingHandler.o
 	# PlantInstance is the CoR receiver; reuse your existing implementation
 	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude -c src/PlantInstance.cpp        -o build/PlantInstance.o
+	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude -c src/SeedState.cpp            -o build/SeedState.o
+	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude -c src/GrowingState.cpp         -o build/GrowingState.o
+	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude -c src/MatureState.cpp          -o build/MatureState.o
+	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude -c src/WitheringState.cpp       -o build/WitheringState.o
+	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude -c src/DeadState.cpp            -o build/DeadState.o
 	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude -c src/Plant.cpp                -o build/Plant.o
 
 chain_of_responsibility_unit_test: chain_of_responsibility
@@ -108,6 +124,7 @@ chain_of_responsibility_unit_test: chain_of_responsibility
 		build/WateringHandler.o \
 		build/FertilizingHandler.o \
 		build/PlantInstance.o \
+		$(STATE_OBJS) \
 		build/Plant.o \
 		build/GreenhouseComponent.o \
 		tests/chain_of_responsibility_test.cpp \
@@ -128,6 +145,7 @@ facade_unit_test:
 		src/Order.cpp \
 		src/StockItem.cpp \
 		src/PlantInstance.cpp \
+		$(STATE_SRCS) \
 		src/Plant.cpp \
 		src/InventoryCollection.cpp \
 		src/InventoryIterator.cpp \
@@ -149,6 +167,7 @@ adapter_unit_test:
 		src/CSVReaderWriter.cpp \
 		src/StockItem.cpp \
 		src/PlantInstance.cpp \
+		$(STATE_SRCS) \
 		src/Plant.cpp \
 		src/InventoryCollection.cpp \
 		src/InventoryIterator.cpp \
@@ -167,6 +186,7 @@ composite_unit_test:
 		src/ConcreteGreenhouseIterator.cpp \
 		src/GreenhouseController.cpp \
 		src/PlantInstance.cpp \
+		$(STATE_SRCS) \
 		src/Plant.cpp \
 	-o build/composite_unit_test
 	./build/composite_unit_test
@@ -191,6 +211,7 @@ greenhouse_iterator_unit_test:
 		src/ConcreteGreenhouseIterator.cpp \
 		src/GreenhouseController.cpp \
 		src/PlantInstance.cpp \
+		$(STATE_SRCS) \
 		src/Plant.cpp \
 		-o build/greenhouse_iterator_unit_test
 	./build/greenhouse_iterator_unit_test
@@ -202,6 +223,21 @@ plant_instance_unit_test:
 		tests/plant_instance_test.cpp \
 		src/GreenhouseComponent.cpp \
 		src/PlantInstance.cpp \
+		$(STATE_SRCS) \
 		src/Plant.cpp \
 		-o build/plant_instance_unit_test
 	./build/plant_instance_unit_test
+
+plant_state_unit_test:
+	@echo "== Building and Running 'plant_state_test.cpp' (UNIT TEST) =="
+	@mkdir -p build
+	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude \
+		tests/plant_state_test.cpp \
+		src/GreenhouseComponent.cpp \
+		src/PlantInstance.cpp \
+		$(STATE_SRCS) \
+		src/waterStrategy.cpp \
+		src/FertilizeStrategy.cpp \
+		src/Plant.cpp \
+		-o build/plant_state_unit_test
+	./build/plant_state_unit_test
