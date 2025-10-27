@@ -113,6 +113,7 @@ private:
     std::unordered_set<PlantInstance*> ownedPlantSet;
     std::vector<PlantInstance*> ownedPlants;
     std::unordered_map<PlantInstance*, std::unique_ptr<Plant>> prototypeOwners;
+    std::unordered_map<std::string, int> plantInstanceCounters;
 
     void registerPlant(PlantInstance* plant, bool takeOwnership);
     void releaseManagedPlants();

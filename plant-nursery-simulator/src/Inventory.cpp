@@ -20,6 +20,7 @@ Inventory::~Inventory() {
     }
     items.clear();
     releaseManagedPlants();
+    plantInstanceCounters.clear();
 }
 
 /**
@@ -165,7 +166,13 @@ PlantInstance* Inventory::createPlantInstance(const std::string& plantName) {
         }
     }
 
-    PlantInstance* instance = new PlantInstance(prototype.get(), plantName);
+    PlantInstance* instance = new PlantInstance(prototype.get(), "");
+    if (!prototype) {
+        const std::string counterKey = plantName.empty() ? "Plant" : plantName;
+        const int counter = ++plantInstanceCounters[counterKey];
+        const std::string baseName = plantName.empty() ? "Plant" : plantName;
+        instance->rename(baseName + std::to_string(counter));
+    }
     registerPlant(instance, true);
     if (prototype) {
         prototypeOwners.emplace(instance, std::move(prototype));
