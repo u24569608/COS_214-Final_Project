@@ -93,6 +93,8 @@ void testCareNotificationsReachObservers() {
 
     plant.attach(&staff);
 
+    const bool initialAvailability = stock.getIsAvailible();
+
     plant.setWaterLevel(5);
     plant.setNutrientLevel(5);
     plant.applyGrowthTick();
@@ -103,7 +105,8 @@ void testCareNotificationsReachObservers() {
                "Reminder message should reference the plant type");
 
     // Ensure stock item ignores care notifications.
-    assertTrue(stock.getIsAvailible(), "Stock item availability should remain unchanged by care events");
+    assertTrue(stock.getIsAvailible() == initialAvailability,
+               "Stock item availability should remain unchanged by care events");
 }
 
 } // namespace
