@@ -20,6 +20,7 @@ A sophisticated `C++` simulation of a plant nursery management system, developed
 
 - **Hierarchical Greenhouse Structure** – Organize plants into beds and larger greenhouse units with the **Composite** pattern for uniform care operations.  
 
+- **Live Inventory Status** – Stock items observe their backing plants to reflect real-time availability.  
 - **Automated Staff Alerts** – Staff are automatically notified when plants need care via the **Observer** pattern.  
 
 - **Decoupled Communication** – Staff and Customers interact through a central **Mediator**, reducing system complexity.  
