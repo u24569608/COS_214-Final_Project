@@ -262,6 +262,7 @@ observer_unit_test:
 		src/GreenhouseComponent.cpp \
 		src/PlantInstance.cpp \
 		src/StockItem.cpp \
+		src/Colleague.cpp \
 		src/Staff.cpp \
 		src/Subject.cpp \
 		$(STATE_SRCS) \
