@@ -1,7 +1,7 @@
 STATE_SRCS = src/SeedState.cpp src/GrowingState.cpp src/MatureState.cpp src/WitheringState.cpp src/DeadState.cpp src/PlantPrototypeRegistry.cpp
 STATE_OBJS = $(STATE_SRCS:src/%.cpp=build/%.o)
 
-test: iterator_unit_test mediator_unit_test command_unit_test builder_unit_test chain_of_responsibility_unit_test facade_unit_test adapter_unit_test greenhouse_iterator_unit_test plant_instance_unit_test plant_state_unit_test strategy_unit_test composite_unit_test observer_unit_test prototype_unit_test
+test: iterator_unit_test mediator_unit_test command_unit_test builder_unit_test chain_of_responsibility_unit_test facade_unit_test adapter_unit_test greenhouse_iterator_unit_test greenhouse_controller_unit_test plant_instance_unit_test plant_state_unit_test strategy_unit_test composite_unit_test observer_unit_test prototype_unit_test
 	@echo "==== ALL PROJECT TESTS DONE ===="
 
 clean:
@@ -335,3 +335,18 @@ observer_unit_test:
 		src/Plant.cpp \
 		-o build/observer_unit_test
 	./build/observer_unit_test
+greenhouse_controller_unit_test:
+	@echo "== Building and Running 'greenhouse_controller_test.cpp' (UNIT TEST) =="
+	@mkdir -p build
+	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude \
+		tests/greenhouse_controller_test.cpp \
+		src/GreenhouseController.cpp \
+		src/GreenhouseComponent.cpp \
+		src/GreenhouseBed.cpp \
+		src/ConcreteGreenhouseIterator.cpp \
+		src/PlantInstance.cpp \
+		src/Subject.cpp \
+		$(STATE_SRCS) \
+		src/Plant.cpp \
+		-o build/greenhouse_controller_unit_test
+	./build/greenhouse_controller_unit_test

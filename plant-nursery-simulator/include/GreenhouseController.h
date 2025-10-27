@@ -12,12 +12,14 @@ public:
     /**
      * @brief Constructs a controller optionally bound to an existing bed hierarchy.
      * @param root Optional pointer to the greenhouse composite that should be managed.
+     * @note The pointer is non-owning; the caller retains responsibility for the bed's lifetime.
      */
     explicit GreenhouseController(GreenhouseBed* root = nullptr);
 
     /**
      * @brief Updates the controller to operate on a different root bed.
      * @param root Pointer to the new composite hierarchy (may be nullptr to detach).
+     * @note This merely updates the stored non-owning pointer; it performs no clean-up of the previous bed.
      */
     void setRootBed(GreenhouseBed* root);
 
