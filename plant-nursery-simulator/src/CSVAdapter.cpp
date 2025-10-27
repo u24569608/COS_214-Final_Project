@@ -14,7 +14,7 @@ CSVAdapter::~CSVAdapter() {
 }
 
 /**
- * @brief Loads inventory from a CSV file using the CSVReaderWriter.
+ * @brief Loads inventory from a CSV file and recreates greenhouse-backed plant instances.
  */
 void CSVAdapter::loadInventory(std::string filePath, Inventory* inventory) {
     if (!inventory) {
@@ -25,8 +25,8 @@ void CSVAdapter::loadInventory(std::string filePath, Inventory* inventory) {
     std::vector<std::pair<std::string, double>> data = csvReader->readCsv(filePath);
 
     for (const auto& pair : data) {
-        // Create a new StockItem for each valid pair and add it
-        inventory->additem(new StockItem(pair.first, pair.second, nullptr));
+        PlantInstance* plant = inventory->createPlantInstance(pair.first);
+        inventory->additem(new StockItem(pair.first, pair.second, plant));
     }
      std::cout << "[CSVAdapter] Loaded data from " << filePath << std::endl;
 }

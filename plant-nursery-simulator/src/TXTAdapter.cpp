@@ -15,7 +15,7 @@ TXTAdapter::~TXTAdapter() {
 }
 
 /**
- * @brief Loads inventory from a TXT file using the TXTReaderWriter.
+ * @brief Loads inventory from a TXT file and rebuilds greenhouse-linked plant instances.
  */
 void TXTAdapter::loadInventory(std::string filePath, Inventory* inventory) {
     if (!inventory) {
@@ -39,7 +39,8 @@ void TXTAdapter::loadInventory(std::string filePath, Inventory* inventory) {
                           << " in file " << filePath << ". Ignoring extra data: " << remaining << std::endl;
             }
             // Create a new StockItem and add it
-            inventory->additem(new StockItem(name, price, nullptr));
+            PlantInstance* plant = inventory->createPlantInstance(name);
+            inventory->additem(new StockItem(name, price, plant));
             
         } else if (!lines[i].empty()) {
              std::cerr << "[TXTAdapter] Warning: Malformed line " << (i + 1)

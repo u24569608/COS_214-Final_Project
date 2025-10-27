@@ -180,6 +180,9 @@ adapter_unit_test:
 		src/InventoryCollection.cpp \
 		src/InventoryIterator.cpp \
 		src/ConcreteInventoryIterator.cpp \
+		src/GreenhouseBed.cpp \
+		src/ConcreteGreenhouseIterator.cpp \
+		src/PlantPrototypeRegistry.cpp \
 		build/GreenhouseComponent.o \
 		-o build/adapter_unit_test
 	./build/adapter_unit_test
