@@ -13,17 +13,29 @@ class PlantInstance;
  */
 class SeedState : public PlantState {
 public:
-    SeedState();
-
+    /**
+     * @brief Retrieves the friendly state name.
+     * @return Constant string "Seed".
+     */
     std::string getName() const override;
-    void onWater(PlantInstance& plant) override;
-    void onFertilize(PlantInstance& plant) override;
-    void onTick(PlantInstance& plant) override;
 
-private:
-    void performWater(PlantInstance& plant) override;
-    void performFertilize(PlantInstance& plant) override;
+    /**
+     * @brief Applies watering logic for a seed.
+     * @param plant Context plant instance receiving water.
+     */
+    void onWater(PlantInstance& plant) override;
+
+    /**
+     * @brief Applies fertilising logic for a seed.
+     * @param plant Context plant instance receiving nutrients.
+     */
+    void onFertilize(PlantInstance& plant) override;
+
+    /**
+     * @brief Updates the seed state at the end of a tick.
+     * @param plant Context plant instance whose vitals may change.
+     */
+    void onTick(PlantInstance& plant) override;
 };
 
 #endif // SEED_STATE_H
-

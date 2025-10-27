@@ -2,8 +2,9 @@
 #define PLANT_INSTANCE_H
 
 #include "GreenhouseComponent.h" // Is-a Component 'Leaf' (Composite)
-#include <string>
 #include "PlantState.h"
+#include <memory>
+#include <string>
 
 // Forward declarations for pointers (Strategy, Prototype)
 class Plant;
@@ -40,6 +41,31 @@ public:
     // === Command Pattern (Receiver methods) ===
     void performWater();
     void performFertilize();
+    /**
+     * @brief Executes the configured watering strategy, if present.
+     */
+    void applyWaterStrategy();
+    /**
+     * @brief Executes the configured fertilising strategy, if present.
+     */
+    void applyFertilizeStrategy();
+     /**
+     * @brief Indicates whether the current care action is a replay triggered by a state transition.
+     * @return True when the active state should skip re-invoking strategies to avoid duplication.
+     */
+    bool isReplayingAction() const;
+
+    /**
+     * @brief Assigns a new lifecycle state to this plant.
+     * @param nextState Newly allocated state that becomes active immediately.
+     */
+    void setState(std::unique_ptr<PlantState> nextState);
+
+    /**
+     * @brief Inspects the currently active lifecycle state.
+     * @return Pointer to the active state, or nullptr if none.
+     */
+    const PlantState* getState() const;
 
     // === Observer Pattern (Subject methods) ===
     /**
@@ -70,12 +96,37 @@ public:
     // === Creative Functions (Getters/Setters) ===
     int getHealth() const;
     void setHealth(int newHealth);
+    /**
+     * @brief Applies a delta to the health and clamps it within valid bounds.
+     * @param delta Signed adjustment amount.
+     */
+    void changeHealth(int delta);
     int getWaterLevel() const;
+    /**
+     * @brief Overrides the stored water level, clamped to the valid range.
+     * @param newLevel Desired absolute water value.
+     */
+    void setWaterLevel(int newLevel);
+    /**
+     * @brief Applies a delta to the water level and clamps the result.
+     * @param delta Signed adjustment amount.
+     */
+    void changeWaterLevel(int delta);
     /**
      * @brief Retrieves the current nutrient saturation level.
      * @return Integer nutrient level in arbitrary units.
      */
     int getNutrientLevel() const;
+    /**
+     * @brief Overrides the stored nutrient level, clamped to the valid range.
+     * @param newLevel Desired nutrient value.
+     */
+    void setNutrientLevel(int newLevel);
+    /**
+     * @brief Applies a delta to the nutrient level and clamps the result.
+     * @param delta Signed adjustment amount.
+     */
+    void changeNutrientLevel(int delta);
     std::string getPlantTypeName() const;
     /**
      * @brief Updates the human-readable name of this plant instance.
@@ -89,11 +140,14 @@ private:
     Plant* plantType; 
     WaterStrategy* wStrategy; ///< Current water strategy
     FertilizeStrategy* fStrategy; ///< Current fertilize strategy
-    PlantState* plantState;
+    std::unique_ptr<PlantState> plantState;
     
     int health;
     int waterLevel;
     int nutrientLevel;
+    bool replayingAction;
+
+    void setReplayingAction(bool value);
 };
 
 #endif // PLANT_INSTANCE_H

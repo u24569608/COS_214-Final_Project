@@ -13,17 +13,29 @@ class PlantInstance;
  */
 class MatureState : public PlantState {
 public:
-    MatureState();
-
+    /**
+     * @brief Retrieves the friendly state name.
+     * @return Constant string "Mature".
+     */
     std::string getName() const override;
-    void onWater(PlantInstance& plant) override;
-    void onFertilize(PlantInstance& plant) override;
-    void onTick(PlantInstance& plant) override;
 
-private:
-    void performWater(PlantInstance& plant) override;
-    void performFertilize(PlantInstance& plant) override;
+    /**
+     * @brief Handles watering for a mature plant.
+     * @param plant Context plant instance receiving water.
+     */
+    void onWater(PlantInstance& plant) override;
+
+    /**
+     * @brief Handles fertilising for a mature plant.
+     * @param plant Context plant instance receiving nutrients.
+     */
+    void onFertilize(PlantInstance& plant) override;
+
+    /**
+     * @brief Updates maturity state during a tick.
+     * @param plant Context plant instance being advanced.
+     */
+    void onTick(PlantInstance& plant) override;
 };
 
 #endif // MATURE_STATE_H
-
