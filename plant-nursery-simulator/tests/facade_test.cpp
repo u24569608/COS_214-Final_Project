@@ -66,7 +66,7 @@ Inventory* inv = nullptr;
 PaymentProcessor* pp = nullptr;
 OrderBuilder* ob = nullptr;
 GreenhouseBed* greenhouse = nullptr;
-PlantPrototypeRegistry* registry = nullptr;
+std::unique_ptr<PlantPrototypeRegistry> registry;
 
 void clearInventory() {
     if (!inv) {
@@ -233,12 +233,12 @@ int main() {
     pp = new PaymentProcessor();
     ob = new CustomOrderBuilder();
     greenhouse = new GreenhouseBed("Unit Test Greenhouse");
-    registry = new PlantPrototypeRegistry();
+    registry = std::make_unique<PlantPrototypeRegistry>();
     registerPrototype("Rose", *registry);
     registerPrototype("Tulip", *registry);
     registerPrototype("Orchid", *registry);
     registerPrototype("Lily", *registry);
-    facade = new SalesFacade(inv, pp, ob, greenhouse, registry);
+    facade = new SalesFacade(inv, pp, ob, greenhouse, registry.get());
 
     // --- ACT & ASSERT ---
     testStockCheckAndAdd();
@@ -255,7 +255,7 @@ int main() {
     delete pp;
     delete ob;
     delete greenhouse;
-    delete registry;
+    registry.reset();
 
     // --- Print Summary ---
     if (failures == 0) {
