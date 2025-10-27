@@ -8,6 +8,8 @@ acts as the leaf. Ownership rules are intentionally simple:
 - `GreenhouseIterator` (and its concrete implementation) caches plant pointers for iteration but never deletes them.
 - `GreenhouseController` keeps a non-owning pointer to the root bed and allocates iterators with `std::unique_ptr` during
   each care cycle.
+- `PlantInstance` owns its lifecycle state (`std::unique_ptr<PlantState>`) but only borrows references to strategies
+  (`WaterStrategy`, `FertilizeStrategy`) and prototypes. These collaborators must outlive the instance.
 
 Implications:
 
@@ -18,7 +20,10 @@ Implications:
    be done by the subsystem that allocated it.
 3. **Iterators and controllers are transient.** They acquire new iterators with `std::unique_ptr`, allowing automatic
    cleanup once a traversal finishes.
+4. **Leaves guard their internal state.** `PlantInstance` automatically cleans up owned state objects when a transition
+   occurs or the plant is destroyed. Because strategies are non-owning, they must be provided by longer-lived objects
+   such as prototypes or dependency singletons.
 
-If ownership requirements change—for example, if beds need to manage plant lifetimes directly—replace the raw pointer
+If ownership requirements change - for example, if beds need to manage plant lifetimes directly - replace the raw pointer
 containers with smart pointers (`std::unique_ptr` or `std::shared_ptr`) at the owning boundary. For now, keeping the
 composite non-owning avoids double-deletion and keeps responsibilities clear.

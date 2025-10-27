@@ -36,8 +36,14 @@ public:
     /**
      * @brief Sets the current water strategy. (FR7)
      * @param ws A pointer to the new WaterStrategy.
+     * @note Ownership remains with the caller or prototype; the instance only keeps a borrowed reference.
      */
     void setWaterStrategy(WaterStrategy* ws);
+    /**
+     * @brief Overrides the current fertiliser strategy.
+     * @param fs Pointer to the new strategy instance.
+     * @note Ownership remains external; callers must ensure the strategy outlives the plant.
+     */
     void setFertilizeStrategy(FertilizeStrategy* fs);
 
     // === Command Pattern (Receiver methods) ===
@@ -147,9 +153,9 @@ public:
 private:
     static std::string deriveInstanceName(Plant* plantType, const std::string& instanceName);
 
-    Plant* plantType; 
-    WaterStrategy* wStrategy; ///< Current water strategy
-    FertilizeStrategy* fStrategy; ///< Current fertilize strategy
+    Plant* plantType; ///< Non-owning pointer to the prototype that supplied defaults.
+    WaterStrategy* wStrategy; ///< Current water strategy (borrowed reference).
+    FertilizeStrategy* fStrategy; ///< Current fertilize strategy (borrowed reference).
     std::unique_ptr<PlantState> plantState;
     
     int health;

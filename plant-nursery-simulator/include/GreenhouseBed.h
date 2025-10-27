@@ -28,12 +28,16 @@ public:
     /**
      * @brief Adds a child component to this bed.
      * @param component The component to add; ignored if nullptr or already present.
+     * @note Pointers are stored without taking ownership. The caller must ensure the child
+     *       outlives the bed or is removed before destruction.
      */
     void add(GreenhouseComponent* component) override;
 
     /**
      * @brief Removes a child component from this bed.
      * @param component The component pointer to remove.
+     * @note Detaching a child only erases the pointer from the composite; it never deletes
+     *       the component instance.
      */
     void remove(GreenhouseComponent* component) override;
 
@@ -63,7 +67,7 @@ public:
 
 private:
     friend class ConcreteGreenhouseIterator; ///< Allows iterator to traverse private children.
-    std::vector<GreenhouseComponent*> children; ///< Child components.
+    std::vector<GreenhouseComponent*> children; ///< Non-owning child component pointers.
 };
 
 #endif // GREENHOUSE_BED_H

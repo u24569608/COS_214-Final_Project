@@ -40,8 +40,8 @@ private:
      */
     void collectPlants(GreenhouseComponent* component);
 
-    GreenhouseBed* rootBed; ///< The bed that owns the traversal.
-    std::vector<PlantInstance*> traversalOrder; ///< Pre-computed DFS order of plants.
+    GreenhouseBed* rootBed; ///< The bed that owns the traversal (non-owning).
+    std::vector<PlantInstance*> traversalOrder; ///< Pre-computed DFS order of plants (borrowed pointers).
     std::size_t currentIndex; ///< Index of the iterator's current position.
 };
 
