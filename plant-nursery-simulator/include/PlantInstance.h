@@ -3,6 +3,7 @@
 
 #include "GreenhouseComponent.h" // Is-a Component 'Leaf' (Composite)
 #include "PlantState.h"
+#include "Subject.h"
 #include <memory>
 #include <string>
 
@@ -16,11 +17,11 @@ class FertilizeStrategy;
  * @brief Represents a single, physical plant in the nursery.
  * @details This is a central class that links many patterns:
  * - Leaf (Composite Pattern) - FR11
- * - ConcreteSubject (Observer Pattern) - FR12 (TODO: reintroduce when observer is implemented)
+ * - ConcreteSubject (Observer Pattern) - FR12
  * - Context (Strategy Pattern) - FR5, FR6, FR7
  * - Receiver (Command Pattern) - FR18
  */
-class PlantInstance : public GreenhouseComponent {
+class PlantInstance : public GreenhouseComponent, public Subject {
 public:
     /**
      * @brief Constructs an instance bound to a plant prototype.
@@ -148,6 +149,10 @@ private:
     bool replayingAction;
 
     void setReplayingAction(bool value);
+    /**
+     * @brief Emits a care request notification if any critical resource is low.
+     */
+    void requestCareIfNeeded();
 };
 
 #endif // PLANT_INSTANCE_H
