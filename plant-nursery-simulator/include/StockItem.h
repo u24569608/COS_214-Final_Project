@@ -3,6 +3,8 @@
 
 #include <string>
 
+#include "Observer.h"
+
 class Order;
 class PlantInstance;
 class WaterStrategy;
@@ -11,7 +13,7 @@ class WaterStrategy;
  * @file StockItem.h
  * @brief A complex class representing an item in an order.
  */
-class StockItem {
+class StockItem : public Observer {
 public:
     StockItem(std::string n, double p, PlantInstance* pl);
     std::string getname() const;
@@ -21,6 +23,17 @@ public:
     bool isPlant();
     bool getIsAvailible();
     void setIsAvailible(bool isAvailible);
+    /**
+     * @brief Retrieves the human-readable availability notice.
+     * @return Status string shown for this stock item.
+     */
+    std::string getDisplayStatus() const;
+
+    /**
+     * @brief Responds to Subject notifications about availability.
+     * @param event Payload describing the update.
+     */
+    void update(const ObserverEvent& event) override;
 
 
 private:
@@ -28,6 +41,7 @@ private:
     double price;
     PlantInstance* plant;
     bool isAvailable;
+    std::string displayStatus;
 };
 
 #endif // STOCK_ITEM_H
