@@ -28,7 +28,7 @@ public:
     ~Staff();
 
     // === Observer Method ===
-    void update(Subject* subject) override;
+    void update(const ObserverEvent& event) override;
 
     // === Colleague Methods ===
     int getID() const override;
@@ -52,6 +52,16 @@ public:
      * @return int The size of the task queue.
      */
     int getTaskQueueSize() const;
+    /**
+     * @brief Creative Function: Number of outstanding care reminders generated via observer updates.
+     * @return Count of recorded reminders.
+     */
+    int getCareReminderCount() const;
+    /**
+     * @brief Creative Function: Retrieve the stored reminder messages.
+     * @return Collection of reminder strings.
+     */
+    const std::vector<std::string>& getCareReminders() const;
 
     // === Chain of Responsibility (Client) Methods ===
     void setCareHandler(CareRequestHandler* h);
@@ -75,6 +85,7 @@ private:
     std::vector<PlantCommand*> taskQueue; ///< Command queue
     CareRequestHandler* handler; ///< Start of the CoR chain
     GreenhouseBed* assignedBed; ///< Bed this staff is responsible for
+    std::vector<std::string> careReminders; ///< Observer-generated care reminders
 };
 
 #endif // STAFF_H//
