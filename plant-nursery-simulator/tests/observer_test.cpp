@@ -187,6 +187,32 @@ void testStockHandlesPlantDestruction() {
     assertTrue(!stock.getIsAvailible(), "Stock should mark itself unavailable after plant destruction");
 }
 
+void testObserversReceiveDestructionMessage() {
+    std::cout << "Running test: testObserversReceiveDestructionMessage..." << std::endl;
+
+    DummyPlant prototype("Transient");
+    NullMediator mediator;
+    Staff staff(33, &mediator);
+
+    const int baseline = staff.getCareReminderCount();
+
+    {
+        PlantInstance ephemeral(&prototype, "Temp");
+        staff.observePlant(&ephemeral);
+        assertEqInt(staff.getCareReminderCount(), baseline,
+                    "Observing a plant should not create an immediate reminder");
+    }
+
+    assertEqInt(staff.getCareReminderCount(), baseline + 1,
+                "Staff should receive a message when an observed plant is destroyed");
+    const auto& reminders = staff.getCareReminders();
+    assertTrue(!reminders.empty(), "Destruction should append a reminder");
+    assertTrue(reminders.back().type == StaffReminderType::Message,
+               "Destruction notice should be treated as a message reminder");
+    assertTrue(reminders.back().message.find("Subject destroyed") != std::string::npos,
+               "Reminder should include the standard destruction message");
+}
+
 } // namespace
 
 int main() {
@@ -211,10 +237,14 @@ int main() {
 
     testStockHandlesPlantDestruction();
     if (failures == baseline) { ++testsPassed; }
+    baseline = failures;
+
+    testObserversReceiveDestructionMessage();
+    if (failures == baseline) { ++testsPassed; }
 
     std::cout << "\n---------------------------\n";
     std::cout << "     TEST SUMMARY          \n";
-    std::cout << " Tests Passed: " << testsPassed << " / 5" << std::endl;
+    std::cout << " Tests Passed: " << testsPassed << " / 6" << std::endl;
     std::cout << "---------------------------\n";
 
     if (failures == 0) {

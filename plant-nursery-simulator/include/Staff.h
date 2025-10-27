@@ -78,6 +78,8 @@ public:
     /**
      * @brief Subscribes this staff member to a plant's observer feed.
      * @param plant Plant instance to observe; ignored when nullptr.
+     * @note The pointer is borrowed; the plant must outlive the staff member or emit
+     *       `SubjectDestroyed` to trigger automatic detachment.
      */
     void observePlant(PlantInstance* plant);
 
@@ -88,6 +90,10 @@ public:
     void stopObservingPlant(PlantInstance* plant);
 
     // === Chain of Responsibility (Client) Methods ===
+    /**
+     * @brief Configures the first handler in the care request chain.
+     * @note Pointer is non-owning; callers manage handler lifetime.
+     */
     void setCareHandler(CareRequestHandler* h);
     void makeCareRequest(PlantInstance* plant, std::string requestType);
 
@@ -95,6 +101,10 @@ public:
     /**
      * @brief Assigns this staff member to a specific greenhouse bed.
      * @param bed The bed to assign.
+     */
+    /**
+     * @brief Assigns this staff member to a specific greenhouse bed.
+     * @param bed The bed to assign (non-owning pointer).
      */
     void assignToBed(GreenhouseBed* bed);
 
@@ -107,10 +117,10 @@ private:
     int id;
     std::string name;
     std::vector<PlantCommand*> taskQueue; ///< Command queue
-    CareRequestHandler* handler; ///< Start of the CoR chain
-    GreenhouseBed* assignedBed; ///< Bed this staff is responsible for
+    CareRequestHandler* handler; ///< Start of the CoR chain (non-owning)
+    GreenhouseBed* assignedBed; ///< Bed this staff is responsible for (non-owning)
     std::vector<StaffReminder> careReminders; ///< Observer-generated reminders
-    std::unordered_set<PlantInstance*> observedPlants; ///< Plants this staff keeps tabs on
+    std::unordered_set<PlantInstance*> observedPlants; ///< Borrowed plant pointers currently observed
 
     void stopObservingAll();
 };

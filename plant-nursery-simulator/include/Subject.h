@@ -13,22 +13,24 @@ class Subject {
 public:
     /**
      * @brief Virtual destructor that notifies observers of shutdown.
-     * @details Emits a `SubjectDestroyed` event before clearing subscriptions.
-     * Observers must not assume the subject remains valid after the call.
+     * @details Emits a `SubjectDestroyed` event with a standard shutdown message before
+     * clearing subscriptions. Observers must not assume the subject remains valid after
+     * the call; they should drop any cached pointers immediately.
      */
     virtual ~Subject();
 
     /**
      * @brief Registers an observer to receive future notifications.
      * @param observer Instance interested in subject events.
-     * @note Subjects own their lifetime; observers must detach or listen for
-     *       the `SubjectDestroyed` event before accessing the subject again.
+     * @note Observers are tracked as non-owning raw pointers. Callers must ensure
+     *       the observer outlives the attachment or invokes `detach` during teardown.
      */
     virtual void attach(Observer* observer);
 
     /**
      * @brief Unregisters an observer from receiving notifications.
      * @param observer Instance that no longer requires updates.
+     * @note Safe to call multiple times; missing observers are ignored.
      */
     virtual void detach(Observer* observer);
 

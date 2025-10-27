@@ -62,6 +62,8 @@ public:
     /**
      * @brief Rebinds this stock item to a different plant instance.
      * @param newPlant Plant instance to observe; nullptr detaches from any current plant.
+     * @note The pointer is non-owning; the stock item automatically detaches when either
+     *       the plant is destroyed or `setPlant(nullptr)` is invoked.
      */
     void setPlant(PlantInstance* newPlant);
 
@@ -69,7 +71,7 @@ private:
     std::string id;
     std::string name;
     double price;
-    PlantInstance* plant;
+    PlantInstance* plant; ///< Borrowed pointer to the observed plant instance.
     bool isAvailable;
     std::string displayStatus;
 
