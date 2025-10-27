@@ -1,4 +1,4 @@
-STATE_SRCS = src/SeedState.cpp src/GrowingState.cpp src/MatureState.cpp src/WitheringState.cpp src/DeadState.cpp
+STATE_SRCS = src/SeedState.cpp src/GrowingState.cpp src/MatureState.cpp src/WitheringState.cpp src/DeadState.cpp src/PlantPrototypeRegistry.cpp
 STATE_OBJS = $(STATE_SRCS:src/%.cpp=build/%.o)
 
 test: iterator_unit_test mediator_unit_test command_unit_test builder_unit_test chain_of_responsibility_unit_test facade_unit_test adapter_unit_test greenhouse_iterator_unit_test plant_instance_unit_test plant_state_unit_test strategy_unit_test composite_unit_test observer_unit_test prototype_unit_test
@@ -30,6 +30,12 @@ mediator_unit_test:
 		src/Colleague.cpp \
 		src/Customer.cpp \
 		src/NurseryMediator.cpp \
+		src/StockItem.cpp \
+		src/GreenhouseComponent.cpp \
+		src/PlantInstance.cpp \
+		src/Subject.cpp \
+		$(STATE_SRCS) \
+		src/Plant.cpp \
 		tests/mediator_test.cpp \
 		-o build/mediator_unit_test
 	./build/mediator_unit_test
@@ -92,6 +98,7 @@ command:
 	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude -c src/WitheringState.cpp   -o build/WitheringState.o
 	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude -c src/DeadState.cpp        -o build/DeadState.o
 	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude -c src/Plant.cpp            -o build/Plant.o
+	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude -c src/PlantPrototypeRegistry.cpp -o build/PlantPrototypeRegistry.o
 
 command_unit_test: command
 	@echo "== Building and Running 'command_test.cpp' (UNIT TEST) =="
@@ -121,6 +128,7 @@ chain_of_responsibility:
 	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude -c src/WitheringState.cpp       -o build/WitheringState.o
 	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude -c src/DeadState.cpp            -o build/DeadState.o
 	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude -c src/Plant.cpp                -o build/Plant.o
+	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude -c src/PlantPrototypeRegistry.cpp -o build/PlantPrototypeRegistry.o
 
 chain_of_responsibility_unit_test: chain_of_responsibility
 	@echo "== Building and Running 'chain_of_responsibility_test.cpp' (UNIT TEST) =="
@@ -159,7 +167,14 @@ facade_unit_test:
 		src/ConcreteInventoryIterator.cpp \
 		src/GreenhouseBed.cpp \
 		src/ConcreteGreenhouseIterator.cpp \
-		src/PlantPrototypeRegistry.cpp \
+		src/waterStrategy.cpp \
+		src/FertilizeStrategy.cpp \
+		src/FrequentWatering.cpp \
+		src/SparseWatering.cpp \
+		src/SeasonalWatering.cpp \
+		src/LiquidFertilizer.cpp \
+		src/SlowReleaseFertilizer.cpp \
+		src/OrganicFertilizer.cpp \
 		src/Customer.cpp \
 		src/Colleague.cpp \
 		build/GreenhouseComponent.o \
@@ -187,7 +202,6 @@ adapter_unit_test:
 		src/ConcreteInventoryIterator.cpp \
 		src/GreenhouseBed.cpp \
 		src/ConcreteGreenhouseIterator.cpp \
-		src/PlantPrototypeRegistry.cpp \
 		build/GreenhouseComponent.o \
 		-o build/adapter_unit_test
 	./build/adapter_unit_test
@@ -282,6 +296,7 @@ strategy:
 	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude -c src/DeadState.cpp             -o build/DeadState.o
 	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude -c src/Plant.cpp                 -o build/Plant.o
 	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude -c src/GreenhouseComponent.cpp   -o build/GreenhouseComponent.o
+	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude -c src/PlantPrototypeRegistry.cpp -o build/PlantPrototypeRegistry.o
 
 strategy_unit_test: strategy
 	@echo "== Building and Running 'strategy_test.cpp' (UNIT TEST) =="
