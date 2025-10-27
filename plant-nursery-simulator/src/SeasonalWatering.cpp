@@ -13,9 +13,10 @@ void SeasonalWatering::water(PlantInstance& plant) const {
 
     // Spring boost: September–November in South Africa
     int waterBoost = (month >= 9 && month <= 11) ? 40 : 20;
-    int newWater = std::min(100, plant.getWaterLevel() + waterBoost);
-    int newHealth = std::min(100, plant.getHealth() + 2);
+    int newWater =  plant.getWaterLevel() + waterBoost;
+    int newHealth = plant.getHealth() + 2;
 
+    plant.setWaterLevel(newWater);
     plant.setHealth(newHealth);
     std::cout << "[SeasonalWatering] " << plant.getPlantTypeName()
               << " watered seasonally (+" << waterBoost

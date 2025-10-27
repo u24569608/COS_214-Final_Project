@@ -70,6 +70,8 @@ public:
     // === Creative Functions (Getters/Setters) ===
     int getHealth() const;
     void setHealth(int newHealth);
+    void setWaterLevel(int newWater);
+    void setNutrientLevel(int newNutrient);
     int getWaterLevel() const;
     /**
      * @brief Retrieves the current nutrient saturation level.

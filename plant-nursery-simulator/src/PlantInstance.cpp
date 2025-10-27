@@ -86,6 +86,15 @@ void PlantInstance::setHealth(int newHealth) {
     this->health = newHealth;
 }
 
+void PlantInstance::setWaterLevel(int newWater) {
+    this->waterLevel = newWater;
+}
+
+void PlantInstance::setNutrientLevel(int newNutrient) {
+    this->nutrientLevel = newNutrient;
+}
+
+
 int PlantInstance::getWaterLevel() const {
     return this->waterLevel;
 }

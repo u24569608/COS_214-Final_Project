@@ -1,4 +1,4 @@
-test: iterator_unit_test mediator_unit_test command_unit_test builder_unit_test chain_of_responsibility_unit_test facade_unit_test adapter_unit_test greenhouse_iterator_unit_test plant_instance_unit_test composite_unit_test prototype_unit_test
+test: iterator_unit_test mediator_unit_test command_unit_test builder_unit_test chain_of_responsibility_unit_test facade_unit_test adapter_unit_test greenhouse_iterator_unit_test plant_instance_unit_test composite_unit_test prototype_unit_test strategy_unit_test
 	@echo "==== ALL PROJECT TESTS DONE ===="
 
 clean:
@@ -205,3 +205,36 @@ plant_instance_unit_test:
 		src/Plant.cpp \
 		-o build/plant_instance_unit_test
 	./build/plant_instance_unit_test
+
+strategy:
+	@echo "== Compiling Strategy Pattern Source Files =="
+	@mkdir -p build
+	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude -c src/WaterStrategy.cpp         -o build/WaterStrategy.o
+	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude -c src/FertilizeStrategy.cpp     -o build/FertilizeStrategy.o
+	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude -c src/FrequentWatering.cpp      -o build/FrequentWatering.o
+	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude -c src/SparseWatering.cpp        -o build/SparseWatering.o
+	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude -c src/SeasonalWatering.cpp      -o build/SeasonalWatering.o
+	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude -c src/LiquidFertilizer.cpp      -o build/LiquidFertilizer.o
+	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude -c src/SlowReleaseFertilizer.cpp -o build/SlowReleaseFertilizer.o
+	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude -c src/OrganicFertilizer.cpp     -o build/OrganicFertilizer.o
+	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude -c src/PlantInstance.cpp         -o build/PlantInstance.o
+	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude -c src/Plant.cpp                 -o build/Plant.o
+	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude -c src/GreenhouseComponent.cpp   -o build/GreenhouseComponent.o
+
+strategy_unit_test: strategy
+	@echo "== Building and Running 'strategy_test.cpp' (UNIT TEST) =="
+	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude \
+		build/WaterStrategy.o \
+		build/FertilizeStrategy.o \
+		build/FrequentWatering.o \
+		build/SparseWatering.o \
+		build/SeasonalWatering.o \
+		build/LiquidFertilizer.o \
+		build/SlowReleaseFertilizer.o \
+		build/OrganicFertilizer.o \
+		build/PlantInstance.o \
+		build/Plant.o \
+		build/GreenhouseComponent.o \
+		tests/strategy_test.cpp \
+		-o build/strategy_unit_test
+	./build/strategy_unit_test
