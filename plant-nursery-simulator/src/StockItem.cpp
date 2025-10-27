@@ -1,11 +1,17 @@
 #include "../include/StockItem.h"
 #include "../include/PlantInstance.h"
 
+#include <utility>
+
 /**
  * @brief Constructor implementation
  */
 StockItem::StockItem(std::string n, double p, PlantInstance* pl)
-    : name(n), price(p), plant(pl), isAvailable(true) {
+    : name(std::move(n)),
+      price(p),
+      plant(pl),
+      isAvailable(true),
+      displayStatus("Available") {
     // Constructor body
 }
 
@@ -46,4 +52,19 @@ bool StockItem::getIsAvailible() {
 
 void StockItem::setIsAvailible(bool isAvailible) {
     this->isAvailable = isAvailible;
+    this->displayStatus = isAvailible ? "Available" : "Unavailable";
+}
+
+std::string StockItem::getDisplayStatus() const {
+    return displayStatus;
+}
+
+void StockItem::update(const ObserverEvent& event) {
+    if (event.type != ObserverEventType::AvailabilityChanged) {
+        return;
+    }
+
+    const bool available = event.message.find("unavailable") == std::string::npos;
+    setIsAvailible(available);
+    displayStatus = event.message;
 }
