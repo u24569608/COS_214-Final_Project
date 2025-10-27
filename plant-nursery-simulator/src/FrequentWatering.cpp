@@ -1,12 +1,11 @@
 #include "../include/FrequentWatering.h"
 #include "../include/PlantInstance.h"
 #include <iostream>
-#include <algorithm>
 
 FrequentWatering::FrequentWatering() {}
 
 void FrequentWatering::water(PlantInstance& plant) const {
-    int newWater =  plant.getWaterLevel() + 35;
+    int newWater = plant.getWaterLevel() + 35;
     int newHealth = plant.getHealth() + 3;
 
     plant.setWaterLevel(newWater);

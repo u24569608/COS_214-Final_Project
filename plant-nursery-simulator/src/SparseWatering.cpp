@@ -1,12 +1,11 @@
 #include "../include/SparseWatering.h"
 #include "../include/PlantInstance.h"
 #include <iostream>
-#include <algorithm>
 
 SparseWatering::SparseWatering() {}
 
 void SparseWatering::water(PlantInstance& plant) const {
-    int newWater =  plant.getWaterLevel() + 15;
+    int newWater = plant.getWaterLevel() + 15;
     int newHealth = plant.getHealth() + 1;
 
     plant.setWaterLevel(newWater);

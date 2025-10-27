@@ -1,13 +1,12 @@
 #include "../include/LiquidFertilizer.h"
 #include "../include/PlantInstance.h"
 #include <iostream>
-#include <algorithm>
 
 LiquidFertilizer::LiquidFertilizer() {}
 
 void LiquidFertilizer::fertilize(PlantInstance& plant) const {
-    int newNutrients =  plant.getNutrientLevel() + 40;
-    int newHealth =  plant.getHealth() + 4;
+    int newNutrients = plant.getNutrientLevel() + 40;
+    int newHealth = plant.getHealth() + 4;
 
     plant.setNutrientLevel(newNutrients);
     plant.setHealth(newHealth);

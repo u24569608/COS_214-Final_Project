@@ -1,7 +1,6 @@
 #include "../include/SeasonalWatering.h"
 #include "../include/PlantInstance.h"
 #include <iostream>
-#include <algorithm>
 #include <ctime>
 
 SeasonalWatering::SeasonalWatering() {}
@@ -13,7 +12,7 @@ void SeasonalWatering::water(PlantInstance& plant) const {
 
     // Spring boost: September–November in South Africa
     int waterBoost = (month >= 9 && month <= 11) ? 40 : 20;
-    int newWater =  plant.getWaterLevel() + waterBoost;
+    int newWater = plant.getWaterLevel() + waterBoost;
     int newHealth = plant.getHealth() + 2;
 
     plant.setWaterLevel(newWater);

@@ -1,13 +1,12 @@
 #include "../include/OrganicFertilizer.h"
 #include "../include/PlantInstance.h"
 #include <iostream>
-#include <algorithm>
 
 OrganicFertilizer::OrganicFertilizer() {}
 
 void OrganicFertilizer::fertilize(PlantInstance& plant) const {
-    int newNutrients =  plant.getNutrientLevel() + 30;
-    int newHealth =  plant.getHealth() + 5;
+    int newNutrients = plant.getNutrientLevel() + 30;
+    int newHealth = plant.getHealth() + 5;
 
     plant.setNutrientLevel(newNutrients);
     plant.setHealth(newHealth);
