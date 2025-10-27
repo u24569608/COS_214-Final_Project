@@ -99,8 +99,8 @@ void testCareNotificationsReachObservers() {
     plant.setNutrientLevel(5);
     plant.applyGrowthTick();
 
-    assertEqInt(staff.getCareReminderCount(), 2,
-                "Staff should have availability and care reminders recorded");
+    assertEqInt(staff.getCareReminderCount(), 1,
+                "Care events should add a reminder for the assigned staff member");
     assertTrue(staff.getCareReminders().back().find("CareCheck") != std::string::npos,
                "Reminder message should reference the plant type");
 
