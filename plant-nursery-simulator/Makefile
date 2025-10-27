@@ -1,4 +1,4 @@
-test: iterator_unit_test mediator_unit_test command_unit_test builder_unit_test chain_of_responsibility_unit_test facade_unit_test adapter_unit_test greenhouse_iterator_unit_test plant_instance_unit_test composite_unit_test
+test: iterator_unit_test mediator_unit_test command_unit_test builder_unit_test chain_of_responsibility_unit_test facade_unit_test adapter_unit_test greenhouse_iterator_unit_test plant_instance_unit_test composite_unit_test prototype_unit_test
 	@echo "==== ALL PROJECT TESTS DONE ===="
 
 clean:
@@ -168,8 +168,18 @@ composite_unit_test:
 		src/GreenhouseController.cpp \
 		src/PlantInstance.cpp \
 		src/Plant.cpp \
-		-o build/composite_unit_test
+	-o build/composite_unit_test
 	./build/composite_unit_test
+
+prototype_unit_test:
+	@echo "== Building and Running 'prototype_test.cpp' (UNIT TEST) =="
+	@mkdir -p build
+	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude \
+		tests/prototype_test.cpp \
+		src/Plant.cpp \
+		src/PlantPrototypeRegistry.cpp \
+		-o build/prototype_unit_test
+	./build/prototype_unit_test
 
 greenhouse_iterator_unit_test:
 	@echo "== Building and Running 'greenhouse_iterator_test.cpp' (UNIT TEST) =="

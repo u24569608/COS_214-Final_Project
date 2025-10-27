@@ -20,17 +20,17 @@ public:
     /**
      * @brief Adds a plant prototype to the registry.
      * @param name The key to store the prototype under.
-     * @param plant A pointer to the prototype.
+     * @param plant A unique_ptr owning the prototype instance.
      */
-    void addPrototype(std::string name, Plant* plant);
+    void addPrototype(const std::string& name, std::unique_ptr<Plant> plant);
 
     /**
      * @brief Clones a plant from the registry.
      * @param name The key of the prototype to clone. 
-     * @param type the type of plant to clone.
+     * @param type Optional override for the clone's type classification.
      * @return Plant* A new clone, or nullptr if not found.
      */
-    Plant* createPlant(std::string name, std::string type);
+    Plant* createPlant(const std::string& name, const std::string& type);
 
 private:
     std::map<std::string, std::unique_ptr<Plant>> prototypes;

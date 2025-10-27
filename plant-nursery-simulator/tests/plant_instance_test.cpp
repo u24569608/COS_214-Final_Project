@@ -11,6 +11,10 @@ public:
     explicit DummyPlant(const std::string& label) {
         name = label;
     }
+
+    Plant* clone() const override {
+        return new DummyPlant(*this);
+    }
 };
 
 int failures = 0;
