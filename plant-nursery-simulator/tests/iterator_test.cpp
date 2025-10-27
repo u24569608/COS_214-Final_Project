@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <memory>
 
 // --- Include the code we want to test ---
 #include "../include/Inventory.h"
@@ -66,9 +67,9 @@ void testStandardTraversal() {
 
     // ARRANGE
     Inventory inv;
-    inv.additem(new StockItem("Monstera", 25.0, nullptr));
-    inv.additem(new StockItem("Fiddle Fig", 45.0, nullptr));
-    inv.additem(new StockItem("Soil", 10.0, nullptr));
+    inv.additem(std::make_unique<StockItem>("Monstera", 25.0, nullptr));
+    inv.additem(std::make_unique<StockItem>("Fiddle Fig", 45.0, nullptr));
+    inv.additem(std::make_unique<StockItem>("Soil", 10.0, nullptr));
 
     std::vector<std::string> expectedNames = {"Monstera", "Fiddle Fig", "Soil"};
     int index = 0; // index remains int
@@ -114,8 +115,8 @@ void testResetIterator() {
 
     // ARRANGE
     Inventory inv;
-    inv.additem(new StockItem("Item A", 1.0, nullptr));
-    inv.additem(new StockItem("Item B", 2.0, nullptr));
+    inv.additem(std::make_unique<StockItem>("Item A", 1.0, nullptr));
+    inv.additem(std::make_unique<StockItem>("Item B", 2.0, nullptr));
 
     InventoryIterator* iter = inv.createIterator();
 
@@ -156,4 +157,3 @@ int main() {
         return 1; // Exit with 1 for FAILURE
     }
 }
-

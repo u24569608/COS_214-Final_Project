@@ -28,7 +28,11 @@ public:
 
     InventoryIterator* createIterator() override;
 
-    void additem(StockItem* plant);
+    /**
+     * @brief Adds a new stock record to the inventory.
+     * @param plant Newly created stock item; ownership transfers to the inventory via std::unique_ptr.
+     */
+    void additem(std::unique_ptr<StockItem> plant);
 
     /**
      * @brief Creative Function: Removes a plant from inventory.
@@ -53,7 +57,8 @@ public:
     /**
      * @brief Creative Function: Finds a plant by its name.
      * @param name to search for.
-     * @return StockItem* The plant, or nullptr if not found.
+     * @return StockItem* Pointer to the managed stock entry, or nullptr if not found.
+     * @note The returned pointer remains owned by the inventory; callers must not delete it.
      */
     StockItem* findItem(std::string name);
 
@@ -61,6 +66,7 @@ public:
      * @brief Retrieves a stock entry by its unique identifier.
      * @param id Stable identifier previously assigned to the item.
      * @return Pointer to the stock item or nullptr when not tracked.
+     * @note The returned pointer remains owned by the inventory; callers must not delete it.
      */
     StockItem* findItemById(const std::string& id) const;
     
@@ -119,7 +125,7 @@ public:
     friend class ConcreteInventoryIterator;
 
 private:
-    std::vector<StockItem*> items; ///< The underlying data structure.
+    std::vector<std::unique_ptr<StockItem>> items; ///< Owned stock entries.
     GreenhouseBed* greenhouseRoot;
     PlantPrototypeRegistry* plantRegistry;
     std::unordered_set<std::string> registeredPlantTypes;

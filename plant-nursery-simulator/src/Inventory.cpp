@@ -21,10 +21,6 @@ Inventory::Inventory()
 }
 
 Inventory::~Inventory() {
-    for (StockItem* item : items) {
-        delete item;
-    }
-    items.clear();
     itemsById.clear();
     releaseManagedPlants();
     plantInstanceCounters.clear();
@@ -40,47 +36,47 @@ InventoryIterator* Inventory::createIterator() {
     return new ConcreteInventoryIterator(this);
 }
 
-void Inventory::additem(StockItem* item) {
-    if (item != nullptr) {
-        items.push_back(item);
-        itemsById[item->getId()] = item;
-        registerPlant(item->getplant(), false);
+void Inventory::additem(std::unique_ptr<StockItem> item) {
+    if (!item) {
+        return;
     }
+    StockItem* rawItem = item.get();
+    itemsById[rawItem->getId()] = rawItem;
+    registerPlant(rawItem->getplant(), false);
+    items.push_back(std::move(item));
 }
 
 void Inventory::removeItem(std::string name) {
     // 1. Find the first item that matches the name
-    auto it = std::find_if(items.begin(), items.end(), 
-        [&name](StockItem* item) {
+    auto it = std::find_if(items.begin(), items.end(),
+        [&name](const std::unique_ptr<StockItem>& item) {
             return item->getname() == name;
         });
 
     // 2. If we found it, delete and erase
     if (it != items.end()) {
-        StockItem* itemToDelete = *it; // Get the pointer
-        removeItemById(itemToDelete->getId());
+        const std::string itemId = (*it)->getId();
+        removeItemById(itemId);
     }
 }
 
 int Inventory::getStockCount(std::string plantType) const {
-    // Use std::count_if from <algorithm> with a lambda
-    return std::count_if(items.begin(), items.end(), 
-        [&plantType](StockItem* item) {
-            // This relies on the corrected StockItem.h
-            return item->getname() == plantType;
-        });
+    return static_cast<int>(std::count_if(items.begin(),
+                                          items.end(),
+                                          [&plantType](const std::unique_ptr<StockItem>& item) {
+                                              return item->getname() == plantType;
+                                          }));
 }
 
 StockItem* Inventory::findItem(std::string name) {
     // Use std::find_if from <algorithm> with a lambda
-    auto it = std::find_if(items.begin(), items.end(), 
-        [&name](StockItem* item) {
-            // This relies on the corrected StockItem.h
+    auto it = std::find_if(items.begin(), items.end(),
+        [&name](const std::unique_ptr<StockItem>& item) {
             return item->getname() == name;
         });
 
     if (it != items.end()) {
-        return *it; // Return the pointer to the found item
+        return it->get();
     }
     return nullptr; // Not found
 }
@@ -114,13 +110,19 @@ bool Inventory::removeItemById(const std::string& id) {
     const std::string itemName = itemToDelete->getname();
     PlantInstance* plant = itemToDelete->getplant();
 
-    auto vecIt = std::find(items.begin(), items.end(), itemToDelete);
-    if (vecIt != items.end()) {
-        items.erase(vecIt);
+    auto vecIt = std::find_if(items.begin(), items.end(),
+                              [itemToDelete](const std::unique_ptr<StockItem>& item) {
+                                  return item.get() == itemToDelete;
+                              });
+    if (vecIt == items.end()) {
+        itemsById.erase(mapIt);
+        return false;
     }
 
-    delete itemToDelete;
+    std::unique_ptr<StockItem> removed = std::move(*vecIt);
+    items.erase(vecIt);
     itemsById.erase(mapIt);
+    removed.reset();
     unregisterPlant(plant);
     if (getStockCount(itemName) == 0) {
         plantInstanceCounters.erase(plantCounterKey(itemName));
@@ -139,9 +141,6 @@ void Inventory::loadFromFile(FileAdapter* adapter, std::string filePath) {
     }
     // Clear current inventory before loading
     std::cout << "[Inventory] Clearing current inventory before loading..." << std::endl;
-    for (StockItem* item : items) {
-        delete item;
-    }
     items.clear();
     itemsById.clear();
     releaseManagedPlants();

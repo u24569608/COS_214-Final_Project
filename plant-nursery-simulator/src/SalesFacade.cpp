@@ -178,9 +178,9 @@ void SalesFacade::addItemToInventory(std::string name, double price, bool isPlan
     if (isPlant) {
         registerPlantType(name);
         PlantInstance* plant = inventory->createPlantInstance(name);
-        inventory->additem(new StockItem(name, price, plant));
+        inventory->additem(std::make_unique<StockItem>(name, price, plant));
     } else {
-        inventory->additem(new StockItem(name, price, nullptr));
+        inventory->additem(std::make_unique<StockItem>(name, price, nullptr));
     }
     std::cout << "[SalesFacade] Added " << name << " to inventory." << std::endl;
 }
@@ -351,10 +351,8 @@ bool SalesFacade::processReturn(Order* order) {
         const std::string& itemName = itemCopy.getname();
         const bool plantStock = isPlantStock(itemName);
         PlantInstance* plant = plantStock ? inventory->createPlantInstance(itemName) : nullptr;
-        StockItem* newItem = new StockItem(itemName, itemCopy.getPrice(), plant);
-
-        // Give the new item to the inventory
-        inventory->additem(newItem);
+        auto newItem = std::make_unique<StockItem>(itemName, itemCopy.getPrice(), plant);
+        inventory->additem(std::move(newItem));
     }
 
     std::cout << "[SalesFacade] Return processed and items restocked." << std::endl;

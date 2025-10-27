@@ -90,8 +90,8 @@ void testCSVSaveLoadRoundTrip() {
 
     // ARRANGE 1: Create initial inventory
     Inventory inv1;
-    inv1.additem(new StockItem("Rose", 10.0, nullptr));
-    inv1.additem(new StockItem("Tulip", 5.5, nullptr));
+    inv1.additem(std::make_unique<StockItem>("Rose", 10.0, nullptr));
+    inv1.additem(std::make_unique<StockItem>("Tulip", 5.5, nullptr));
     ASSERT_EQ_INT(inv1.getStockCount("Rose"), 1, "Initial Rose count");
     ASSERT_EQ_INT(inv1.getStockCount("Tulip"), 1, "Initial Tulip count");
 
@@ -147,8 +147,8 @@ void testTXTSaveLoadRoundTrip() {
 
     // ARRANGE 1
     Inventory inv1;
-    inv1.additem(new StockItem("Spade", 12.50, nullptr));
-    inv1.additem(new StockItem("Gloves", 15.75, nullptr));
+    inv1.additem(std::make_unique<StockItem>("Spade", 12.50, nullptr));
+    inv1.additem(std::make_unique<StockItem>("Gloves", 15.75, nullptr));
 
     // ACT 1: Save
     TXTAdapter txtAdapter;

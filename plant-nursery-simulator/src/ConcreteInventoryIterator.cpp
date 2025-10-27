@@ -52,7 +52,7 @@ bool ConcreteInventoryIterator::hasNext() const {
 StockItem* ConcreteInventoryIterator::currentItem() const {
     // Check bounds *before* accessing the vector element
     if (static_cast<size_t>(currentIndex) >= 0 && static_cast<size_t>(currentIndex) < inventory->items.size()) {
-        return inventory->items[currentIndex];
+        return inventory->items[currentIndex].get();
     }
     return nullptr; // We are at the end or index is invalid
 }
