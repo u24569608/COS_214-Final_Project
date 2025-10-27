@@ -63,7 +63,6 @@ void testAttachDetachObservers() {
     NullMediator mediator;
     Staff staff(1, &mediator);
 
-    plant.attach(&stock);
     plant.attach(&staff);
 
     plant.setState(std::make_unique<MatureState>());
@@ -92,7 +91,6 @@ void testCareNotificationsReachObservers() {
     NullMediator mediator;
     Staff staff(7, &mediator);
 
-    plant.attach(&stock);
     plant.attach(&staff);
 
     plant.setWaterLevel(5);
