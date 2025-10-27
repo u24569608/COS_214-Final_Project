@@ -7,6 +7,7 @@
 #include <memory>
 
 class ConcreteGreenhouseIterator;
+class PlantInstance;
 
 /**
  * @file GreenhouseBed.h
@@ -28,14 +29,38 @@ public:
     /**
      * @brief Adds a child component to this bed.
      * @param component The component to add; ignored if nullptr or already present.
+     * @note Calling this overload transfers ownership of the supplied pointer to the bed.
+     *       Only pass dynamically allocated components that are no longer managed elsewhere.
      */
     void add(GreenhouseComponent* component) override;
 
     /**
+     * @brief Transfers ownership of a child component into this bed.
+     * @param component Newly created component to adopt.
+     * @return Raw pointer to the adopted component, or nullptr when ignored.
+     */
+    GreenhouseComponent* add(std::unique_ptr<GreenhouseComponent> component);
+
+    /**
      * @brief Removes a child component from this bed.
      * @param component The component pointer to remove.
+     * @note Removing a child releases and destroys it unless `release` was used to transfer ownership.
      */
     void remove(GreenhouseComponent* component) override;
+
+    /**
+     * @brief Transfers ownership of a specific child back to the caller.
+     * @param component Target child pointer.
+     * @return Unique pointer owning the component, or nullptr if not found.
+     */
+    std::unique_ptr<GreenhouseComponent> release(GreenhouseComponent* component);
+
+    /**
+     * @brief Convenience wrapper to transfer a plant leaf out of the bed.
+     * @param plant Leaf component to extract.
+     * @return Owning unique_ptr for the plant, or nullptr when not present.
+     */
+    std::unique_ptr<PlantInstance> releasePlant(PlantInstance* plant);
 
     /**
      * @brief Cascades the care action to all children. (FR11)
@@ -63,7 +88,7 @@ public:
 
 private:
     friend class ConcreteGreenhouseIterator; ///< Allows iterator to traverse private children.
-    std::vector<GreenhouseComponent*> children; ///< Child components.
+    std::vector<std::unique_ptr<GreenhouseComponent>> children; ///< Owned child components.
 };
 
 #endif // GREENHOUSE_BED_H

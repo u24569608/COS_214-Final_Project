@@ -4,6 +4,8 @@
 #include "../include/GreenhouseComponent.h"
 #include "../include/PlantInstance.h"
 
+#include <memory>
+
 ConcreteGreenhouseIterator::ConcreteGreenhouseIterator(GreenhouseBed* root)
     : rootBed(root),
       traversalOrder(),
@@ -55,8 +57,8 @@ void ConcreteGreenhouseIterator::collectPlants(GreenhouseComponent* component) {
     }
 
     if (auto* bed = dynamic_cast<GreenhouseBed*>(component)) {
-        for (GreenhouseComponent* child : bed->children) {
-            collectPlants(child);
+        for (const std::unique_ptr<GreenhouseComponent>& child : bed->children) {
+            collectPlants(child.get());
         }
     }
 }

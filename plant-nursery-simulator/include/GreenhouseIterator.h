@@ -7,6 +7,7 @@ class PlantInstance;
 /**
  * @file GreenhouseIterator.h
  * @brief Declares the iteration interface used to traverse nursery plants.
+ * @note Returned pointers are non-owning handles into the greenhouse composite; plants must outlive the iterator.
  */
 class GreenhouseIterator {
 public:

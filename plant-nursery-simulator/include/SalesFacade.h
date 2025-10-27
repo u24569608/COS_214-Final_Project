@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <unordered_set>
 
 // Forward declarations for subsystem pointers
 class Inventory;
@@ -12,6 +13,8 @@ class PlantInstance;
 class Order;
 class OrderBuilder;
 class StockItem;
+class GreenhouseBed;
+class PlantPrototypeRegistry;
 
 /**
  * @file SalesFacade.h
@@ -20,13 +23,51 @@ class StockItem;
  */
 class SalesFacade {
 public:
-    SalesFacade(Inventory* inv, PaymentProcessor* pp, OrderBuilder* ob);
+    SalesFacade(Inventory* inv,
+                PaymentProcessor* pp,
+                OrderBuilder* ob,
+                GreenhouseBed* greenhouse = nullptr,
+                PlantPrototypeRegistry* registry = nullptr);
+
+    /**
+     * @brief Registers a customer with the sales subsystem for cart updates.
+     */
+    void registerCustomer(Customer* customer);
+
+    /**
+     * @brief Detaches a customer from sales notifications.
+     */
+    void unregisterCustomer(Customer* customer);
+
+    /**
+     * @brief Sets the greenhouse root bed used for plant inventory tracking.
+     */
+    void setGreenhouseRoot(GreenhouseBed* root);
+
+    /**
+     * @brief Supplies the registry used to clone prototype plants when stocking inventory.
+     */
+    void setPlantRegistry(PlantPrototypeRegistry* registry);
+
+    /**
+     * @brief Marks the given stock name as representing a plant type.
+     * @note Ensures new stock entries produce greenhouse-backed plant instances.
+     */
+    void registerPlantType(const std::string& name);
 
     /**
      * @brief Simplifies buying a single item at the counter.
      * @return bool True if the sale was successful.
      */
     bool purchaseItem(Customer* customer, StockItem* item);
+
+    /**
+     * @brief Adds an inventory entry to the supplied customer's cart.
+     * @param customer Recipient of the cart entry.
+     * @param itemName Logical stock name to add.
+     * @return True when the item was found and tracked.
+     */
+    bool addItemToCart(Customer* customer, const std::string& itemName);
 
     /**
      * @brief Creative Function: Processes a complex custom order.
@@ -48,12 +89,32 @@ public:
      */
     int checkStock(std::string plantType);
 
-    void addItemToInventory(std::string name, double price);
+    /**
+     * @brief Adds a new item to the inventory and greenhouse (when applicable).
+     * @param name Logical stock name.
+     * @param price Retail price.
+     * @param isPlant When true, a greenhouse plant instance will accompany the stock.
+     */
+    void addItemToInventory(std::string name, double price, bool isPlant = true);
 
 private:
+    /**
+     * @brief Notifies registered customers that a stock item has been sold.
+     * @param itemId Stable identifier of the removed stock entry (may be empty when unknown).
+     * @param itemName Human-readable name of the sold item.
+     */
+    void notifyItemSold(const std::string& itemId, const std::string& itemName);
+    void syncInventoryContext();
+    bool isPlantStock(const std::string& name) const;
+    void ensurePrototypeRegistered(const std::string& name);
+
     Inventory* inventory; ///< Subsystem 1
     PaymentProcessor* paymentProcessor; ///< Subsystem 2
     OrderBuilder* orderBuilder; ///< Subsystem 3
+    GreenhouseBed* greenhouseRoot;
+    PlantPrototypeRegistry* plantRegistry;
+    std::vector<Customer*> customers;
+    std::unordered_set<std::string> registeredManualPlants;
 };
 
 #endif // SALES_FACADE_H

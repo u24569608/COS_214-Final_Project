@@ -18,6 +18,11 @@ Transitions are driven by the plant's health, water and nutrient levels. Constan
 
 ## Shared Concepts
 
+- **Memory & Ownership** - each `PlantInstance` owns its active state via
+  `std::unique_ptr<PlantState>`, guaranteeing the old state is destroyed whenever
+  `setState` installs a replacement. Observers attached to the plant receive a
+  `SubjectDestroyed` message during teardown so `StockItem` and `Staff` instances
+  can null their borrowed pointers safely.
 - **Water Strategy & Fertilize Strategy** - state methods call `PlantInstance::applyWaterStrategy()` and `PlantInstance::applyFertilizeStrategy()` to execute the currently configured strategies. When a state transition occurs during a care action, the action is replayed on the new state exactly once; the `PlantInstance::isReplayingAction()` guard prevents duplicate strategy invocations.
 - **Resource Stress** - water below `kWitheringWaterThreshold` or nutrients below `kWitheringNutrientThreshold` will push the plant towards the Withering track or reduce health during ticks.
 - **Recovery** - water and nutrients at or above the seed-to-growing thresholds, together with adequate health, allow the plant to recover from Withering.

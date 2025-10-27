@@ -3,6 +3,7 @@
 
 #include "FileAdapter.h"
 #include <string>
+#include <memory>
 
 // Forward declarations
 class Inventory;
@@ -15,13 +16,13 @@ class CSVReaderWriter;
 class CSVAdapter : public FileAdapter {
 public:
     CSVAdapter();
-    ~CSVAdapter();
+    ~CSVAdapter() override = default;
 
     void loadInventory(std::string filePath, Inventory* inventory) override;
     void saveInventory(std::string filePath, Inventory* inventory) override;
 
 private:
-    CSVReaderWriter* csvReader; ///< The wrapped 'Adaptee'.
+    std::unique_ptr<CSVReaderWriter> csvReader; ///< The wrapped 'Adaptee'.
 };
 
 #endif // CSV_ADAPTER_H

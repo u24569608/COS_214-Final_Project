@@ -3,6 +3,7 @@
 
 #include "FileAdapter.h"
 #include <string>
+#include <memory>
 
 // Forward declarations
 class Inventory;
@@ -15,13 +16,13 @@ class TXTReaderWriter;
 class TXTAdapter : public FileAdapter {
 public:
     TXTAdapter();
-    ~TXTAdapter();
+    ~TXTAdapter() override = default;
 
     void loadInventory(std::string filePath, Inventory* inventory) override;
     void saveInventory(std::string filePath, Inventory* inventory) override;
 
 private:
-    TXTReaderWriter* txtReader; ///< The wrapped 'Adaptee'.
+    std::unique_ptr<TXTReaderWriter> txtReader; ///< The wrapped 'Adaptee'.
 };
 
 #endif // TXT_ADAPTER_H

@@ -15,7 +15,7 @@ public:
     virtual StockItem* next() = 0;
     virtual bool hasNext() const = 0;
     virtual StockItem* currentItem() const = 0;
-    void reset();
+    virtual void reset();
 };
 
 #endif // INVENTORY_ITERATOR_H

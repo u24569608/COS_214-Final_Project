@@ -46,27 +46,31 @@ bool testFlatBedIterationOrder() {
     bool passed = true;
 
     GreenhouseBed bed("Row A");
-    TestPlant plantOne("Plant One");
-    TestPlant plantTwo("Plant Two");
-    TestPlant plantThree("Plant Three");
+    auto plantOne = std::make_unique<TestPlant>("Plant One");
+    auto plantTwo = std::make_unique<TestPlant>("Plant Two");
+    auto plantThree = std::make_unique<TestPlant>("Plant Three");
 
-    bed.add(&plantOne);
-    bed.add(&plantTwo);
-    bed.add(&plantThree);
+    TestPlant* rawOne = plantOne.get();
+    TestPlant* rawTwo = plantTwo.get();
+    TestPlant* rawThree = plantThree.get();
+
+    bed.add(std::move(plantOne));
+    bed.add(std::move(plantTwo));
+    bed.add(std::move(plantThree));
 
     std::unique_ptr<GreenhouseIterator> iterator = bed.createIterator();
     passed &= reportFailure(static_cast<bool>(iterator), "Iterator should not be null");
 
     PlantInstance* first = iterator->first();
-    passed &= reportFailure(first == &plantOne, "First plant should be Plant One");
+    passed &= reportFailure(first == rawOne, "First plant should be Plant One");
 
     passed &= reportFailure(iterator->hasNext(), "Iterator should report more elements after first");
-    passed &= reportFailure(iterator->currentItem() == &plantOne, "Current item should stay on Plant One after first()");
+    passed &= reportFailure(iterator->currentItem() == rawOne, "Current item should stay on Plant One after first()");
 
     PlantInstance* second = iterator->next();
-    passed &= reportFailure(second == &plantTwo, "Next plant should be Plant Two");
+    passed &= reportFailure(second == rawTwo, "Next plant should be Plant Two");
     PlantInstance* third = iterator->next();
-    passed &= reportFailure(third == &plantThree, "Next plant should be Plant Three");
+    passed &= reportFailure(third == rawThree, "Next plant should be Plant Three");
     passed &= reportFailure(iterator->next() == nullptr, "Advancing past end should yield nullptr");
     passed &= reportFailure(iterator->hasNext() == false, "Iterator should report exhaustion after end");
 
@@ -78,24 +82,28 @@ bool testNestedBedDepthFirstOrder() {
     bool passed = true;
 
     GreenhouseBed root("Root");
-    GreenhouseBed left("Left");
-    GreenhouseBed right("Right");
+    auto leftBed = std::make_unique<GreenhouseBed>("Left");
+    auto rightBed = std::make_unique<GreenhouseBed>("Right");
 
-    TestPlant plantLeft("Left Plant");
-    TestPlant plantMiddle("Middle Plant");
-    TestPlant plantRight("Right Plant");
+    auto plantLeft = std::make_unique<TestPlant>("Left Plant");
+    auto plantMiddle = std::make_unique<TestPlant>("Middle Plant");
+    auto plantRight = std::make_unique<TestPlant>("Right Plant");
 
-    left.add(&plantLeft);
-    right.add(&plantRight);
+    TestPlant* rawLeft = plantLeft.get();
+    TestPlant* rawMiddle = plantMiddle.get();
+    TestPlant* rawRight = plantRight.get();
 
-    root.add(&left);
-    root.add(&plantMiddle);
-    root.add(&right);
+    leftBed->add(std::move(plantLeft));
+    rightBed->add(std::move(plantRight));
+
+    root.add(std::move(leftBed));
+    root.add(std::move(plantMiddle));
+    root.add(std::move(rightBed));
 
     std::unique_ptr<GreenhouseIterator> iterator = root.createIterator();
     passed &= reportFailure(static_cast<bool>(iterator), "Iterator should not be null for nested structure");
 
-    std::vector<PlantInstance*> expectedOrder = {&plantLeft, &plantMiddle, &plantRight};
+    std::vector<PlantInstance*> expectedOrder = {rawLeft, rawMiddle, rawRight};
     std::vector<PlantInstance*> observedOrder;
 
     for (PlantInstance* plant = iterator->first(); plant != nullptr; plant = iterator->next()) {
@@ -119,10 +127,13 @@ bool testIteratorRefreshesOnFirst() {
     bool passed = true;
 
     GreenhouseBed bed("Dynamic Bed");
-    TestPlant initial("Initial Plant");
-    TestPlant lateArrival("Late Arrival");
+    auto initial = std::make_unique<TestPlant>("Initial Plant");
+    auto lateArrival = std::make_unique<TestPlant>("Late Arrival");
 
-    bed.add(&initial);
+    TestPlant* rawInitial = initial.get();
+    TestPlant* rawLate = lateArrival.get();
+
+    bed.add(std::move(initial));
 
     std::unique_ptr<GreenhouseIterator> iterator = bed.createIterator();
     passed &= reportFailure(static_cast<bool>(iterator), "Iterator should not be null");
@@ -133,13 +144,13 @@ bool testIteratorRefreshesOnFirst() {
     }
 
     passed &= reportFailure(initialOrder.size() == 1, "Iterator should recognise the single existing plant");
-    passed &= reportFailure(initialOrder.front() == &initial, "Initial traversal should contain the first plant");
+    passed &= reportFailure(initialOrder.front() == rawInitial, "Initial traversal should contain the first plant");
 
-    bed.add(&lateArrival);
+    bed.add(std::move(lateArrival));
 
     bool foundLateArrival = false;
     for (PlantInstance* plant = iterator->first(); plant != nullptr; plant = iterator->next()) {
-        if (plant == &lateArrival) {
+        if (plant == rawLate) {
             foundLateArrival = true;
             break;
         }

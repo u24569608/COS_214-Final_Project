@@ -45,6 +45,29 @@ private:
     mutable int callCount;
 };
 
+class CountingState : public PlantState {
+public:
+    explicit CountingState(const std::string& label) : name(label) {}
+
+    ~CountingState() override {
+        ++destructorCount;
+    }
+
+    std::string getName() const override { return name; }
+    void onWater(PlantInstance&) override {}
+    void onFertilize(PlantInstance&) override {}
+    void onTick(PlantInstance&) override {}
+
+    static void resetCounter() { destructorCount = 0; }
+    static int getDestructorCount() { return destructorCount; }
+
+private:
+    std::string name;
+    static int destructorCount;
+};
+
+int CountingState::destructorCount = 0;
+
 class TrackingFertilizeStrategy : public FertilizeStrategy {
 public:
     TrackingFertilizeStrategy() : callCount(0) {}
@@ -237,6 +260,22 @@ void testWitheringRecovery() {
                 "Fertilize strategy should be invoked once during recovery");
 }
 
+void testStateReplacementDestroysPrevious() {
+    std::cout << "Running test: testStateReplacementDestroysPrevious..." << std::endl;
+
+    DummyPlant prototype("Managed Fern");
+    PlantInstance plant(&prototype);
+
+    CountingState::resetCounter();
+    plant.setState(std::make_unique<CountingState>("CountingOne"));
+    assertEqInt(CountingState::getDestructorCount(), 0,
+                "Replacing Seed with CountingState should not increment counter yet");
+
+    plant.setState(std::make_unique<CountingState>("CountingTwo"));
+    assertEqInt(CountingState::getDestructorCount(), 1,
+                "Replacing a CountingState should destroy the previous instance");
+}
+
 int main() {
     int testsPassed = 0;
     int baseline = failures;
@@ -255,10 +294,14 @@ int main() {
 
     testWitheringRecovery();
     if (failures == baseline) { ++testsPassed; }
+    baseline = failures;
+
+    testStateReplacementDestroysPrevious();
+    if (failures == baseline) { ++testsPassed; }
 
     std::cout << "\n---------------------------\n";
     std::cout << "     TEST SUMMARY          \n";
-    std::cout << " Tests Passed: " << testsPassed << " / 4" << std::endl;
+    std::cout << " Tests Passed: " << testsPassed << " / 5" << std::endl;
     std::cout << "---------------------------\n";
 
     if (failures == 0) {

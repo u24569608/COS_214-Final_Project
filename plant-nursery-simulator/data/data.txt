@@ -1,3 +1,4 @@
-Spade 12.50
-Gloves 15.75
-Shears 20.0
+Plant,Rose,10.00,Mature
+Plant,Tulip,6.00,Growing
+Item,Spade,12.00
+Item,Pot,7.00

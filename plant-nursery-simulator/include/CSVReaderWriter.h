@@ -16,7 +16,7 @@ class CSVReaderWriter {
 public:
     CSVReaderWriter();
     // Returns pairs read, handles basic errors
-    std::vector<std::pair<std::string, double>> readCsv(const std::string& filePath); 
+    std::vector<std::vector<std::string>> readCsv(const std::string& filePath);
     // Takes data to write, returns true on success
     bool writeDataToCSV(const std::string& filePath, const std::vector<StockItem*>& items);
 };

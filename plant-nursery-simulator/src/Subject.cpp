@@ -8,7 +8,7 @@ Subject::~Subject() {
         const ObserverEvent destroyEvent{
             ObserverEventType::SubjectDestroyed,
             this,
-            "",
+            "Subject destroyed, observers detached.",
             std::nullopt};
         notify(destroyEvent);
     }

@@ -1,13 +1,27 @@
 #include "../include/StockItem.h"
 #include "../include/PlantInstance.h"
 
+#include <atomic>
+#include <cstdint>
+#include <sstream>
 #include <utility>
+
+namespace {
+std::string makeStockId() {
+    static std::atomic<uint64_t> counter{0};
+    const uint64_t value = counter.fetch_add(1U, std::memory_order_relaxed) + 1U;
+    std::ostringstream oss;
+    oss << "stock-" << value;
+    return oss.str();
+}
+} // namespace
 
 /**
  * @brief Constructor implementation
  */
 StockItem::StockItem(std::string n, double p, PlantInstance* pl)
-    : name(std::move(n)),
+    : id(makeStockId()),
+      name(std::move(n)),
       price(p),
       plant(nullptr),
       isAvailable(true),
@@ -17,6 +31,10 @@ StockItem::StockItem(std::string n, double p, PlantInstance* pl)
 
 StockItem::~StockItem() {
     detachFromPlant();
+}
+
+const std::string& StockItem::getId() const{
+    return id;
 }
 
 std::string StockItem::getname() const{
@@ -36,6 +54,10 @@ int StockItem::getPrice() const{
  * @brief Returns the associated plant instance
  */
 PlantInstance* StockItem::getplant() {
+    return this->plant;
+}
+
+const PlantInstance* StockItem::getplant() const{
     return this->plant;
 }
 

@@ -1,5 +1,7 @@
 #include "../include/TXTReaderWriter.h"
 #include "../include/StockItem.h" // Needed for writing
+#include "../include/PlantInstance.h"
+#include "../include/PlantState.h"
 #include <fstream>
 #include <sstream>
 #include <iostream>
@@ -8,7 +10,7 @@
 TXTReaderWriter::TXTReaderWriter() {}
 
 /**
- * @brief Reads data from a space-separated TXT file.
+ * @brief Reads data from a comma-separated TXT file.
  * @param filePath Path to the file.
  * @return Vector of strings, each string is one line from the file.
  * Returns an empty vector if the file cannot be opened.
@@ -48,9 +50,16 @@ bool TXTReaderWriter::writeDataToTxt(const std::string& filePath, const std::vec
     }
 
     for (const StockItem* item : items) {
-        if (item != nullptr) {
-            // Write "ItemName Price"
-            outputFile << item->getname() << " " << item->getPrice() << "\n";
+        if (item == nullptr) {
+            continue;
+        }
+        const PlantInstance* plant = item->getplant();
+        if (plant != nullptr) {
+            const PlantState* state = plant->getState();
+            const std::string stateName = state ? state->getName() : "Seed";
+            outputFile << "Plant," << item->getname() << "," << item->getPrice() << "," << stateName << "\n";
+        } else {
+            outputFile << "Item," << item->getname() << "," << item->getPrice() << "\n";
         }
     }
 

@@ -30,23 +30,25 @@ bool testAddAndRemoveChild() {
     bool passed = true;
 
     GreenhouseBed root("Root Bed");
-    GreenhouseBed child("Child Bed");
+    auto child = std::make_unique<GreenhouseBed>("Child Bed");
+    GreenhouseBed* childPtr = child.get();
 
     passed &= checkTest(root.getSize() == 0, "Initial bed size should be zero");
 
-    root.add(&child);
+    root.add(std::move(child));
     passed &= checkTest(root.getSize() == 1, "Size should be one after add");
-    passed &= checkTest(root.findPlantInBed("Child Bed") == &child,
+    passed &= checkTest(root.findPlantInBed("Child Bed") == childPtr,
                         "findPlantInBed should locate child bed");
 
     // Duplicate add should be ignored
-    root.add(&child);
+    root.add(childPtr);
     passed &= checkTest(root.getSize() == 1, "Duplicate add should not change size");
 
-    root.remove(&child);
+    root.remove(childPtr);
     passed &= checkTest(root.getSize() == 0, "Size should return to zero after remove");
 
-    root.remove(&child); // Removing non-existent child should not crash
+    GreenhouseBed missing("Missing Bed");
+    root.remove(&missing); // Removing non-existent child should not crash
     passed &= checkTest(root.getSize() == 0, "Removing missing child keeps size zero");
 
     return passed;
@@ -57,12 +59,13 @@ bool testPerformCareCascades() {
     bool passed = true;
 
     GreenhouseBed bed("Care Bed");
-    MockComponent mockChild;
+    auto mockChild = std::make_unique<MockComponent>();
+    MockComponent* childPtr = mockChild.get();
 
-    bed.add(&mockChild);
+    bed.add(std::move(mockChild));
     bed.performCare();
 
-    passed &= checkTest(mockChild.cared, "Child component should be cared for");
+    passed &= checkTest(childPtr->cared, "Child component should be cared for");
 
     return passed;
 }
@@ -72,16 +75,16 @@ bool testFindPlantInNestedBeds() {
     bool passed = true;
 
     GreenhouseBed root("Root");
-    GreenhouseBed inner("Inner");
-    GreenhouseBed leafHolder("Leaf Holder");
-    GreenhouseComponent* found = nullptr;
+    auto inner = std::make_unique<GreenhouseBed>("Inner");
+    auto leafHolder = std::make_unique<GreenhouseBed>("Leaf Holder");
+    GreenhouseBed* innerPtr = inner.get();
 
-    root.add(&leafHolder);
-    root.add(&inner);
+    root.add(std::move(leafHolder));
+    root.add(std::move(inner));
 
     // TODO: Replace with iterator-based traversal when available.
-    found = root.findPlantInBed("Inner");
-    passed &= checkTest(found == &inner, "findPlantInBed should locate nested bed");
+    GreenhouseComponent* found = root.findPlantInBed("Inner");
+    passed &= checkTest(found == innerPtr, "findPlantInBed should locate nested bed");
 
     return passed;
 }
