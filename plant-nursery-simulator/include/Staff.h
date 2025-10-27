@@ -100,10 +100,6 @@ public:
     // === Creative Functions ===
     /**
      * @brief Assigns this staff member to a specific greenhouse bed.
-     * @param bed The bed to assign.
-     */
-    /**
-     * @brief Assigns this staff member to a specific greenhouse bed.
      * @param bed The bed to assign (non-owning pointer).
      */
     void assignToBed(GreenhouseBed* bed);
