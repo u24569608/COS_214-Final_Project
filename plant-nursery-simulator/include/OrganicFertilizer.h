@@ -12,7 +12,6 @@ public:
     OrganicFertilizer();
     void fertilize(PlantInstance& plant) const override;
     FertilizeStrategy* clone() const override;
-
 };
 
 #endif // ORGANIC_FERTILIZER_H

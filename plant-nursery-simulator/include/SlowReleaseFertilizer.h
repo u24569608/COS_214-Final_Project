@@ -12,7 +12,6 @@ public:
     SlowReleaseFertilizer();
     void fertilize(PlantInstance& plant) const override;
     FertilizeStrategy* clone() const override;
-
 };
 
 #endif // SLOW_RELEASE_FERTILIZER_H

@@ -15,7 +15,6 @@ public:
      */
     virtual void fertilize(PlantInstance& plant) const = 0;
     virtual FertilizeStrategy* clone() const = 0;
-
 };
 
 #endif // FERTILIZE_STRATEGY_H
