@@ -1,5 +1,7 @@
 #include "../include/CSVReaderWriter.h"
 #include "../include/StockItem.h" // Needed for writing
+#include "../include/PlantInstance.h"
+#include "../include/PlantState.h"
 #include <fstream>
 #include <sstream>
 #include <iostream>
@@ -9,12 +11,12 @@
 CSVReaderWriter::CSVReaderWriter() {}
 
 /**
- * @brief Reads data from a CSV file.
+ * @brief Reads data from a CSV file using the structured Item/Plant format.
  * @param filePath Path to the file.
- * @return Vector of pairs (ItemName, Price). Handles basic parsing errors.
+ * @return Vector of raw field rows for further processing.
  */
-std::vector<std::pair<std::string, double>> CSVReaderWriter::readCsv(const std::string& filePath) {
-    std::vector<std::pair<std::string, double>> data;
+std::vector<std::vector<std::string>> CSVReaderWriter::readCsv(const std::string& filePath) {
+    std::vector<std::vector<std::string>> data;
     std::ifstream inputFile(filePath);
     std::string line;
     int lineNumber = 0;
@@ -35,25 +37,8 @@ std::vector<std::pair<std::string, double>> CSVReaderWriter::readCsv(const std::
             fields.push_back(segment);
         }
 
-        // Basic validation: Check for exactly two fields
-        if (fields.size() == 2) {
-            std::string name = fields[0];
-            double price;
-            try {
-                // Try to convert the second field to a double
-                price = std::stod(fields[1]);
-                data.push_back({name, price});
-            } catch (const std::invalid_argument& e) {
-                std::cerr << "[CSVReaderWriter] Warning: Invalid price format on line " 
-                          << lineNumber << " in file " << filePath << ". Skipping row: " << line << std::endl;
-            } catch (const std::out_of_range& e) {
-                 std::cerr << "[CSVReaderWriter] Warning: Price out of range on line " 
-                          << lineNumber << " in file " << filePath << ". Skipping row: " << line << std::endl;
-            }
-        } else if (!line.empty()) { // Only warn if it's not just an empty line
-            std::cerr << "[CSVReaderWriter] Warning: Malformed line " << lineNumber 
-                      << " in file " << filePath << ". Expected 2 fields, got " 
-                      << fields.size() << ". Skipping row: " << line << std::endl;
+        if (!line.empty()) { // Only warn if it's not just an empty line
+            data.push_back(fields);
         }
     }
 
@@ -75,13 +60,17 @@ bool CSVReaderWriter::writeDataToCSV(const std::string& filePath, const std::vec
         return false;
     }
 
-    // Optional: Write header
-    // outputFile << "ItemName,Price\n";
-
     for (const StockItem* item : items) {
-        if (item != nullptr) {
-            // Write "ItemName,Price"
-            outputFile << item->getname() << "," << item->getPrice() << "\n";
+        if (item == nullptr) {
+            continue;
+        }
+        const PlantInstance* plant = item->getplant();
+        if (plant != nullptr) {
+            const PlantState* state = plant->getState();
+            const std::string stateName = state ? state->getName() : "Seed";
+            outputFile << "Plant," << item->getname() << "," << item->getPrice() << "," << stateName << "\n";
+        } else {
+            outputFile << "Item," << item->getname() << "," << item->getPrice() << "\n";
         }
     }
 

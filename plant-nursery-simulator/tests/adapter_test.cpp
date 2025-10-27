@@ -123,9 +123,9 @@ void testCSVSaveLoadRoundTrip() {
     }
     testFile.close();
     ASSERT_EQ_INT(static_cast<int>(lines.size()), 3, "CSV should contain three rows");
-    ASSERT_EQ_STR(lines[0], "Rose,10", "CSV Rose row");
-    ASSERT_EQ_STR(lines[1], "Tulip,6", "CSV Tulip row");
-    ASSERT_EQ_STR(lines[2], "Spade,12", "CSV Spade row");
+    ASSERT_EQ_STR(lines[0], "Plant,Rose,10,Mature", "CSV Rose row");
+    ASSERT_EQ_STR(lines[1], "Plant,Tulip,6,Mature", "CSV Tulip row");
+    ASSERT_EQ_STR(lines[2], "Item,Spade,12", "CSV Spade row");
 
     // ARRANGE 2: Prepare import context with greenhouse and prototypes
     PlantPrototypeRegistry importRegistry;
@@ -151,6 +151,9 @@ void testCSVSaveLoadRoundTrip() {
     ASSERT_EQ_INT(loadedRose->getPrice(), 10, "Loaded Rose price");
     ASSERT_EQ_INT(loadedTulip->getPrice(), 6, "Loaded Tulip price");
     ASSERT_EQ_INT(loadedSpade->getPrice(), 12, "Loaded Spade price");
+    ASSERT_TRUE(loadedRose->getplant() != nullptr, "Loaded Rose should have a PlantInstance");
+    ASSERT_TRUE(loadedTulip->getplant() != nullptr, "Loaded Tulip should have a PlantInstance");
+    ASSERT_EQ_STR(loadedRose->getplant()->getState()->getName(), "Mature", "Rose state persisted");
 
     // ASSERT 3: Greenhouse reflects only plant-backed stock
     ASSERT_EQ_INT(importBed.getSize(), 2, "Greenhouse should contain two plants post-import");
@@ -254,11 +257,11 @@ void testLoadInvalidFile() {
 
 
      // ARRANGE: Create bad data files
-     std::ofstream badCsv(badCsvPath);
-     badCsv << "Rose,Ten\n"; // Bad price
-     badCsv << "Tulip,5,ExtraField\n"; // Bad number of fields
-     badCsv << "\n"; // Empty line
-     badCsv << "Orchid,25.5\n"; // Good line
+    std::ofstream badCsv(badCsvPath);
+    badCsv << "Plant,Rose,Ten,Mature\n"; // Bad price
+    badCsv << "Plant,Tulip,5,ExtraField\n"; // Extra field
+    badCsv << "\n"; // Empty line
+    badCsv << "Plant,Orchid,25.50,Mature\n"; // Good line
      badCsv.close();
 
     std::ofstream badTxt(badTxtPath);
@@ -272,11 +275,13 @@ void testLoadInvalidFile() {
      std::cout << "--- Testing bad CSV file (expect warnings) ---" << std::endl;
      inv.loadFromFile(&csvAdapter, badCsvPath);
      // ASSERT: Should load only the valid item (Orchid)
-     ASSERT_EQ_INT(inv.getStockCount("Rose"), 0, "Bad CSV: Rose not loaded");
-     ASSERT_EQ_INT(inv.getStockCount("Tulip"), 0, "Bad CSV: Tulip not loaded");
-     ASSERT_EQ_INT(inv.getStockCount("Orchid"), 1, "Bad CSV: Orchid loaded");
-     ASSERT_EQ_INT(inv.findItem("Orchid")->getPrice(), 25, "Bad CSV: Orchid price"); // Price is int
-     ASSERT_EQ_INT(validationBed.getSize(), 1, "Greenhouse tracks Orchid plant");
+    ASSERT_EQ_INT(inv.getStockCount("Rose"), 1, "Bad CSV: Rose defaulted to zero price");
+    ASSERT_EQ_INT(inv.findItem("Rose")->getPrice(), 0, "Bad CSV: Rose price defaults to zero");
+    ASSERT_EQ_INT(inv.getStockCount("Tulip"), 1, "Bad CSV: Tulip retained despite extra field");
+    ASSERT_EQ_INT(inv.findItem("Tulip")->getPrice(), 5, "Bad CSV: Tulip price");
+    ASSERT_EQ_INT(inv.getStockCount("Orchid"), 1, "Bad CSV: Orchid loaded");
+    ASSERT_EQ_INT(inv.findItem("Orchid")->getPrice(), 25, "Bad CSV: Orchid price");
+    ASSERT_EQ_INT(validationBed.getSize(), 1, "Greenhouse tracks valid plant entries");
      std::cout << "--- Done testing bad CSV file ---" << std::endl;
 
 
