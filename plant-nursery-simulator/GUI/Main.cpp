@@ -75,6 +75,7 @@ __fastcall TfrmMain::TfrmMain(TComponent* Owner)
 	objPrototypeRegistry->addPrototype("Fern", std::make_unique<ConcretePlant>("Fern", "Foliage"));
 	objPrototypeRegistry->addPrototype("Spruce", std::make_unique<ConcretePlant>("Spruce", "Conifer"));
 
+	// THIS NEEDS TO BE POPULATED DIFFERNTLY -- NB
 	// 3. Create the main Greenhouse root
 	objGreenhouse = std::make_unique<GreenhouseBed>("Main Greenhouse");
 
