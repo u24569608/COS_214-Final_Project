@@ -27,8 +27,6 @@ __published:	// IDE-managed Components
 	TBitBtn *btnProcessPayment;
 	TLabel *lblOrderSummaryHeading;
 	TBitBtn *btnRefund;
-	void __fastcall cmbItemSelectionChange(TObject *Sender);
-	void __fastcall cmbPotSizeSelectionChange(TObject *Sender);
 	void __fastcall btnAddToOrderClick(TObject *Sender);
 	void __fastcall lbledtCustomerNameChange(TObject *Sender);
 private:	// User declarations

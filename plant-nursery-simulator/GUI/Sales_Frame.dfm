@@ -76,7 +76,6 @@ object frmSales: TfrmSales
     Height = 29
     TabOrder = 0
     Text = 'Item'
-    OnChange = cmbItemSelectionChange
   end
   object pnlAddToOrder: TPanel
     Left = 11

@@ -2,8 +2,8 @@ object frmMain: TfrmMain
   Left = 41
   Top = 55
   Caption = 'Plant Palace'
-  ClientHeight = 608
-  ClientWidth = 849
+  ClientHeight = 591
+  ClientWidth = 843
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -18,17 +18,16 @@ object frmMain: TfrmMain
   object pnlTop: TPanel
     Left = 0
     Top = 0
-    Width = 849
+    Width = 843
     Height = 49
     Align = alTop
     BevelOuter = bvNone
     TabOrder = 0
-    ExplicitWidth = 843
   end
   object pgcBase: TPageControl
     Left = 0
-    Top = 347
-    Width = 849
+    Top = 330
+    Width = 843
     Height = 261
     ActivePage = tsMessages
     Align = alBottom
@@ -40,13 +39,13 @@ object frmMain: TfrmMain
       object pnlMessaging: TPanel
         Left = 0
         Top = 0
-        Width = 841
+        Width = 835
         Height = 129
         Align = alTop
         BevelOuter = bvNone
         TabOrder = 0
         DesignSize = (
-          841
+          835
           129)
         object lblMessageBodyHeading: TLabel
           Left = 4
@@ -119,16 +118,15 @@ object frmMain: TfrmMain
         object edtMessageBody: TEdit
           Left = 4
           Top = 95
-          Width = 730
+          Width = 724
           Height = 29
           Anchors = [akLeft, akTop, akRight]
           TabOrder = 2
           TextHint = 'Enter your message'
           OnChange = edtMessageBodyChange
-          ExplicitWidth = 724
         end
         object btnSend: TBitBtn
-          Left = 743
+          Left = 737
           Top = 95
           Width = 89
           Height = 28
@@ -148,13 +146,12 @@ object frmMain: TfrmMain
           ParentFont = False
           TabOrder = 3
           OnClick = btnSendClick
-          ExplicitLeft = 737
         end
       end
       object redtMessages: TRichEdit
         Left = 0
         Top = 129
-        Width = 841
+        Width = 835
         Height = 96
         Align = alClient
         BevelInner = bvNone
@@ -171,7 +168,6 @@ object frmMain: TfrmMain
         ScrollBars = ssVertical
         TabOrder = 1
         StyleElements = [seBorder]
-        ExplicitWidth = 835
       end
     end
     object tsLog: TTabSheet
@@ -204,14 +200,12 @@ object frmMain: TfrmMain
   object pgcMain: TPageControl
     Left = 0
     Top = 49
-    Width = 849
-    Height = 298
+    Width = 843
+    Height = 281
     ActivePage = tsGreenhouseManagement
     Align = alClient
     Images = vrtlmglstMain
     TabOrder = 2
-    ExplicitWidth = 843
-    ExplicitHeight = 281
     object tsGreenhouseManagement: TTabSheet
       Caption = 'Greenhouse Management   '
       ImageIndex = 3
@@ -220,17 +214,16 @@ object frmMain: TfrmMain
         Left = 0
         Top = 0
         Width = 177
-        Height = 262
+        Height = 245
         Align = alLeft
         Indent = 19
         TabOrder = 0
-        ExplicitHeight = 245
       end
       object scrlbxGreenhouseInformation: TScrollBox
         Left = 177
         Top = 0
-        Width = 664
-        Height = 262
+        Width = 658
+        Height = 245
         VertScrollBar.Smooth = True
         VertScrollBar.Tracking = True
         Align = alClient
@@ -238,12 +231,10 @@ object frmMain: TfrmMain
         BevelOuter = bvNone
         TabOrder = 1
         UseWheelForScrolling = True
-        ExplicitWidth = 658
-        ExplicitHeight = 245
         inline frmGreenhouseInformation1: TfrmGreenhouseInformation
           Left = 0
           Top = 0
-          Width = 634
+          Width = 628
           Height = 496
           Align = alTop
           Color = clWhite
@@ -256,7 +247,7 @@ object frmMain: TfrmMain
           ParentColor = False
           ParentFont = False
           TabOrder = 0
-          ExplicitWidth = 634
+          ExplicitWidth = 628
           inherited grpAction: TGroupBox
             inherited btnFertilise: TBitBtn
               Images = nil
@@ -275,8 +266,8 @@ object frmMain: TfrmMain
       object pgcSalesInventory: TPageControl
         Left = 0
         Top = 0
-        Width = 841
-        Height = 262
+        Width = 835
+        Height = 245
         ActivePage = tsInventory
         Align = alClient
         Images = vrtlmglstMain
@@ -332,8 +323,8 @@ object frmMain: TfrmMain
           object scrlbxSales: TScrollBox
             Left = 0
             Top = 0
-            Width = 833
-            Height = 226
+            Width = 827
+            Height = 209
             VertScrollBar.Smooth = True
             Align = alClient
             TabOrder = 0
@@ -341,7 +332,7 @@ object frmMain: TfrmMain
             inline frmSales1: TfrmSales
               Left = 0
               Top = 0
-              Width = 803
+              Width = 797
               Height = 761
               Align = alTop
               Color = clWhite
@@ -354,7 +345,7 @@ object frmMain: TfrmMain
               ParentColor = False
               ParentFont = False
               TabOrder = 0
-              ExplicitWidth = 803
+              ExplicitWidth = 797
               inherited pnlAddToOrder: TPanel
                 inherited btnAddToOrder: TBitBtn
                   Images = nil
@@ -364,6 +355,9 @@ object frmMain: TfrmMain
                 inherited btnProcessPayment: TBitBtn
                   Images = nil
                 end
+              end
+              inherited btnRefund: TBitBtn
+                Images = nil
               end
             end
           end
@@ -477,8 +471,8 @@ object frmMain: TfrmMain
           ImageIndex = 14
           ImageName = 'Staff'
           DesignSize = (
-            833
-            226)
+            827
+            209)
           object lblStaffTaskQueueHeading: TLabel
             Left = 25
             Top = 16
@@ -496,15 +490,17 @@ object frmMain: TfrmMain
           object lvStaffTaskQueue: TListView
             Left = 0
             Top = 48
-            Width = 833
-            Height = 178
+            Width = 827
+            Height = 161
             Align = alBottom
             Anchors = [akLeft, akTop, akRight, akBottom]
             Columns = <>
             TabOrder = 0
+            ExplicitWidth = 833
+            ExplicitHeight = 178
           end
           object btnProcessNextTask: TBitBtn
-            Left = 632
+            Left = 626
             Top = 14
             Width = 185
             Height = 28
@@ -514,6 +510,7 @@ object frmMain: TfrmMain
             ImageName = 'Next'
             Images = vrtlmglstMain
             TabOrder = 1
+            ExplicitLeft = 632
           end
         end
       end
