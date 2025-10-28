@@ -103,6 +103,34 @@ object frmMain: TfrmMain
             ' -960 960 960" width="24px" fill="#61708c"><path d="M647-440H160' +
             'v-80h487L423-744l57-56 320 320-320 320-57-56 224-224Z"/></svg>'
         end
+        object lblSwitchHeading: TLabel
+          Left = 463
+          Top = 7
+          Width = 205
+          Height = 21
+          Caption = 'Switch the Sender && Receiver'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = 9203809
+          Font.Height = -16
+          Font.Name = 'Segoe UI'
+          Font.Style = []
+          ParentFont = False
+          StyleElements = [seClient, seBorder]
+        end
+        object lblClearMessagesHeading: TLabel
+          Left = 707
+          Top = 7
+          Width = 108
+          Height = 21
+          Caption = 'Clear Messages'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = 9203809
+          Font.Height = -16
+          Font.Name = 'Segoe UI'
+          Font.Style = []
+          ParentFont = False
+          StyleElements = [seClient, seBorder]
+        end
         object cmbSender: TComboBox
           Left = 4
           Top = 34
@@ -154,11 +182,11 @@ object frmMain: TfrmMain
           ExplicitLeft = 737
         end
         object btnClearMessages: TBitBtn
-          Left = 628
-          Top = 34
-          Width = 148
+          Left = 707
+          Top = 37
+          Width = 106
           Height = 29
-          Caption = 'Clear Messages'
+          Caption = 'Clear'
           ImageIndex = 21
           ImageName = 'Clear'
           Images = vrtlmglstMain
@@ -168,7 +196,7 @@ object frmMain: TfrmMain
         object btnReverse: TBitBtn
           Left = 463
           Top = 34
-          Width = 148
+          Width = 106
           Height = 29
           Caption = 'Switch'
           ImageIndex = 22

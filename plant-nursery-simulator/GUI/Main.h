@@ -95,6 +95,8 @@ __published:	// IDE-managed Components
 	TPanel *pnlInventoryManagement;
 	TBitBtn *btnClearMessages;
 	TBitBtn *btnReverse;
+	TLabel *lblSwitchHeading;
+	TLabel *lblClearMessagesHeading;
 	void __fastcall edtMessageBodyChange(TObject *Sender);
 	void __fastcall FormCreate(TObject *Sender);
 	void __fastcall btnSendClick(TObject *Sender);
