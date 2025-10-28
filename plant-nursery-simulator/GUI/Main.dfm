@@ -24,6 +24,17 @@ object frmMain: TfrmMain
     BevelOuter = bvNone
     TabOrder = 0
     ExplicitWidth = 843
+    object btnSimulate: TButton
+      Left = 8
+      Top = 11
+      Width = 161
+      Height = 28
+      Caption = 'Simulate Growth'
+      ImageIndex = 15
+      ImageName = 'Plant'
+      Images = vrtlmglstMain
+      TabOrder = 0
+    end
   end
   object pgcBase: TPageControl
     Left = 0
@@ -106,9 +117,9 @@ object frmMain: TfrmMain
         object lblSwitchHeading: TLabel
           Left = 463
           Top = 7
-          Width = 205
+          Width = 179
           Height = 21
-          Caption = 'Switch the Sender && Receiver'
+          Caption = 'Switch Sender && Receiver'
           Font.Charset = DEFAULT_CHARSET
           Font.Color = 9203809
           Font.Height = -16
@@ -118,7 +129,7 @@ object frmMain: TfrmMain
           StyleElements = [seClient, seBorder]
         end
         object lblClearMessagesHeading: TLabel
-          Left = 707
+          Left = 666
           Top = 7
           Width = 108
           Height = 21
@@ -182,9 +193,9 @@ object frmMain: TfrmMain
           ExplicitLeft = 737
         end
         object btnClearMessages: TBitBtn
-          Left = 707
-          Top = 37
-          Width = 106
+          Left = 666
+          Top = 34
+          Width = 95
           Height = 29
           Caption = 'Clear'
           ImageIndex = 21
@@ -196,7 +207,7 @@ object frmMain: TfrmMain
         object btnReverse: TBitBtn
           Left = 463
           Top = 34
-          Width = 106
+          Width = 98
           Height = 29
           Caption = 'Switch'
           ImageIndex = 22
@@ -280,6 +291,7 @@ object frmMain: TfrmMain
         Align = alLeft
         Indent = 19
         TabOrder = 0
+        OnChange = tvGreenhouseChange
         ExplicitHeight = 245
       end
       object scrlbxGreenhouseInformation: TScrollBox

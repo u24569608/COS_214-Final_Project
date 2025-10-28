@@ -97,11 +97,13 @@ __published:	// IDE-managed Components
 	TBitBtn *btnReverse;
 	TLabel *lblSwitchHeading;
 	TLabel *lblClearMessagesHeading;
+	TButton *btnSimulate;
 	void __fastcall edtMessageBodyChange(TObject *Sender);
 	void __fastcall FormCreate(TObject *Sender);
 	void __fastcall btnSendClick(TObject *Sender);
 	void __fastcall btnClearMessagesClick(TObject *Sender);
 	void __fastcall btnReverseClick(TObject *Sender);
+	void __fastcall tvGreenhouseChange(TObject *Sender, TTreeNode *Node);
 
 private:	// User declarations
 	// --- Mediator Pattern ---

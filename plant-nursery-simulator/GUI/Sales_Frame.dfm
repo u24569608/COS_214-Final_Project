@@ -13,6 +13,9 @@ object frmSales: TfrmSales
   ParentColor = False
   ParentFont = False
   TabOrder = 0
+  DesignSize = (
+    640
+    761)
   object lblBuildOrderHeading: TLabel
     Left = 11
     Top = 8
@@ -80,15 +83,20 @@ object frmSales: TfrmSales
   object pnlAddToOrder: TPanel
     Left = 11
     Top = 128
-    Width = 606
+    Width = 614
     Height = 49
+    Anchors = [akLeft, akTop, akRight]
     ParentBackground = False
     TabOrder = 1
+    DesignSize = (
+      614
+      49)
     object btnAddToOrder: TBitBtn
-      Left = 440
+      Left = 448
       Top = 8
       Width = 156
       Height = 33
+      Anchors = [akTop, akRight]
       Caption = 'Add to Order'
       Enabled = False
       ImageIndex = 12
@@ -96,6 +104,7 @@ object frmSales: TfrmSales
       Images = frmMain.vrtlmglstMain
       TabOrder = 0
       OnClick = btnAddToOrderClick
+      ExplicitLeft = 440
     end
   end
   object redtOrderDetails: TRichEdit
@@ -133,28 +142,35 @@ object frmSales: TfrmSales
   object pnlProcessPayment: TPanel
     Left = 11
     Top = 608
-    Width = 606
+    Width = 614
     Height = 49
+    Anchors = [akLeft, akTop, akRight]
     ParentBackground = False
     TabOrder = 4
+    DesignSize = (
+      614
+      49)
     object btnProcessPayment: TBitBtn
-      Left = 440
+      Left = 448
       Top = 8
       Width = 156
       Height = 33
+      Anchors = [akTop, akRight]
       Caption = 'Process Payment'
       Enabled = False
       ImageIndex = 13
       ImageName = 'Cash'
       Images = frmMain.vrtlmglstMain
       TabOrder = 0
+      ExplicitLeft = 440
     end
   end
   object btnRefund: TBitBtn
-    Left = 451
+    Left = 459
     Top = 672
     Width = 156
     Height = 33
+    Anchors = [akTop, akRight]
     Caption = 'Refund Order'
     Enabled = False
     ImageIndex = 13

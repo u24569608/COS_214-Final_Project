@@ -266,3 +266,63 @@ void TfrmMain::PopulateGreenhouseTree(TTreeNode* parentNode, GreenhouseComponent
 	}
 	// If it's not a bed, it's a PlantInstance (Leaf), so recursion stops here.
 }
+
+void __fastcall TfrmMain::tvGreenhouseChange(TObject *Sender, TTreeNode *Node)
+{
+	// On Greenhouse List View Change
+    // 1. Get the currently selected node in the TreeView
+	TTreeNode* selectedNode = tvGreenhouse->Selected;
+
+	// 2. Check if a node is actually selected
+	if (selectedNode != nullptr && selectedNode->Data != nullptr)
+	{
+		// 3. Get the C++ object stored in the node's Data property
+		GreenhouseComponent* component = static_cast<GreenhouseComponent*>(selectedNode->Data);
+
+		// 4. Try to safely cast it to a PlantInstance*
+		PlantInstance* plant = dynamic_cast<PlantInstance*>(component);
+
+		// 5. Check if the cast was successful (i.e., the user clicked a plant)
+		if (plant != nullptr)
+		{
+			// --- Update the Greenhouse Information Frame ---
+			// Ensure the frame pointer (e.g., frmGreenhouseInformation1) is correct
+
+			// a) Plant Name: Use getName() from the base GreenhouseComponent
+			frmGreenhouseInformation1->lbledtPlantName->Text = plant->getName().c_str();
+
+			// b) Plant State: Get the state object and then its name
+			const PlantState* currentState = plant->getState(); //
+			if (currentState != nullptr) {
+				frmGreenhouseInformation1->lbledtPlantState->Text = currentState->getName().c_str();
+			} else {
+				frmGreenhouseInformation1->lbledtPlantState->Text = "Unknown State";
+			}
+
+			// c) Growth Progress Bar: Let's use health for now (0-100)
+			// You might have a specific growth property later
+			int health = plant->getHealth(); //
+			frmGreenhouseInformation1->pbGrowth->Position = health;
+
+			// d) Enable care buttons (since a plant is selected)
+			frmGreenhouseInformation1->rgWaterStrategy->Enabled = true;
+			frmGreenhouseInformation1->rgFertiliseStrategy->Enabled = true;
+			// (Call the button enable/disable logic you wrote earlier)
+			frmGreenhouseInformation1->enableDisableCareButtons();
+
+			return; // Exit after updating for a plant
+		}
+	}
+
+	// --- If no node selected, or it wasn't a plant ---
+	// Clear the details and disable care buttons
+	/* frmGreenhouseInformation1->lbledtPlantName->Text = "";
+	frmGreenhouseInformation1->lbledtPlantState->Text = "";
+	frmGreenhouseInformation1->pbGrowth->Position = 0;
+	frmGreenhouseInformation1->rgWaterStrategy->Enabled = false;
+	frmGreenhouseInformation1->rgFertiliseStrategy->Enabled = false;
+	frmGreenhouseInformation1->btnWater->Enabled = false;
+	frmGreenhouseInformation1->btnFertilise->Enabled = false;  */
+}
+//---------------------------------------------------------------------------
+

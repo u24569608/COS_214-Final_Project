@@ -34,9 +34,10 @@ __published:	// IDE-managed Components
 	void __fastcall rgWaterStrategyClick(TObject *Sender);
 	void __fastcall rgFertiliseStrategyClick(TObject *Sender);
 private:	// User declarations
-	void enableDisableCareButtons();
+
 public:		// User declarations
 	__fastcall TfrmGreenhouseInformation(TComponent* Owner);
+	void enableDisableCareButtons();
 };
 //---------------------------------------------------------------------------
 extern PACKAGE TfrmGreenhouseInformation *frmGreenhouseInformation;
