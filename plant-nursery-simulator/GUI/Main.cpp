@@ -121,3 +121,11 @@ void __fastcall TfrmMain::btnSendClick(TObject *Sender)
 }
 //---------------------------------------------------------------------------
 
+void __fastcall TfrmMain::btnClearMessagesClick(TObject *Sender)
+{
+    // Clear the Message Output
+    redtMessages->Clear();
+}
+//---------------------------------------------------------------------------
+
+

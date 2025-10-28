@@ -83,9 +83,12 @@ __published:	// IDE-managed Components
 	TBitBtn *btnProcessNextTask;
 	TPanel *pnlPlantPrototype;
 	TPanel *pnlInventoryManagement;
+	TBitBtn *btnClearMessages;
+	TBitBtn *btnReverse;
 	void __fastcall edtMessageBodyChange(TObject *Sender);
 	void __fastcall FormCreate(TObject *Sender);
 	void __fastcall btnSendClick(TObject *Sender);
+	void __fastcall btnClearMessagesClick(TObject *Sender);
 
 private:	// User declarations
 	// Mediator Object
