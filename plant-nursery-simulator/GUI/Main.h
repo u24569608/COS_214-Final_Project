@@ -21,6 +21,14 @@
 #include "Greenhouse_Information_Frame.h"
 #include "Sales_Frame.h"
 #include <Vcl.Dialogs.hpp>
+#include <vector>
+#include <memory>
+
+// MEDIATOR PATTERN
+#include "../include/NurseryMediator.h"
+#include "../include/Colleague.h"
+#include "../include/Staff.h"
+#include "../include/Customer.h"
 //---------------------------------------------------------------------------
 class TfrmMain : public TForm
 {
@@ -33,8 +41,8 @@ __published:	// IDE-managed Components
 	TTabSheet *tsMessages;
 	TRichEdit *redtLog;
 	TPanel *pnlMessaging;
-	TComboBox *cbbSender;
-	TComboBox *cbbReceiver;
+	TComboBox *cmbSender;
+	TComboBox *cmbReceiver;
 	TRichEdit *redtMessages;
 	TEdit *edtMessageBody;
 	TLabel *lblMessageBodyHeading;
@@ -75,12 +83,19 @@ __published:	// IDE-managed Components
 	TBitBtn *btnProcessNextTask;
 	TPanel *pnlPlantPrototype;
 	TPanel *pnlInventoryManagement;
-	TTimer *tmrDateTime;
 	void __fastcall edtMessageBodyChange(TObject *Sender);
 	void __fastcall FormCreate(TObject *Sender);
-	void __fastcall tmrDateTimeTimer(TObject *Sender);
+	void __fastcall btnSendClick(TObject *Sender);
 
 private:	// User declarations
+	// Mediator Object
+	std::unique_ptr<NurseryMediator> objMediator;
+
+	// A list to hold all colleagues (Staff and Customers)
+	std::vector<std::unique_ptr<Colleague>> vtrColleagues;
+
+	// A helper function to fill in the combo boxes
+	void PopulateColleagueComboBoxes();
 public:		// User declarations
 	__fastcall TfrmMain(TComponent* Owner);
 };

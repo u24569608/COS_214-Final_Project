@@ -16,7 +16,7 @@ __fastcall TfrmSales::TfrmSales(TComponent* Owner)
 {
 }
 //---------------------------------------------------------------------------
-void __fastcall TfrmSales::cmbPlantSelectionChange(TObject *Sender)
+void __fastcall TfrmSales::cmbItemSelectionChange(TObject *Sender)
 {
 	// VALIDATION OF PLANT SELECTION MUST STILL OCCUR
 	if (cmbPlantSelection->Text != "Plant") {

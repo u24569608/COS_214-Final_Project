@@ -16,11 +16,8 @@ class TfrmSales : public TFrame
 {
 __published:	// IDE-managed Components
 	TLabel *lblBuildOrderHeading;
-	TComboBox *cmbPlantSelection;
-	TLabel *lblPlantSelectionHeading;
-	TComboBox *cmbPotSizeSelection;
-	TLabel *lblPotSizeSelectionHeading;
-	TCheckBox *chkGiftWrapping;
+	TComboBox *cmbItemSelection;
+	TLabel *lblItemSelectionHeading;
 	TPanel *pnlAddToOrder;
 	TBitBtn *btnAddToOrder;
 	TLabel *lblCheckoutHeading;
@@ -29,7 +26,8 @@ __published:	// IDE-managed Components
 	TPanel *pnlProcessPayment;
 	TBitBtn *btnProcessPayment;
 	TLabel *lblOrderSummaryHeading;
-	void __fastcall cmbPlantSelectionChange(TObject *Sender);
+	TBitBtn *btnRefund;
+	void __fastcall cmbItemSelectionChange(TObject *Sender);
 	void __fastcall cmbPotSizeSelectionChange(TObject *Sender);
 	void __fastcall btnAddToOrderClick(TObject *Sender);
 	void __fastcall lbledtCustomerNameChange(TObject *Sender);

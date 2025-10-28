@@ -18,12 +18,19 @@ __published:	// IDE-managed Components
 	TLabeledEdit *lbledtPlantName;
 	TLabeledEdit *lbledtPlantState;
 	TProgressBar *pbGrowth;
-	TLabel *lblGrowthLabel;
+	TLabel *lblGrowthLabelHeading;
 	TRadioGroup *rgWaterStrategy;
 	TRadioGroup *rgFertiliseStrategy;
 	TBitBtn *btnWater;
 	TBitBtn *btnFertilise;
 	TGroupBox *grpAction;
+	TComboBox *cmbStaffMember;
+	TLabel *lblSelectStaffMemberHeading;
+	TLabel *lblWaterLevelHeading;
+	TProgressBar *ProgressBar1;
+	TProgressBar *ProgressBar2;
+	TLabel *lblNutrientLevelHeading;
+	TLabeledEdit *lbledtSaleReadiness;
 	void __fastcall rgWaterStrategyClick(TObject *Sender);
 	void __fastcall rgFertiliseStrategyClick(TObject *Sender);
 private:	// User declarations
