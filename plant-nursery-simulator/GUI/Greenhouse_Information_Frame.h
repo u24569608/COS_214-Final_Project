@@ -27,8 +27,8 @@ __published:	// IDE-managed Components
 	TComboBox *cmbStaffMember;
 	TLabel *lblSelectStaffMemberHeading;
 	TLabel *lblWaterLevelHeading;
-	TProgressBar *ProgressBar1;
-	TProgressBar *ProgressBar2;
+	TProgressBar *pbWater;
+	TProgressBar *pbNutrients;
 	TLabel *lblNutrientLevelHeading;
 	TLabeledEdit *lbledtSaleReadiness;
 	void __fastcall rgWaterStrategyClick(TObject *Sender);

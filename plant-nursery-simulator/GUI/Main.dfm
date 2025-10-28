@@ -147,6 +147,7 @@ object frmMain: TfrmMain
           Top = 34
           Width = 200
           Height = 29
+          Sorted = True
           TabOrder = 0
           Text = 'Sender'
         end
@@ -155,6 +156,7 @@ object frmMain: TfrmMain
           Top = 34
           Width = 200
           Height = 29
+          Sorted = True
           TabOrder = 1
           Text = 'Receiver'
         end
@@ -273,7 +275,7 @@ object frmMain: TfrmMain
     Top = 49
     Width = 849
     Height = 298
-    ActivePage = tsGreenhouseManagement
+    ActivePage = tsSalesInventory
     Align = alClient
     Images = vrtlmglstMain
     TabOrder = 2
@@ -360,9 +362,9 @@ object frmMain: TfrmMain
             Height = 226
             Align = alClient
             Columns = <>
+            ReadOnly = True
             TabOrder = 0
-            ExplicitWidth = 786
-            ExplicitHeight = 209
+            ViewStyle = vsList
           end
           object pnlInventoryMovement: TPanel
             Left = 792
@@ -459,7 +461,7 @@ object frmMain: TfrmMain
         Top = 0
         Width = 841
         Height = 262
-        ActivePage = tsStaffTasks
+        ActivePage = tsInventoryManagement
         Align = alClient
         Images = vrtlmglstMain
         TabOrder = 0
@@ -503,6 +505,7 @@ object frmMain: TfrmMain
               ImageName = 'Load'
               Images = vrtlmglstMain
               TabOrder = 1
+              OnClick = btnLoadInventoryClick
             end
           end
         end
@@ -5104,8 +5107,9 @@ object frmMain: TfrmMain
     Top = 32
   end
   object dlgOpenLoadInventory: TOpenDialog
-    Left = 608
-    Top = 64
+    Title = 'Select an Inventory File'
+    Left = 640
+    Top = 16
   end
   object dlgSaveSaveInventory: TSaveDialog
     Left = 600

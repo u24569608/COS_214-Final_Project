@@ -39,6 +39,19 @@
 #include "../include/GreenhouseComponent.h"
 #include "../include/GreenhouseIterator.h"
 #include "../include/ConcreteGreenhouseIterator.h"
+
+
+// --- ADAPTER PATTERN ---
+#include "../include/Inventory.h"
+#include "../include/FileAdapter.h"
+#include "../include/CSVAdapter.h"
+#include "../include/TXTAdapter.h"
+
+// --- ITERATOR PATTERN (for displaying inventory) ---
+#include "../include/StockItem.h"
+#include "../include/InventoryIterator.h"
+#include "../include/InventoryCollection.h"
+#include "../include/ConcreteInventoryIterator.h"
 //---------------------------------------------------------------------------
 class TfrmMain : public TForm
 {
@@ -104,6 +117,7 @@ __published:	// IDE-managed Components
 	void __fastcall btnClearMessagesClick(TObject *Sender);
 	void __fastcall btnReverseClick(TObject *Sender);
 	void __fastcall tvGreenhouseChange(TObject *Sender, TTreeNode *Node);
+	void __fastcall btnLoadInventoryClick(TObject *Sender);
 
 private:	// User declarations
 	// --- Mediator Pattern ---
@@ -122,6 +136,10 @@ private:	// User declarations
 	std::unique_ptr<GreenhouseBed> objGreenhouse; // The (Composite) root
 	void PopulateGreenhouseTree(TTreeNode* parentNode, GreenhouseComponent* component);
 
+	// void __fastcall btnLoadInventoryClick(TObject *Sender);
+
+	std::unique_ptr<Inventory> objInventory;
+    void RefreshInventoryListView();
 public:		// User declarations
 	__fastcall TfrmMain(TComponent* Owner);
 };

@@ -16,9 +16,9 @@ object frmGreenhouseInformation: TfrmGreenhouseInformation
   object lblGrowthLabelHeading: TLabel
     Left = 438
     Top = 101
-    Width = 92
+    Width = 85
     Height = 21
-    Caption = 'Growth Level'
+    Caption = 'Health Level'
   end
   object lblWaterLevelHeading: TLabel
     Left = 16
@@ -146,7 +146,7 @@ object frmGreenhouseInformation: TfrmGreenhouseInformation
       Text = 'Staff Member'
     end
   end
-  object ProgressBar1: TProgressBar
+  object pbWater: TProgressBar
     Left = 16
     Top = 128
     Width = 180
@@ -154,7 +154,7 @@ object frmGreenhouseInformation: TfrmGreenhouseInformation
     Smooth = True
     TabOrder = 6
   end
-  object ProgressBar2: TProgressBar
+  object pbNutrients: TProgressBar
     Left = 226
     Top = 128
     Width = 180

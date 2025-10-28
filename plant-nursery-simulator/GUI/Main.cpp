@@ -118,6 +118,13 @@ __fastcall TfrmMain::TfrmMain(TComponent* Owner)
 	// 8. === Populate the Prototype ComboBox ===
 	//    (We'll add this later when implementing the Clone button)
 	// PopulatePrototypeComboBox();
+
+    // --- Create Inventory Object ---
+	objInventory = std::make_unique<Inventory>();
+
+    // Give the Inventory pointers to the other systems it needs
+    objInventory->setPlantRegistry(objPrototypeRegistry.get());
+    objInventory->setGreenhouseRoot(objGreenhouse.get());
 }
 //---------------------------------------------------------------------------
 
@@ -299,7 +306,7 @@ void __fastcall TfrmMain::tvGreenhouseChange(TObject *Sender, TTreeNode *Node)
 				frmGreenhouseInformation1->lbledtPlantState->Text = "Unknown State";
 			}
 
-			// c) Growth Progress Bar: Let's use health for now (0-100)
+			// c) Growth Progress Bar. Using HEALTH for now...
 			// You might have a specific growth property later
 			int health = plant->getHealth(); //
 			frmGreenhouseInformation1->pbGrowth->Position = health;
@@ -316,13 +323,95 @@ void __fastcall TfrmMain::tvGreenhouseChange(TObject *Sender, TTreeNode *Node)
 
 	// --- If no node selected, or it wasn't a plant ---
 	// Clear the details and disable care buttons
-	/* frmGreenhouseInformation1->lbledtPlantName->Text = "";
-	frmGreenhouseInformation1->lbledtPlantState->Text = "";
+	frmGreenhouseInformation1->lbledtPlantName->Text = "—";
+	frmGreenhouseInformation1->lbledtPlantState->Text = "—";
 	frmGreenhouseInformation1->pbGrowth->Position = 0;
+	frmGreenhouseInformation1->pbWater->Position = 0;
+	frmGreenhouseInformation1->pbNutrients->Position = 0;
 	frmGreenhouseInformation1->rgWaterStrategy->Enabled = false;
 	frmGreenhouseInformation1->rgFertiliseStrategy->Enabled = false;
 	frmGreenhouseInformation1->btnWater->Enabled = false;
-	frmGreenhouseInformation1->btnFertilise->Enabled = false;  */
+	frmGreenhouseInformation1->btnFertilise->Enabled = false;
 }
 //---------------------------------------------------------------------------
 
+void __fastcall TfrmMain::btnLoadInventoryClick(TObject *Sender)
+{
+	// Load Inventory
+    // 1. Show the Open Dialog (Ensure name is dlgOpenLoadInventory)
+	if (dlgOpenLoadInventory->Execute())
+	{
+		// 2. Get file path and extension
+		UnicodeString uFileName = dlgOpenLoadInventory->FileName;
+		UnicodeString uExt = ExtractFileExt(uFileName);
+		std::string filePath = AnsiString(uFileName).c_str();
+
+		// 3. Create the correct Adapter
+		FileAdapter* adapter = nullptr;
+		if (uExt.LowerCase() == ".csv") {
+			adapter = new CSVAdapter(); //
+		} else if (uExt.LowerCase() == ".txt") {
+			adapter = new TXTAdapter(); //
+		}
+
+		// 4. Load the file using the adapter
+		if (adapter != nullptr) {
+			try {
+				// Call backend Inventory::loadFromFile
+				// WRONG order
+				objInventory->loadFromFile(adapter, filePath);
+
+				// 5. Refresh the ListView display
+				RefreshInventoryListView(); // Call helper function
+
+				ShowMessage("Inventory loaded successfully from " + uFileName);
+			}
+			catch (const std::exception &ex) {
+				ShowMessage("Error loading file: " + String(ex.what()));
+			}
+			delete adapter; // Clean up adapter
+		} else {
+			ShowMessage("Error: Unsupported file type selected.");
+		}
+	}
+}
+//---------------------------------------------------------------------------
+
+void TfrmMain::RefreshInventoryListView()
+{
+	// 1. Clear previous items (Ensure name is lvInventory)
+	lvInventory->Items->Clear();
+
+	// 2. Get iterator (returns InventoryIterator*)
+	InventoryIterator* itRaw = objInventory->createIterator();
+    if (!itRaw) {
+		ShowMessage("Error: Could not get inventory iterator.");
+		return;
+	}
+    // Use unique_ptr for automatic cleanup
+    std::unique_ptr<InventoryIterator> it(itRaw);
+
+	// 3. Loop through inventory using first() / next() / hasNext()
+	for (StockItem* item = it->first(); it->hasNext(); item = it->next())
+	{
+		if (item) // Check if item is valid (currentItem might return null if hasNext is tricky)
+		{
+            item = it->currentItem(); // Get current item explicitly
+            if (!item) continue; // Skip if somehow currentItem is null despite hasNext
+
+			// 4. Create a new item in the TListView
+			TListItem *listItem = lvInventory->Items->Add();
+
+			// --- Populate ListView Columns ---
+			// Column 0 (Caption): Item Name
+			listItem->Caption = item->getname().c_str(); //
+
+			// Column 1: Item Price (Ensure column exists in designer)
+			listItem->SubItems->Add(FloatToStrF(item->getPrice(), ffCurrency, 8, 2)); //
+
+			// Column 2: Availability Status (Ensure column exists in designer)
+			listItem->SubItems->Add(item->getDisplayStatus().c_str()); //
+		}
+	}
+     // Iterator unique_ptr automatically cleans up here
+}
