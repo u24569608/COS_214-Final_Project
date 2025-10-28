@@ -169,6 +169,7 @@ object frmMain: TfrmMain
           ImageName = 'Switch'
           Images = vrtlmglstMain
           TabOrder = 5
+          OnClick = btnReverseClick
         end
       end
       object redtMessages: TRichEdit

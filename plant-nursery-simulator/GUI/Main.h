@@ -89,6 +89,7 @@ __published:	// IDE-managed Components
 	void __fastcall FormCreate(TObject *Sender);
 	void __fastcall btnSendClick(TObject *Sender);
 	void __fastcall btnClearMessagesClick(TObject *Sender);
+	void __fastcall btnReverseClick(TObject *Sender);
 
 private:	// User declarations
 	// Mediator Object

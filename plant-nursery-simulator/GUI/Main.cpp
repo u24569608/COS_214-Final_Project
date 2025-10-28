@@ -63,6 +63,9 @@ void TfrmMain::PopulateColleagueComboBoxes()
 	cmbSender->Clear();
 	cmbReceiver->Clear();
 
+	cmbSender->Text = "Sender";
+	cmbReceiver->Text = "Receiver";
+
 	// Loop through list of Colleague objects
 	for (const auto& colleague : vtrColleagues)
 	{
@@ -128,4 +131,14 @@ void __fastcall TfrmMain::btnClearMessagesClick(TObject *Sender)
 }
 //---------------------------------------------------------------------------
 
+
+void __fastcall TfrmMain::btnReverseClick(TObject *Sender)
+{
+	std::string sSender = AnsiString(cmbSender->Text).c_str();
+	std::string sReceiver = AnsiString(cmbReceiver->Text).c_str();
+
+	cmbSender->Text = sReceiver.c_str();
+	cmbReceiver->Text = sSender.c_str();
+}
+//---------------------------------------------------------------------------
 
