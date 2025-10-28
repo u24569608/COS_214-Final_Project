@@ -375,3 +375,12 @@ greenhouse_composite_unit_test:
 		src/Plant.cpp \
 		-o build/greenhouse_composite_unit_test
 	./build/greenhouse_composite_unit_test
+
+demomain:
+	@echo "== Building and Running 'demomain.cpp' (PROJECT DEMO) =="
+	@mkdir -p build
+	g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude \
+		tests/demomain.cpp \
+		src/*.cpp \
+		-o build/demomain
+	./build/demomain
