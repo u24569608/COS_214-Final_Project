@@ -115,7 +115,7 @@ void PlantInstance::setState(std::unique_ptr<PlantState> nextState) {
                 ObserverEventType::AvailabilityChanged,
                 this,
                 isAvailable ? "Plant ready for sale" : "Plant unavailable for sale",
-                std::optional<bool>(isAvailable)};
+                std::optional<bool>{isAvailable}};
             notify(availabilityEvent);
         }
 
