@@ -71,3 +71,5 @@ __astcache/
 *.log
 *.bak
 *.tmp
+plant-nursery-simulator/data/New_Data.csv
+plant-nursery-simulator/data/New_Data.txt

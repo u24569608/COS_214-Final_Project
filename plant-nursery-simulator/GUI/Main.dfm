@@ -41,7 +41,7 @@ object frmMain: TfrmMain
     Top = 347
     Width = 849
     Height = 261
-    ActivePage = tsMessages
+    ActivePage = tsLog
     Align = alBottom
     Images = vrtlmglstMain
     TabOrder = 1
@@ -274,7 +274,7 @@ object frmMain: TfrmMain
     Top = 49
     Width = 849
     Height = 298
-    ActivePage = tsSalesInventory
+    ActivePage = tsSystemAdmin
     Align = alClient
     Images = vrtlmglstMain
     TabOrder = 2
@@ -399,6 +399,7 @@ object frmMain: TfrmMain
               ImageName = 'Up'
               Images = vrtlmglstMain
               TabOrder = 0
+              OnClick = btnInventoryUpClick
             end
             object btnInventoryDown: TBitBtn
               Left = 0
@@ -409,6 +410,7 @@ object frmMain: TfrmMain
               ImageName = 'Down'
               Images = vrtlmglstMain
               TabOrder = 1
+              OnClick = btnInventoryDownClick
             end
           end
         end
@@ -508,6 +510,7 @@ object frmMain: TfrmMain
               ImageName = 'Save'
               Images = vrtlmglstMain
               TabOrder = 0
+              OnClick = btnSaveInventoryClick
             end
             object btnLoadInventory: TButton
               Left = 25
@@ -4991,8 +4994,8 @@ object frmMain: TfrmMain
               6600000006494441540300DC32186AD2734CAE0000000049454E44AE426082}
           end>
       end>
-    Left = 712
-    Top = 32
+    Left = 608
+    Top = 16
   end
   object vrtlmglstMain: TVirtualImageList
     Images = <
@@ -5112,8 +5115,8 @@ object frmMain: TfrmMain
         Name = 'Switch'
       end>
     ImageCollection = imgclctnMain
-    Left = 760
-    Top = 32
+    Left = 648
+    Top = 16
   end
   object dlgOpenLoadInventory: TFileOpenDialog
     FavoriteLinks = <>
@@ -5142,7 +5145,7 @@ object frmMain: TfrmMain
     OkButtonLabel = 'Save'
     Options = []
     Title = 'Save Inventory to File'
-    Left = 624
-    Top = 24
+    Left = 752
+    Top = 16
   end
 end

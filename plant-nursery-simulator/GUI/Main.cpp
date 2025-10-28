@@ -142,7 +142,7 @@ void __fastcall TfrmMain::edtMessageBodyChange(TObject *Sender)
 void __fastcall TfrmMain::FormCreate(TObject *Sender)
 {
 	// Display Welcome Message in Log
-	redtLog->Lines->Add("Welcome to Plant Palace!");
+	redtLog->Lines->Add("[" + DateTimeToStr(Now()) + "] Welcome to Plant Palace!");
 }
 //---------------------------------------------------------------------------
 
@@ -183,7 +183,7 @@ void __fastcall TfrmMain::btnSendClick(TObject *Sender)
 		receiverId = std::stoi(AnsiString(receiverIdStr).c_str());
 	}
 	catch(...) {
-		ShowMessage("Error: Invalid Sender or Receiver ID");
+        redtLog->Lines->Add("[" + DateTimeToStr(Now()) + "] ERROR: Invalid Sender or Receiver ID");
 		return;
 	}
 
@@ -208,7 +208,7 @@ void __fastcall TfrmMain::btnSendClick(TObject *Sender)
 		// 7. Clear the message box
 		edtMessageBody->Text = "";
 	} else {
-		ShowMessage("Error: Could not find sender object.");
+		redtLog->Lines->Add("[" + DateTimeToStr(Now()) + "] ERROR: Could not find Sender Object");
 	}
 }
 //---------------------------------------------------------------------------
@@ -357,21 +357,19 @@ void __fastcall TfrmMain::btnLoadInventoryClick(TObject *Sender)
 		// 4. Load the file using the adapter
 		if (adapter != nullptr) {
 			try {
-				// Call backend Inventory::loadFromFile
-				// WRONG order
 				objInventory->loadFromFile(adapter, filePath);
 
 				// 5. Refresh the ListView display
-				RefreshInventoryListView(); // Call helper function
+				RefreshInventoryListView();
 
-				ShowMessage("Inventory loaded successfully from '" + uFileName + "'");
+				redtLog->Lines->Add("[" + DateTimeToStr(Now()) + "] Successfully Loaded Inventory from '" + uFileName + "'");
 			}
 			catch (const std::exception &ex) {
-				ShowMessage("Error loading file: " + String(ex.what()));
+				redtLog->Lines->Add("[" + DateTimeToStr(Now()) + "] Error Loading File: " + String(ex.what()));
 			}
-			delete adapter; // Clean up adapter
+			delete adapter;
 		} else {
-			ShowMessage("Error: Unsupported file type selected.");
+			redtLog->Lines->Add("[" + DateTimeToStr(Now()) + "] ERROR: Unsupported File Type Selected");
 		}
 	}
 }
@@ -385,7 +383,7 @@ void TfrmMain::RefreshInventoryListView()
 	// 2. Get iterator (returns InventoryIterator*)
 	InventoryIterator* itRaw = objInventory->createIterator();
     if (!itRaw) {
-		ShowMessage("Error: Could not get inventory iterator.");
+		redtLog->Lines->Add("[" + DateTimeToStr(Now()) + "] ERROR: Could not get Inventory Iterator");
 		return;
 	}
     // Use unique_ptr for automatic cleanup
@@ -415,3 +413,77 @@ void TfrmMain::RefreshInventoryListView()
 	}
      // Iterator unique_ptr automatically cleans up here
 }
+void __fastcall TfrmMain::btnInventoryUpClick(TObject *Sender)
+{
+    // Scroll Up
+	if (lvInventory->ItemIndex > -1) {
+		lvInventory->ItemIndex = lvInventory->ItemIndex - 1;
+	} else {
+		lvInventory->ItemIndex = 0;
+        Beep();
+    }
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TfrmMain::btnInventoryDownClick(TObject *Sender)
+{
+    // Scroll Down
+	if (lvInventory->ItemIndex < lvInventory->Items->Count - 1) {
+		lvInventory->ItemIndex = lvInventory->ItemIndex + 1;
+	} else {
+		lvInventory->ItemIndex = lvInventory->Items->Count - 1;
+        Beep();
+    }
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TfrmMain::btnSaveInventoryClick(TObject *Sender)
+{
+    // 1. Show the Save Dialog (Ensure name is dlgSaveSaveInventory)
+	if (dlgSaveSaveInventory->Execute())
+	{
+		// 2. Get the chosen file path and determine extension
+		UnicodeString uFileName = dlgSaveSaveInventory->FileName;
+		// Ensure the extension matches the selected filter type
+		// C++ Builder usually handles this if DefaultExt is set, but we can double-check.
+		UnicodeString uExt = ExtractFileExt(uFileName);
+        // If DefaultExt worked, uExt should match filter. If not, maybe force it based on FilterIndex?
+        // Example: if (dlgSaveSaveInventory->FilterIndex == 1) uExt = ".csv";
+        //          else if (dlgSaveSaveInventory->FilterIndex == 2) uExt = ".txt";
+        //          uFileName = ChangeFileExt(uFileName, uExt); // Force extension
+
+		std::string filePath = AnsiString(uFileName).c_str();
+
+		// 3. Create the correct Adapter based on the file extension
+		FileAdapter* adapter = nullptr;
+		if (uExt.LowerCase() == ".csv") {
+			adapter = new CSVAdapter(); //
+		} else if (uExt.LowerCase() == ".txt") {
+			adapter = new TXTAdapter(); //
+		}
+
+		// 4. Save the inventory using the adapter
+		if (adapter != nullptr) {
+			try {
+				// Call backend Inventory::saveToFile (adapter first, then path)
+                // Assuming saveToFile exists and takes adapter, filePath
+                // Your FileAdapter interface confirms saveInventory(filePath, inventory)
+                // but adapters might call a different internal method.
+                // Adapters call Inventory::createIterator internally
+                // and then call the ReaderWriter.
+                // The adapter's saveInventory is the correct call from here.
+				adapter->saveInventory(filePath, objInventory.get()); //
+
+				ShowMessage("Inventory saved successfully to " + uFileName);
+			}
+			catch (const std::exception &ex) {
+				ShowMessage("Error saving file: " + String(ex.what()));
+			}
+			delete adapter; // Clean up adapter
+		} else {
+			ShowMessage("Error: Could not determine file type to save.");
+		}
+	}
+}
+//---------------------------------------------------------------------------
+

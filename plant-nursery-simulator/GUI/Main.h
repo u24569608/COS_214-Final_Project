@@ -118,6 +118,9 @@ __published:	// IDE-managed Components
 	void __fastcall btnReverseClick(TObject *Sender);
 	void __fastcall tvGreenhouseChange(TObject *Sender, TTreeNode *Node);
 	void __fastcall btnLoadInventoryClick(TObject *Sender);
+	void __fastcall btnInventoryUpClick(TObject *Sender);
+	void __fastcall btnInventoryDownClick(TObject *Sender);
+	void __fastcall btnSaveInventoryClick(TObject *Sender);
 
 private:	// User declarations
 	// --- Mediator Pattern ---
@@ -136,12 +139,13 @@ private:	// User declarations
 	std::unique_ptr<GreenhouseBed> objGreenhouse; // The (Composite) root
 	void PopulateGreenhouseTree(TTreeNode* parentNode, GreenhouseComponent* component);
 
-	// void __fastcall btnLoadInventoryClick(TObject *Sender);
 
 	std::unique_ptr<Inventory> objInventory;
-    void RefreshInventoryListView();
+	void RefreshInventoryListView();
+
 public:		// User declarations
 	__fastcall TfrmMain(TComponent* Owner);
+
 };
 //---------------------------------------------------------------------------
 extern PACKAGE TfrmMain *frmMain;
