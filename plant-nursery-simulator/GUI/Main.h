@@ -29,6 +29,16 @@
 #include "../include/Colleague.h"
 #include "../include/Staff.h"
 #include "../include/Customer.h"
+
+
+// --- COMPOSITE & PROTOTYPE & ITERATOR ---
+#include "../include/PlantPrototypeRegistry.h"
+#include "../include/Plant.h"
+#include "../include/GreenhouseBed.h"
+#include "../include/PlantInstance.h"
+#include "../include/GreenhouseComponent.h"
+#include "../include/GreenhouseIterator.h"
+#include "../include/ConcreteGreenhouseIterator.h"
 //---------------------------------------------------------------------------
 class TfrmMain : public TForm
 {
@@ -92,6 +102,7 @@ __published:	// IDE-managed Components
 	void __fastcall btnReverseClick(TObject *Sender);
 
 private:	// User declarations
+	// --- Mediator Pattern ---
 	// Mediator Object
 	std::unique_ptr<NurseryMediator> objMediator;
 
@@ -100,6 +111,13 @@ private:	// User declarations
 
 	// A helper function to fill in the combo boxes
 	void PopulateColleagueComboBoxes();
+
+
+	// --- Composite Pattern ---
+	std::unique_ptr<PlantPrototypeRegistry> objPrototypeRegistry;
+	std::unique_ptr<GreenhouseBed> objGreenhouse; // The (Composite) root
+	void PopulateGreenhouseTree(TTreeNode* parentNode, GreenhouseComponent* component);
+
 public:		// User declarations
 	__fastcall TfrmMain(TComponent* Owner);
 };

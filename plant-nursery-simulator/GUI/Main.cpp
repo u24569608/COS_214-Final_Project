@@ -13,6 +13,31 @@
 #pragma link "Sales_Frame"
 #pragma resource "*.dfm"
 TfrmMain *frmMain;
+
+// --- Helper class to make the abstract Plant concrete ---
+class ConcretePlant : public Plant {
+	public:
+		// Use Plant's setters since constructor might be protected or absent
+		ConcretePlant(const std::string& nameValue, const std::string& typeValue) {
+			setName(nameValue); // Use Plant's public setName
+			setType(typeValue); // Use Plant's public setType
+		}
+
+		// Copy constructor needed for cloning
+		ConcretePlant(const ConcretePlant& other) : Plant() {
+			setName(other.getName());
+			setType(other.getType());
+			// Note: Does not copy default strategies from base Plant. Add if needed.
+		}
+
+
+		// Implement the pure virtual clone() method
+		Plant* clone() const override {
+			// Create a copy using the copy constructor
+			return new ConcretePlant(*this); // Return raw pointer as per base class
+		}
+};
+// --------------------------------------------------------------------------
 //---------------------------------------------------------------------------
 __fastcall TfrmMain::TfrmMain(TComponent* Owner)
 	: TForm(Owner)
@@ -35,7 +60,63 @@ __fastcall TfrmMain::TfrmMain(TComponent* Owner)
 
 	// 4. Fill GUI combo boxes with the IDs
 	PopulateColleagueComboBoxes();
-    // --- END Mediator Pattern Setup ---
+	// --- END Mediator Pattern Setup ---
+
+
+
+
+	// --- Core System Setup (Composite & Prototype) ---
+
+	// 1. Create the Plant Prototype Registry
+	objPrototypeRegistry = std::make_unique<PlantPrototypeRegistry>();
+
+	// 2. Add concrete prototypes to the registry using ConcretePlant
+	objPrototypeRegistry->addPrototype("Rose", std::make_unique<ConcretePlant>("Rose", "Flower"));
+	objPrototypeRegistry->addPrototype("Fern", std::make_unique<ConcretePlant>("Fern", "Foliage"));
+	objPrototypeRegistry->addPrototype("Spruce", std::make_unique<ConcretePlant>("Spruce", "Conifer"));
+
+	// 3. Create the main Greenhouse root
+	objGreenhouse = std::make_unique<GreenhouseBed>("Main Greenhouse");
+
+	// 4. Create a bed (using raw pointer for add() method)
+	//    ASSUMPTION: GreenhouseBed::add TAKES OWNERSHIP of the raw pointer.
+	//    If not, this will leak memory. You might need unique_ptr management.
+	GreenhouseBed* roseBedPtr = new GreenhouseBed("Rose Bed");
+
+	// 5. Create plant instances BY CLONING from the registry
+	Plant* roseClone1 = objPrototypeRegistry->createPlant("Rose", ""); // Returns RAW pointer
+	if (roseClone1) {
+		// PlantInstance constructor takes RAW Plant*
+		// GreenhouseBed::add takes RAW GreenhouseComponent*
+		roseBedPtr->add(new PlantInstance(roseClone1, "Rose 1")); // ASSUMPTION: add() takes ownership
+        // If PlantInstance does NOT copy prototype info AND Bed doesn't own prototype, delete needed.
+        // Assuming PlantInstance copies or Bed add owns prototype:
+         delete roseClone1; // Delete the clone AFTER instance uses it
+	}
+
+    Plant* roseClone2 = objPrototypeRegistry->createPlant("Rose", "");
+    if (roseClone2) {
+        roseBedPtr->add(new PlantInstance(roseClone2, "Rose 2"));
+        delete roseClone2; // Delete the clone AFTER instance uses it
+    }
+
+	// 6. Add the bed (with plants) to the main greenhouse
+	//    ASSUMPTION: add() takes ownership of roseBedPtr
+	objGreenhouse->add(roseBedPtr);
+
+    // Add another empty bed
+    objGreenhouse->add(new GreenhouseBed("Empty Bed")); // Assumes add() takes ownership
+
+
+	// 7. === Populate the TreeView ===
+	// Make sure tvGreenhouse is the correct name of your TTreeView component
+	tvGreenhouse->Items->Clear();
+	PopulateGreenhouseTree(nullptr, objGreenhouse.get()); // Start recursion
+	tvGreenhouse->FullExpand(); // Optional: expand all nodes
+
+	// 8. === Populate the Prototype ComboBox ===
+	//    (We'll add this later when implementing the Clone button)
+	// PopulatePrototypeComboBox();
 }
 //---------------------------------------------------------------------------
 
@@ -142,3 +223,45 @@ void __fastcall TfrmMain::btnReverseClick(TObject *Sender)
 }
 //---------------------------------------------------------------------------
 
+void TfrmMain::PopulateGreenhouseTree(TTreeNode* parentNode, GreenhouseComponent* component)
+{
+	if (component == nullptr) {
+		return;
+	}
+
+	// 1. Get the name from the component
+	std::string name = component->getName();
+
+	// 2. Create a new TTreeNode
+	TTreeNode* node;
+	if (parentNode == nullptr) { // Root node
+		node = tvGreenhouse->Items->Add(nullptr, name.c_str());
+	} else { // Child node
+		node = tvGreenhouse->Items->AddChild(parentNode, name.c_str());
+	}
+
+	// 3. Store the C++ object pointer in the node's Data property
+	node->Data = component;
+
+	// 4. Check if the component is a GreenhouseBed (Composite)
+	GreenhouseBed* bed = dynamic_cast<GreenhouseBed*>(component);
+	if (bed != nullptr)
+	{
+		// 5. It's a bed, so get its iterator
+		std::unique_ptr<GreenhouseIterator> it = bed->createIterator();
+
+		// 6. Loop using the iterator - CORRECTED LOOP
+		if (it) {
+			// Start at the first item
+			GreenhouseComponent* child = it->first();
+			// Loop while hasNext() is true
+			while (child != nullptr) {
+				// Recursively call this function for the child
+				PopulateGreenhouseTree(node, child);
+				// Advance to the next item
+				child = it->next();
+			}
+		}
+	}
+	// If it's not a bed, it's a PlantInstance (Leaf), so recursion stops here.
+}
