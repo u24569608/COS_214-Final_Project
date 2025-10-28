@@ -114,6 +114,31 @@ void demoComposite() {
     std::cout << "  (SubBed plants managed recursively by the composite.)\n";
 }
 
+// STRATEGY PATTERN
+void demoStrategy() {
+    std::cout << "\n===== STRATEGY PATTERN DEMO =====\n";
+
+    Plant* plantPrototype = nullptr; // We assume Plant is abstract, so we simulate a prototype name
+    PlantInstance rose(plantPrototype, "Rose");
+
+    FrequentWatering waterStrat;
+    LiquidFertilizer fertStrat;
+
+    rose.setWaterStrategy(&waterStrat);
+    rose.setFertilizeStrategy(&fertStrat);
+
+    std::cout << "Before care -> Health: " << rose.getHealth()
+              << ", Water: " << rose.getWaterLevel()
+              << ", Nutrients: " << rose.getNutrientLevel() << std::endl;
+
+    rose.performWater();
+    rose.performFertilize();
+
+    std::cout << "After care -> Health: " << rose.getHealth()
+              << ", Water: " << rose.getWaterLevel()
+              << ", Nutrients: " << rose.getNutrientLevel() << std::endl;
+}
+
 
 // MAIN DEMO DRIVER
 int main() {
@@ -122,6 +147,7 @@ int main() {
     demoState();
     demoCommand();
     demoComposite();
+    demoStrategy();
 
     std::cout << "\n========== DEMO COMPLETE ==========\n";
     return 0;
