@@ -96,8 +96,6 @@ __published:	// IDE-managed Components
 	TTabSheet *tsStaffTasks;
 	TButton *btnLoadInventory;
 	TButton *btnSaveInventory;
-	TOpenDialog *dlgOpenLoadInventory;
-	TSaveDialog *dlgSaveSaveInventory;
 	TButton *btnClonePlant;
 	TComboBox *cmbPrototypes;
 	TLabel *lblSelectPlantCloneHeading;
@@ -111,6 +109,8 @@ __published:	// IDE-managed Components
 	TLabel *lblSwitchHeading;
 	TLabel *lblClearMessagesHeading;
 	TButton *btnSimulate;
+	TFileOpenDialog *dlgOpenLoadInventory;
+	TFileSaveDialog *dlgSaveSaveInventory;
 	void __fastcall edtMessageBodyChange(TObject *Sender);
 	void __fastcall FormCreate(TObject *Sender);
 	void __fastcall btnSendClick(TObject *Sender);

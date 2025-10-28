@@ -266,7 +266,6 @@ object frmMain: TfrmMain
         ScrollBars = ssVertical
         TabOrder = 0
         StyleElements = [seBorder]
-        ExplicitWidth = 835
       end
     end
   end
@@ -294,7 +293,6 @@ object frmMain: TfrmMain
         Indent = 19
         TabOrder = 0
         OnChange = tvGreenhouseChange
-        ExplicitHeight = 245
       end
       object scrlbxGreenhouseInformation: TScrollBox
         Left = 177
@@ -311,7 +309,7 @@ object frmMain: TfrmMain
         inline frmGreenhouseInformation1: TfrmGreenhouseInformation
           Left = 0
           Top = 0
-          Width = 634
+          Width = 639
           Height = 496
           Align = alTop
           Color = clWhite
@@ -324,7 +322,7 @@ object frmMain: TfrmMain
           ParentColor = False
           ParentFont = False
           TabOrder = 0
-          ExplicitWidth = 628
+          ExplicitWidth = 634
           inherited grpAction: TGroupBox
             inherited btnFertilise: TBitBtn
               Images = nil
@@ -361,10 +359,25 @@ object frmMain: TfrmMain
             Width = 792
             Height = 226
             Align = alClient
-            Columns = <>
+            Columns = <
+              item
+                Caption = 'Name'
+                MinWidth = 100
+                Width = 150
+              end
+              item
+                Caption = 'Price'
+                MinWidth = 100
+                Width = 150
+              end
+              item
+                Caption = 'Availability'
+                MinWidth = 100
+                Width = 150
+              end>
             ReadOnly = True
             TabOrder = 0
-            ViewStyle = vsList
+            ViewStyle = vsReport
           end
           object pnlInventoryMovement: TPanel
             Left = 792
@@ -415,7 +428,7 @@ object frmMain: TfrmMain
             inline frmSales1: TfrmSales
               Left = 0
               Top = 0
-              Width = 803
+              Width = 808
               Height = 761
               Align = alTop
               Color = clWhite
@@ -428,24 +441,29 @@ object frmMain: TfrmMain
               ParentColor = False
               ParentFont = False
               TabOrder = 0
-              ExplicitWidth = 797
+              ExplicitWidth = 803
               inherited pnlAddToOrder: TPanel
+                Width = 619
+                ExplicitWidth = 619
                 inherited btnAddToOrder: TBitBtn
+                  Left = 453
                   Images = nil
+                  ExplicitLeft = 453
                 end
               end
-              inherited lbledtCustomerName: TLabeledEdit
-                EditLabel.ExplicitLeft = 0
-                EditLabel.ExplicitTop = -24
-                EditLabel.ExplicitWidth = 149
-              end
               inherited pnlProcessPayment: TPanel
+                Width = 619
+                ExplicitWidth = 619
                 inherited btnProcessPayment: TBitBtn
+                  Left = 453
                   Images = nil
+                  ExplicitLeft = 453
                 end
               end
               inherited btnRefund: TBitBtn
+                Left = 464
                 Images = nil
+                ExplicitLeft = 464
               end
             end
           end
@@ -465,8 +483,6 @@ object frmMain: TfrmMain
         Align = alClient
         Images = vrtlmglstMain
         TabOrder = 0
-        ExplicitWidth = 835
-        ExplicitHeight = 245
         object tsInventoryManagement: TTabSheet
           Caption = 'Inventory Management   '
           ImageIndex = 5
@@ -482,8 +498,6 @@ object frmMain: TfrmMain
             ParentBackground = False
             TabOrder = 0
             StyleElements = []
-            ExplicitWidth = 827
-            ExplicitHeight = 209
             object btnSaveInventory: TButton
               Left = 25
               Top = 64
@@ -524,8 +538,6 @@ object frmMain: TfrmMain
             ParentBackground = False
             TabOrder = 0
             StyleElements = []
-            ExplicitWidth = 827
-            ExplicitHeight = 209
             object lblSelectPlantCloneHeading: TLabel
               Left = 25
               Top = 16
@@ -591,8 +603,6 @@ object frmMain: TfrmMain
             Anchors = [akLeft, akTop, akRight, akBottom]
             Columns = <>
             TabOrder = 0
-            ExplicitWidth = 827
-            ExplicitHeight = 161
           end
           object btnProcessNextTask: TBitBtn
             Left = 632
@@ -605,7 +615,6 @@ object frmMain: TfrmMain
             ImageName = 'Next'
             Images = vrtlmglstMain
             TabOrder = 1
-            ExplicitLeft = 626
           end
         end
       end
@@ -5106,13 +5115,34 @@ object frmMain: TfrmMain
     Left = 760
     Top = 32
   end
-  object dlgOpenLoadInventory: TOpenDialog
-    Title = 'Select an Inventory File'
-    Left = 640
+  object dlgOpenLoadInventory: TFileOpenDialog
+    FavoriteLinks = <>
+    FileTypes = <
+      item
+        DisplayName = 'Inventory File'
+        FileMask = '*.txt; *.csv'
+      end>
+    OkButtonLabel = 'Load'
+    Options = []
+    Title = 'Load Inventory File'
+    Left = 528
     Top = 16
   end
-  object dlgSaveSaveInventory: TSaveDialog
-    Left = 600
-    Top = 16
+  object dlgSaveSaveInventory: TFileSaveDialog
+    FavoriteLinks = <>
+    FileTypes = <
+      item
+        DisplayName = 'Inventory Text File'
+        FileMask = '*.txt'
+      end
+      item
+        DisplayName = 'Inventory CSV File'
+        FileMask = '*.csv'
+      end>
+    OkButtonLabel = 'Save'
+    Options = []
+    Title = 'Save Inventory to File'
+    Left = 624
+    Top = 24
   end
 end

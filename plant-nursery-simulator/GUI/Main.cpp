@@ -364,7 +364,7 @@ void __fastcall TfrmMain::btnLoadInventoryClick(TObject *Sender)
 				// 5. Refresh the ListView display
 				RefreshInventoryListView(); // Call helper function
 
-				ShowMessage("Inventory loaded successfully from " + uFileName);
+				ShowMessage("Inventory loaded successfully from '" + uFileName + "'");
 			}
 			catch (const std::exception &ex) {
 				ShowMessage("Error loading file: " + String(ex.what()));
