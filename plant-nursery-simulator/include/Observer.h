@@ -18,6 +18,11 @@ enum class ObserverEventType {
     Generic              ///< Fallback event type for miscellaneous notices.
 };
 
+enum class AvailabilityStatus {
+    Unavailable,
+    Available
+};
+
 /**
  * @brief Describes a notification emitted by a Subject.
  */
@@ -25,7 +30,7 @@ struct ObserverEvent {
     ObserverEventType type; ///< Classifies the event for observers.
     Subject* source;        ///< Subject instance responsible for the notification.
     std::string message;    ///< Human-readable context about the event.
-    std::optional<bool> availability; ///< Availability flag when provided.
+    std::optional<AvailabilityStatus> availability; ///< Availability flag when provided.
 };
 
 /**
