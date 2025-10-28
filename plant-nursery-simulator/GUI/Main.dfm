@@ -41,7 +41,7 @@ object frmMain: TfrmMain
     Top = 347
     Width = 849
     Height = 261
-    ActivePage = tsLog
+    ActivePage = tsMessages
     Align = alBottom
     Images = vrtlmglstMain
     TabOrder = 1
@@ -274,7 +274,7 @@ object frmMain: TfrmMain
     Top = 49
     Width = 849
     Height = 298
-    ActivePage = tsSystemAdmin
+    ActivePage = tsGreenhouseManagement
     Align = alClient
     Images = vrtlmglstMain
     TabOrder = 2
