@@ -57,6 +57,62 @@ void demoCommand() {
               << ", Nutrients: " << plant.getNutrientLevel() << std::endl;
 }
 
+// COMPOSITE + ITERATOR + CONTROLLER
+void demoComposite() {
+    std::cout << "\n===== COMPOSITE, ITERATOR & CONTROLLER PATTERN DEMO =====\n";
+
+    // Create a root greenhouse bed (composite)
+    auto rootBed = std::make_unique<GreenhouseBed>("MainBed");
+
+    // Add some plants into the main bed
+    auto rose = new PlantInstance(nullptr, "Rose");
+    auto tulip = new PlantInstance(nullptr, "Tulip");
+    auto daisy = new PlantInstance(nullptr, "Daisy");
+
+    rootBed->add(rose);
+    rootBed->add(tulip);
+    rootBed->add(daisy);
+
+    // Add a sub-bed (nested composite)
+    auto subBed = std::make_unique<GreenhouseBed>("SubBed");
+    subBed->add(new PlantInstance(nullptr, "Lavender"));
+    subBed->add(new PlantInstance(nullptr, "Mint"));
+    rootBed->add(subBed.release()); // transfer ownership to main bed
+
+    // Show structure
+    std::cout << "Created greenhouse structure:\n";
+    std::cout << "  MainBed\n";
+    std::cout << "  ├── Rose\n";
+    std::cout << "  ├── Tulip\n";
+    std::cout << "  ├── Daisy\n";
+    std::cout << "  └── SubBed\n";
+    std::cout << "       ├── Lavender\n";
+    std::cout << "       └── Mint\n\n";
+
+    // Create a controller to manage the composite
+    GreenhouseController controller(rootBed.get());
+
+    std::cout << "Applying a growth tick across the entire greenhouse...\n";
+    controller.runGrowthTick();
+
+    // Manually perform care to show recursive traversal
+    std::cout << "\nTriggering performCare() on MainBed...\n";
+    rootBed->performCare();
+
+    // Show results after care
+    std::cout << "\nPlant conditions after automatic care:\n";
+    std::cout << "  Rose   -> Health: " << rose->getHealth()
+              << ", Water: " << rose->getWaterLevel()
+              << ", Nutrients: " << rose->getNutrientLevel() << '\n';
+    std::cout << "  Tulip  -> Health: " << tulip->getHealth()
+              << ", Water: " << tulip->getWaterLevel()
+              << ", Nutrients: " << tulip->getNutrientLevel() << '\n';
+    std::cout << "  Daisy  -> Health: " << daisy->getHealth()
+              << ", Water: " << daisy->getWaterLevel()
+              << ", Nutrients: " << daisy->getNutrientLevel() << '\n';
+
+    std::cout << "  (SubBed plants managed recursively by the composite.)\n";
+}
 
 
 // MAIN DEMO DRIVER
@@ -65,6 +121,7 @@ int main() {
 
     demoState();
     demoCommand();
+    demoComposite();
 
     std::cout << "\n========== DEMO COMPLETE ==========\n";
     return 0;
