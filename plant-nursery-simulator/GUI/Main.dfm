@@ -274,7 +274,7 @@ object frmMain: TfrmMain
     Top = 49
     Width = 849
     Height = 298
-    ActivePage = tsSystemAdmin
+    ActivePage = tsGreenhouseManagement
     Align = alClient
     Images = vrtlmglstMain
     TabOrder = 2
@@ -302,7 +302,7 @@ object frmMain: TfrmMain
           Left = 0
           Top = 0
           Width = 635
-          Height = 496
+          Height = 467
           Align = alTop
           Color = clWhite
           Font.Charset = DEFAULT_CHARSET
@@ -477,7 +477,7 @@ object frmMain: TfrmMain
         Top = 0
         Width = 841
         Height = 262
-        ActivePage = tsPlantPrototypes
+        ActivePage = tsInventoryManagement
         Align = alClient
         Images = vrtlmglstMain
         TabOrder = 0
@@ -562,6 +562,7 @@ object frmMain: TfrmMain
               ImageName = 'Add'
               Images = vrtlmglstMain
               TabOrder = 2
+              OnClick = btnAddItemClick
             end
           end
         end

@@ -131,6 +131,7 @@ __published:	// IDE-managed Components
 	void __fastcall btnSaveInventoryClick(TObject *Sender);
 	void __fastcall FormActivate(TObject *Sender);
 	void __fastcall btnAddPlantToRegistryClick(TObject *Sender);
+	void __fastcall btnAddItemClick(TObject *Sender);
 
 private:	// User declarations
 	// --- Mediator Pattern ---

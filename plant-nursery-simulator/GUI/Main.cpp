@@ -8,6 +8,7 @@
 #include "Sales_Frame.h"
 #include <System.SysUtils.hpp>
 #include "Add_Plant.h"
+#include "Add_Item.h"
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 #pragma link "Greenhouse_Information_Frame"
@@ -557,6 +558,13 @@ void TfrmMain::PopulateCustomerComboBox()
 void __fastcall TfrmMain::btnAddPlantToRegistryClick(TObject *Sender)
 {
     frmAddPlant->Show();
+}
+//---------------------------------------------------------------------------
+
+
+void __fastcall TfrmMain::btnAddItemClick(TObject *Sender)
+{
+    frmAddItem->Show();
 }
 //---------------------------------------------------------------------------
 
