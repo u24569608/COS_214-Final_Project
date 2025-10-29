@@ -2,7 +2,7 @@ object frmSales: TfrmSales
   Left = 0
   Top = 0
   Width = 640
-  Height = 711
+  Height = 761
   Color = clWhite
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -13,6 +13,9 @@ object frmSales: TfrmSales
   ParentColor = False
   ParentFont = False
   TabOrder = 0
+  DesignSize = (
+    640
+    761)
   object lblBuildOrderHeading: TLabel
     Left = 11
     Top = 8
@@ -27,26 +30,12 @@ object frmSales: TfrmSales
     ParentFont = False
     StyleElements = [seClient, seBorder]
   end
-  object lblPlantSelectionHeading: TLabel
+  object lblItemSelectionHeading: TLabel
     Left = 11
     Top = 57
-    Width = 80
+    Width = 76
     Height = 21
-    Caption = 'Select Plant'
-    Font.Charset = DEFAULT_CHARSET
-    Font.Color = 9203809
-    Font.Height = -16
-    Font.Name = 'Segoe UI'
-    Font.Style = []
-    ParentFont = False
-    StyleElements = [seClient, seBorder]
-  end
-  object lblPotSizeSelectionHeading: TLabel
-    Left = 235
-    Top = 57
-    Width = 99
-    Height = 21
-    Caption = 'Select Pot Size'
+    Caption = 'Select Item'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = 9203809
     Font.Height = -16
@@ -83,50 +72,31 @@ object frmSales: TfrmSales
     ParentFont = False
     StyleElements = [seClient, seBorder]
   end
-  object cmbPlantSelection: TComboBox
+  object cmbItemSelection: TComboBox
     Left = 11
     Top = 84
     Width = 195
     Height = 29
     TabOrder = 0
-    Text = 'Plant'
-    OnChange = cmbPlantSelectionChange
-  end
-  object cmbPotSizeSelection: TComboBox
-    Left = 235
-    Top = 84
-    Width = 195
-    Height = 29
-    Enabled = False
-    TabOrder = 1
-    Text = 'Pot Size'
-    OnChange = cmbPotSizeSelectionChange
-    Items.Strings = (
-      'Small'
-      'Medium'
-      'Large')
-  end
-  object chkGiftWrapping: TCheckBox
-    Left = 459
-    Top = 86
-    Width = 134
-    Height = 25
-    Caption = 'Gift Wrapping'
-    Enabled = False
-    TabOrder = 2
+    Text = 'Item'
   end
   object pnlAddToOrder: TPanel
     Left = 11
     Top = 128
-    Width = 606
+    Width = 614
     Height = 49
+    Anchors = [akLeft, akTop, akRight]
     ParentBackground = False
-    TabOrder = 3
+    TabOrder = 1
+    DesignSize = (
+      614
+      49)
     object btnAddToOrder: TBitBtn
-      Left = 440
+      Left = 448
       Top = 8
       Width = 156
       Height = 33
+      Anchors = [akTop, akRight]
       Caption = 'Add to Order'
       Enabled = False
       ImageIndex = 12
@@ -134,6 +104,7 @@ object frmSales: TfrmSales
       Images = frmMain.vrtlmglstMain
       TabOrder = 0
       OnClick = btnAddToOrderClick
+      ExplicitLeft = 440
     end
   end
   object redtOrderDetails: TRichEdit
@@ -151,7 +122,7 @@ object frmSales: TfrmSales
     PlainText = True
     ReadOnly = True
     ScrollBars = ssVertical
-    TabOrder = 4
+    TabOrder = 2
     StyleElements = [seClient, seBorder]
   end
   object lbledtCustomerName: TLabeledEdit
@@ -163,7 +134,7 @@ object frmSales: TfrmSales
     EditLabel.Height = 21
     EditLabel.Caption = 'Customer Name'
     Enabled = False
-    TabOrder = 5
+    TabOrder = 3
     Text = ''
     TextHint = 'Enter your name'
     OnChange = lbledtCustomerNameChange
@@ -171,21 +142,40 @@ object frmSales: TfrmSales
   object pnlProcessPayment: TPanel
     Left = 11
     Top = 608
-    Width = 606
+    Width = 614
     Height = 49
+    Anchors = [akLeft, akTop, akRight]
     ParentBackground = False
-    TabOrder = 6
+    TabOrder = 4
+    DesignSize = (
+      614
+      49)
     object btnProcessPayment: TBitBtn
-      Left = 440
+      Left = 448
       Top = 8
       Width = 156
       Height = 33
+      Anchors = [akTop, akRight]
       Caption = 'Process Payment'
       Enabled = False
       ImageIndex = 13
       ImageName = 'Cash'
       Images = frmMain.vrtlmglstMain
       TabOrder = 0
+      ExplicitLeft = 440
     end
+  end
+  object btnRefund: TBitBtn
+    Left = 459
+    Top = 672
+    Width = 156
+    Height = 33
+    Anchors = [akTop, akRight]
+    Caption = 'Refund Order'
+    Enabled = False
+    ImageIndex = 13
+    ImageName = 'Cash'
+    Images = frmMain.vrtlmglstMain
+    TabOrder = 5
   end
 end

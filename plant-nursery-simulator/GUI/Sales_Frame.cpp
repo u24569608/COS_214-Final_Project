@@ -16,27 +16,6 @@ __fastcall TfrmSales::TfrmSales(TComponent* Owner)
 {
 }
 //---------------------------------------------------------------------------
-void __fastcall TfrmSales::cmbPlantSelectionChange(TObject *Sender)
-{
-	// VALIDATION OF PLANT SELECTION MUST STILL OCCUR
-	if (cmbPlantSelection->Text != "Plant") {
-		cmbPotSizeSelection->Enabled = true;
-	}
-}
-//---------------------------------------------------------------------------
-void __fastcall TfrmSales::cmbPotSizeSelectionChange(TObject *Sender)
-{
-	std::string potSize = AnsiString(cmbPotSizeSelection->Text).c_str();
-	if (potSize == "Small" || potSize == "Medium" || potSize == "Large") {
-		chkGiftWrapping->Enabled = true;
-		btnAddToOrder->Enabled = true;
-	}
-	else {
-        chkGiftWrapping->Enabled = false;
-		btnAddToOrder->Enabled = false;
-    }
-}
-//---------------------------------------------------------------------------
 void __fastcall TfrmSales::btnAddToOrderClick(TObject *Sender)
 {
 	redtOrderDetails->Enabled = true;

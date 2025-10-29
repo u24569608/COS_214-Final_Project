@@ -86,12 +86,15 @@ void StockItem::update(const ObserverEvent& event) {
     switch (event.type) {
     case ObserverEventType::AvailabilityChanged: {
         if (event.availability.has_value()) {
-            setIsAvailible(*event.availability);
+            const bool available = *event.availability == AvailabilityStatus::Available;
+            setIsAvailible(available);
         }
         if (!event.message.empty()) {
             displayStatus = event.message;
         } else if (event.availability.has_value()) {
-            displayStatus = *event.availability ? "Available" : "Unavailable";
+            displayStatus = (*event.availability == AvailabilityStatus::Available)
+                                ? "Available"
+                                : "Unavailable";
         }
         break;
     }

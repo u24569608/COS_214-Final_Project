@@ -71,7 +71,8 @@ void Staff::update(const ObserverEvent& event) {
     if (event.type == ObserverEventType::AvailabilityChanged) {
         std::string message = event.message;
         if (message.empty() && event.availability.has_value()) {
-            message = *event.availability ? "Plant ready for sale" : "Plant unavailable for sale";
+            const bool available = *event.availability == AvailabilityStatus::Available;
+            message = available ? "Plant ready for sale" : "Plant unavailable for sale";
         }
         careReminders.push_back({StaffReminderType::Availability,
                                  buildReminderMessage({ObserverEventType::CareRequired,

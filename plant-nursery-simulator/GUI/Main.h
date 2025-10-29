@@ -21,6 +21,37 @@
 #include "Greenhouse_Information_Frame.h"
 #include "Sales_Frame.h"
 #include <Vcl.Dialogs.hpp>
+#include <vector>
+#include <memory>
+
+// MEDIATOR PATTERN
+#include "../include/NurseryMediator.h"
+#include "../include/Colleague.h"
+#include "../include/Staff.h"
+#include "../include/Customer.h"
+
+
+// --- COMPOSITE & PROTOTYPE & ITERATOR ---
+#include "../include/PlantPrototypeRegistry.h"
+#include "../include/Plant.h"
+#include "../include/GreenhouseBed.h"
+#include "../include/PlantInstance.h"
+#include "../include/GreenhouseComponent.h"
+#include "../include/GreenhouseIterator.h"
+#include "../include/ConcreteGreenhouseIterator.h"
+
+
+// --- ADAPTER PATTERN ---
+#include "../include/Inventory.h"
+#include "../include/FileAdapter.h"
+#include "../include/CSVAdapter.h"
+#include "../include/TXTAdapter.h"
+
+// --- ITERATOR PATTERN (for displaying inventory) ---
+#include "../include/StockItem.h"
+#include "../include/InventoryIterator.h"
+#include "../include/InventoryCollection.h"
+#include "../include/ConcreteInventoryIterator.h"
 //---------------------------------------------------------------------------
 class TfrmMain : public TForm
 {
@@ -33,8 +64,8 @@ __published:	// IDE-managed Components
 	TTabSheet *tsMessages;
 	TRichEdit *redtLog;
 	TPanel *pnlMessaging;
-	TComboBox *cbbSender;
-	TComboBox *cbbReceiver;
+	TComboBox *cmbSender;
+	TComboBox *cmbReceiver;
 	TRichEdit *redtMessages;
 	TEdit *edtMessageBody;
 	TLabel *lblMessageBodyHeading;
@@ -65,8 +96,6 @@ __published:	// IDE-managed Components
 	TTabSheet *tsStaffTasks;
 	TButton *btnLoadInventory;
 	TButton *btnSaveInventory;
-	TOpenDialog *dlgOpenLoadInventory;
-	TSaveDialog *dlgSaveSaveInventory;
 	TButton *btnClonePlant;
 	TComboBox *cmbPrototypes;
 	TLabel *lblSelectPlantCloneHeading;
@@ -75,14 +104,48 @@ __published:	// IDE-managed Components
 	TBitBtn *btnProcessNextTask;
 	TPanel *pnlPlantPrototype;
 	TPanel *pnlInventoryManagement;
-	TTimer *tmrDateTime;
+	TBitBtn *btnClearMessages;
+	TBitBtn *btnReverse;
+	TLabel *lblSwitchHeading;
+	TLabel *lblClearMessagesHeading;
+	TButton *btnSimulate;
+	TFileOpenDialog *dlgOpenLoadInventory;
+	TFileSaveDialog *dlgSaveSaveInventory;
 	void __fastcall edtMessageBodyChange(TObject *Sender);
 	void __fastcall FormCreate(TObject *Sender);
-	void __fastcall tmrDateTimeTimer(TObject *Sender);
+	void __fastcall btnSendClick(TObject *Sender);
+	void __fastcall btnClearMessagesClick(TObject *Sender);
+	void __fastcall btnReverseClick(TObject *Sender);
+	void __fastcall tvGreenhouseChange(TObject *Sender, TTreeNode *Node);
+	void __fastcall btnLoadInventoryClick(TObject *Sender);
+	void __fastcall btnInventoryUpClick(TObject *Sender);
+	void __fastcall btnInventoryDownClick(TObject *Sender);
+	void __fastcall btnSaveInventoryClick(TObject *Sender);
 
 private:	// User declarations
+	// --- Mediator Pattern ---
+	// Mediator Object
+	std::unique_ptr<NurseryMediator> objMediator;
+
+	// A list to hold all colleagues (Staff and Customers)
+	std::vector<std::unique_ptr<Colleague>> vtrColleagues;
+
+	// A helper function to fill in the combo boxes
+	void PopulateColleagueComboBoxes();
+
+
+	// --- Composite Pattern ---
+	std::unique_ptr<PlantPrototypeRegistry> objPrototypeRegistry;
+	std::unique_ptr<GreenhouseBed> objGreenhouse; // The (Composite) root
+	void PopulateGreenhouseTree(TTreeNode* parentNode, GreenhouseComponent* component);
+
+
+	std::unique_ptr<Inventory> objInventory;
+	void RefreshInventoryListView();
+
 public:		// User declarations
 	__fastcall TfrmMain(TComponent* Owner);
+
 };
 //---------------------------------------------------------------------------
 extern PACKAGE TfrmMain *frmMain;

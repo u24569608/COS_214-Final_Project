@@ -111,11 +111,13 @@ void PlantInstance::setState(std::unique_ptr<PlantState> nextState) {
 
     if (currentName != previousName) {
         if (wasAvailable != isAvailable) {
+            const AvailabilityStatus availabilityStatus =
+                isAvailable ? AvailabilityStatus::Available : AvailabilityStatus::Unavailable;
             ObserverEvent availabilityEvent{
                 ObserverEventType::AvailabilityChanged,
                 this,
                 isAvailable ? "Plant ready for sale" : "Plant unavailable for sale",
-                std::optional<bool>(isAvailable)};
+                std::optional<AvailabilityStatus>{availabilityStatus}};
             notify(availabilityEvent);
         }
 

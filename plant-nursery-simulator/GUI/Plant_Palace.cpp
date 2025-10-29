@@ -6,9 +6,9 @@
 //---------------------------------------------------------------------------
 #include <Vcl.Styles.hpp>
 #include <Vcl.Themes.hpp>
-USEFORM("Main.cpp", frmMain);
-USEFORM("Greenhouse_Information_Frame.cpp", frmGreenhouseInformation); /* TFrame: File Type */
 USEFORM("Sales_Frame.cpp", frmSales); /* TFrame: File Type */
+USEFORM("Greenhouse_Information_Frame.cpp", frmGreenhouseInformation); /* TFrame: File Type */
+USEFORM("Main.cpp", frmMain);
 //---------------------------------------------------------------------------
 int WINAPI _tWinMain(HINSTANCE, HINSTANCE, LPTSTR, int)
 {

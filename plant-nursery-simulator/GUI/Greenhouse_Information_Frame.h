@@ -18,18 +18,26 @@ __published:	// IDE-managed Components
 	TLabeledEdit *lbledtPlantName;
 	TLabeledEdit *lbledtPlantState;
 	TProgressBar *pbGrowth;
-	TLabel *lblGrowthLabel;
+	TLabel *lblGrowthLabelHeading;
 	TRadioGroup *rgWaterStrategy;
 	TRadioGroup *rgFertiliseStrategy;
 	TBitBtn *btnWater;
 	TBitBtn *btnFertilise;
 	TGroupBox *grpAction;
+	TComboBox *cmbStaffMember;
+	TLabel *lblSelectStaffMemberHeading;
+	TLabel *lblWaterLevelHeading;
+	TProgressBar *pbWater;
+	TProgressBar *pbNutrients;
+	TLabel *lblNutrientLevelHeading;
+	TLabeledEdit *lbledtSaleReadiness;
 	void __fastcall rgWaterStrategyClick(TObject *Sender);
 	void __fastcall rgFertiliseStrategyClick(TObject *Sender);
 private:	// User declarations
-	void enableDisableCareButtons();
+
 public:		// User declarations
 	__fastcall TfrmGreenhouseInformation(TComponent* Owner);
+	void enableDisableCareButtons();
 };
 //---------------------------------------------------------------------------
 extern PACKAGE TfrmGreenhouseInformation *frmGreenhouseInformation;
