@@ -29,6 +29,7 @@ __published:	// IDE-managed Components
 	TBitBtn *btnRefund;
 	void __fastcall btnAddToOrderClick(TObject *Sender);
 	void __fastcall lbledtCustomerNameChange(TObject *Sender);
+	void __fastcall cmbItemSelectionChange(TObject *Sender);
 private:	// User declarations
 public:		// User declarations
 	__fastcall TfrmSales(TComponent* Owner);

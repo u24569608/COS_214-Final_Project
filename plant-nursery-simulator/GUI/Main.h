@@ -24,14 +24,11 @@
 #include <vector>
 #include <memory>
 
-// MEDIATOR PATTERN
 #include "../include/NurseryMediator.h"
 #include "../include/Colleague.h"
 #include "../include/Staff.h"
 #include "../include/Customer.h"
 
-
-// --- COMPOSITE & PROTOTYPE & ITERATOR ---
 #include "../include/PlantPrototypeRegistry.h"
 #include "../include/Plant.h"
 #include "../include/GreenhouseBed.h"
@@ -40,18 +37,21 @@
 #include "../include/GreenhouseIterator.h"
 #include "../include/ConcreteGreenhouseIterator.h"
 
-
-// --- ADAPTER PATTERN ---
 #include "../include/Inventory.h"
 #include "../include/FileAdapter.h"
 #include "../include/CSVAdapter.h"
 #include "../include/TXTAdapter.h"
 
-// --- ITERATOR PATTERN (for displaying inventory) ---
 #include "../include/StockItem.h"
 #include "../include/InventoryIterator.h"
 #include "../include/InventoryCollection.h"
 #include "../include/ConcreteInventoryIterator.h"
+
+#include "../include/SalesFacade.h"
+#include "../include/OrderBuilder.h"
+#include "../include/CustomOrderBuilder.h"
+#include "../include/Order.h"
+#include "../include/PaymentProcessor.h"
 //---------------------------------------------------------------------------
 class TfrmMain : public TForm
 {
@@ -140,12 +140,21 @@ private:	// User declarations
 	void PopulateGreenhouseTree(TTreeNode* parentNode, GreenhouseComponent* component);
 
 
-	std::unique_ptr<Inventory> objInventory;
-	void RefreshInventoryListView();
+
+
+
 
 public:		// User declarations
 	__fastcall TfrmMain(TComponent* Owner);
-
+    void PopulateSalesItemComboBox();
+	void UpdateOrderDisplay();
+     // --- Sales/Order Objects ---
+	std::unique_ptr<PaymentProcessor> objPaymentProcessor;
+	std::unique_ptr<OrderBuilder> objOrderBuilder;
+	std::unique_ptr<SalesFacade> objSalesFacade;
+	std::unique_ptr<Order> currentOrder;
+    std::unique_ptr<Inventory> objInventory;
+	void RefreshInventoryListView();
 };
 //---------------------------------------------------------------------------
 extern PACKAGE TfrmMain *frmMain;

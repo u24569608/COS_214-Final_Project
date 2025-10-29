@@ -111,7 +111,36 @@ __fastcall TfrmMain::TfrmMain(TComponent* Owner)
 
     // Give the Inventory pointers to the other systems it needs
     objInventory->setPlantRegistry(objPrototypeRegistry.get());
+	objInventory->setGreenhouseRoot(objGreenhouse.get());
+
+
+    // --- Sales System Setup ---
+	// Create Payment Processor
+	objPaymentProcessor = std::make_unique<PaymentProcessor>();
+
+	// Create the Order Builder (Concrete Builder)
+	objOrderBuilder = std::make_unique<CustomOrderBuilder>();
+
+    // Create an initial empty order for the builder to manage
+    objOrderBuilder->createNewOrder();
+
+	// Create the Sales Facade, passing pointers to subsystems
+	objSalesFacade = std::make_unique<SalesFacade>(
+		objInventory.get(),
+		objPaymentProcessor.get(),
+		objOrderBuilder.get(),
+		objGreenhouse.get(),
+		objPrototypeRegistry.get()
+	);
+
+    objInventory->setPlantRegistry(objPrototypeRegistry.get());
     objInventory->setGreenhouseRoot(objGreenhouse.get());
+
+
+    // ... (Populate TreeView, etc.) ...
+
+	// Populate the item selection combobox on the Sales Frame
+    PopulateSalesItemComboBox();
 }
 //---------------------------------------------------------------------------
 
@@ -344,6 +373,9 @@ void __fastcall TfrmMain::btnLoadInventoryClick(TObject *Sender)
 				// Refresh the ListView display
 				RefreshInventoryListView();
 
+                // Populate the sales dropdown
+                PopulateSalesItemComboBox();
+
 				redtLog->Lines->Add("[" + DateTimeToStr(Now()) + "] Successfully Loaded Inventory from '" + uFileName + "'");
 			}
 			catch (const std::exception &ex) {
@@ -448,3 +480,55 @@ void __fastcall TfrmMain::btnSaveInventoryClick(TObject *Sender)
 }
 //---------------------------------------------------------------------------
 
+// Populates the item selection dropdown on the Sales Frame
+void TfrmMain::PopulateSalesItemComboBox()
+{
+    // Access the combobox on the Sales Frame instance (frmSales1)
+	frmSales1->cmbItemSelection->Clear();
+
+	// Use Inventory Iterator to get available items
+	InventoryIterator* itRaw = objInventory->createIterator();
+    if (!itRaw) return; // Handle error if iterator fails
+    std::unique_ptr<InventoryIterator> it(itRaw);
+
+	// Loop and add item names to the combobox
+    for (StockItem* item = it->first(); it->hasNext(); item = it->next())
+	{
+        item = it->currentItem(); // Get current item
+        if (item && item->getIsAvailible()) // Only add available items
+        {
+			frmSales1->cmbItemSelection->Items->Add(item->getname().c_str());
+		}
+	}
+
+    frmSales1->cmbItemSelection->ItemIndex = -1;
+	frmSales1->cmbItemSelection->Text = "Select an Item";
+}
+
+// Updates the RichEdit on the Sales Frame to show the current order
+void TfrmMain::UpdateOrderDisplay()
+{
+    // Get the current order from the builder
+    Order* currentOrder = objOrderBuilder->getOrder();
+
+    // Access the RichEdit on the Sales Frame instance (frmSales1)
+	frmSales1->redtOrderDetails->Clear();
+
+    if (currentOrder) {
+		frmSales1->redtOrderDetails->Lines->Add("Current Order:");
+        // Loop through items in the order
+		for (const StockItem& item : currentOrder->getItems()) {
+			UnicodeString line = " - ";
+			line += item.getname().c_str(); // Item Name
+			line += " (";
+			line += FloatToStrF(item.getPrice(), ffCurrency, 8, 2); // Item Price
+			line += ")";
+			frmSales1->redtOrderDetails->Lines->Add(line);
+		}
+		// Display Total
+		frmSales1->redtOrderDetails->Lines->Add("--------------------");
+		frmSales1->redtOrderDetails->Lines->Add("Total: " + FloatToStrF(currentOrder->calculateTotal(), ffCurrency, 8, 2));
+	} else {
+        frmSales1->redtOrderDetails->Lines->Add("(Order is empty)");
+    }
+}

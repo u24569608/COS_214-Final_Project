@@ -79,6 +79,7 @@ object frmSales: TfrmSales
     Height = 29
     TabOrder = 0
     Text = 'Item'
+    OnChange = cmbItemSelectionChange
   end
   object pnlAddToOrder: TPanel
     Left = 11
@@ -104,7 +105,6 @@ object frmSales: TfrmSales
       Images = frmMain.vrtlmglstMain
       TabOrder = 0
       OnClick = btnAddToOrderClick
-      ExplicitLeft = 440
     end
   end
   object redtOrderDetails: TRichEdit
@@ -162,7 +162,6 @@ object frmSales: TfrmSales
       ImageName = 'Cash'
       Images = frmMain.vrtlmglstMain
       TabOrder = 0
-      ExplicitLeft = 440
     end
   end
   object btnRefund: TBitBtn
