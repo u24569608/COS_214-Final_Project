@@ -13,6 +13,7 @@ object frmMain: TfrmMain
   Menu = mmMain
   Position = poDesigned
   WindowState = wsMaximized
+  OnActivate = FormActivate
   OnCreate = FormCreate
   TextHeight = 21
   object pnlTop: TPanel
@@ -41,7 +42,7 @@ object frmMain: TfrmMain
     Top = 347
     Width = 849
     Height = 261
-    ActivePage = tsMessages
+    ActivePage = tsLog
     Align = alBottom
     Images = vrtlmglstMain
     TabOrder = 1
@@ -229,8 +230,8 @@ object frmMain: TfrmMain
         BevelOuter = bvNone
         Color = clBlack
         Font.Charset = ANSI_CHARSET
-        Font.Color = clLime
-        Font.Height = -16
+        Font.Color = clWhite
+        Font.Height = -17
         Font.Name = 'Consolas'
         Font.Style = []
         ParentFont = False
@@ -295,16 +296,16 @@ object frmMain: TfrmMain
         OnChange = tvGreenhouseChange
       end
       object scrlbxGreenhouseInformation: TScrollBox
-        Left = 177
+        Left = 181
         Top = 0
-        Width = 664
+        Width = 660
         Height = 262
         VertScrollBar.Smooth = True
         VertScrollBar.Tracking = True
         Align = alClient
         BevelInner = bvNone
         BevelOuter = bvNone
-        TabOrder = 1
+        TabOrder = 0
         UseWheelForScrolling = True
         inline frmGreenhouseInformation1: TfrmGreenhouseInformation
           Left = 0
@@ -331,6 +332,28 @@ object frmMain: TfrmMain
               Images = nil
             end
           end
+        end
+      end
+      object pnlGreenhouseListView: TPanel
+        Left = 0
+        Top = 0
+        Width = 181
+        Height = 262
+        Align = alLeft
+        Caption = 'Panel1'
+        TabOrder = 1
+        object tvGreenhouse: TTreeView
+          Left = 1
+          Top = 1
+          Width = 179
+          Height = 260
+          Align = alClient
+          Indent = 19
+          TabOrder = 0
+          OnChange = tvGreenhouseChange
+          ExplicitLeft = -2
+          ExplicitTop = 2
+          ExplicitHeight = 223
         end
       end
     end
@@ -502,7 +525,7 @@ object frmMain: TfrmMain
             StyleElements = []
             object btnSaveInventory: TButton
               Left = 25
-              Top = 64
+              Top = 86
               Width = 150
               Height = 28
               Caption = 'Save Inventory...'
@@ -514,7 +537,7 @@ object frmMain: TfrmMain
             end
             object btnLoadInventory: TButton
               Left = 25
-              Top = 16
+              Top = 46
               Width = 150
               Height = 28
               Caption = 'Load Inventory...'
@@ -542,11 +565,25 @@ object frmMain: TfrmMain
             TabOrder = 0
             StyleElements = []
             object lblSelectPlantCloneHeading: TLabel
+              Left = 227
+              Top = 16
+              Width = 212
+              Height = 21
+              Caption = 'Select a Plant to Plant in Greenhouse'
+              Font.Charset = DEFAULT_CHARSET
+              Font.Color = 9203809
+              Font.Height = -16
+              Font.Name = 'Segoe UI'
+              Font.Style = []
+              ParentFont = False
+              StyleElements = [seClient, seBorder]
+            end
+            object lblAddPlantToRegistryHeading: TLabel
               Left = 25
               Top = 16
-              Width = 154
+              Width = 146
               Height = 21
-              Caption = 'Select a Plant to Clone'
+              Caption = 'Add Plant to Registry'
               Font.Charset = DEFAULT_CHARSET
               Font.Color = 9203809
               Font.Height = -16
@@ -556,23 +593,46 @@ object frmMain: TfrmMain
               StyleElements = [seClient, seBorder]
             end
             object btnClonePlant: TButton
-              Left = 25
-              Top = 93
-              Width = 93
+              Left = 227
+              Top = 158
+              Width = 78
               Height = 28
-              Caption = 'Clone'
-              ImageIndex = 18
-              ImageName = 'Clone'
+              Caption = 'Plant'
+              ImageIndex = 15
+              ImageName = 'Plant'
               Images = vrtlmglstMain
               TabOrder = 0
             end
             object cmbPrototypes: TComboBox
-              Left = 25
+              Left = 227
               Top = 49
-              Width = 180
+              Width = 138
               Height = 29
               TabOrder = 1
-              Text = 'Select a Plant Type'
+              Text = 'Plant'
+            end
+            object btnAddPlantToRegistry: TButton
+              Left = 25
+              Top = 46
+              Width = 120
+              Height = 28
+              Caption = 'Add Plant...'
+              ImageIndex = 12
+              ImageName = 'Add'
+              Images = vrtlmglstMain
+              TabOrder = 2
+              OnClick = btnAddPlantToRegistryClick
+            end
+            object lblSetPrice: TLabeledEdit
+              Left = 227
+              Top = 112
+              Width = 138
+              Height = 29
+              EditLabel.Width = 60
+              EditLabel.Height = 21
+              EditLabel.Caption = 'Set Price'
+              TabOrder = 3
+              Text = ''
             end
           end
         end

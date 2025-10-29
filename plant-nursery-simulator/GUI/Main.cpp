@@ -7,6 +7,8 @@
 #include "Greenhouse_Information_Frame.h"
 #include "Sales_Frame.h"
 #include <System.SysUtils.hpp>
+#include "Add_Plant.h"
+#include "Add_Item.h"
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 #pragma link "Greenhouse_Information_Frame"
@@ -96,6 +98,10 @@ __fastcall TfrmMain::TfrmMain(TComponent* Owner)
     // Add another empty bed
 	objGreenhouse->add(new GreenhouseBed("Empty Bed"));
 
+	// === Populate the TreeView ===
+	tvGreenhouse->Items->Clear();
+	PopulateGreenhouseTree(nullptr, objGreenhouse.get());
+	tvGreenhouse->FullExpand();
 
 	// === Populate the TreeView ===
 	tvGreenhouse->Items->Clear();
@@ -305,8 +311,8 @@ void __fastcall TfrmMain::tvGreenhouseChange(TObject *Sender, TTreeNode *Node)
 
 	// --- If no node selected, or it wasn't a plant ---
 	// Clear the details and disable care buttons
-	frmGreenhouseInformation1->lbledtPlantName->Text = "—";
-	frmGreenhouseInformation1->lbledtPlantState->Text = "—";
+	frmGreenhouseInformation1->lbledtPlantName->Text = "Â—";
+	frmGreenhouseInformation1->lbledtPlantState->Text = "Â—";
 	frmGreenhouseInformation1->pbGrowth->Position = 0;
 	frmGreenhouseInformation1->pbWater->Position = 0;
 	frmGreenhouseInformation1->pbNutrients->Position = 0;

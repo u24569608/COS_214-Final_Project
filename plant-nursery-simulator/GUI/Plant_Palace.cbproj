@@ -185,6 +185,18 @@
         <AppDPIAwarenessMode>PerMonitorV2</AppDPIAwarenessMode>
     </PropertyGroup>
     <ItemGroup>
+        <CppCompile Include="Add_Item.cpp">
+            <Form>frmAddItem</Form>
+            <FormType>dfm</FormType>
+            <DependentOn>Add_Item.h</DependentOn>
+            <BuildOrder>53</BuildOrder>
+        </CppCompile>
+        <CppCompile Include="Add_Plant.cpp">
+            <Form>frmAddPlant</Form>
+            <FormType>dfm</FormType>
+            <DependentOn>Add_Plant.h</DependentOn>
+            <BuildOrder>52</BuildOrder>
+        </CppCompile>
         <CppCompile Include="Greenhouse_Information_Frame.cpp">
             <Form>frmGreenhouseInformation</Form>
             <FormType>dfm</FormType>

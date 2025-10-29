@@ -45,8 +45,8 @@ object frmSales: TfrmSales
     StyleElements = [seClient, seBorder]
   end
   object lblCheckoutHeading: TLabel
-    Left = 11
-    Top = 202
+    Left = 258
+    Top = 8
     Width = 251
     Height = 37
     Caption = 'Complete your Order'
@@ -59,8 +59,8 @@ object frmSales: TfrmSales
     StyleElements = [seClient, seBorder]
   end
   object lblOrderSummaryHeading: TLabel
-    Left = 11
-    Top = 253
+    Left = 258
+    Top = 57
     Width = 96
     Height = 21
     Caption = 'Order Receipt'
@@ -75,7 +75,7 @@ object frmSales: TfrmSales
   object cmbItemSelection: TComboBox
     Left = 11
     Top = 84
-    Width = 195
+    Width = 173
     Height = 29
     TabOrder = 0
     Text = 'Item'
@@ -108,10 +108,10 @@ object frmSales: TfrmSales
     end
   end
   object redtOrderDetails: TRichEdit
-    Left = 11
-    Top = 280
-    Width = 238
-    Height = 241
+    Left = 258
+    Top = 84
+    Width = 173
+    Height = 120
     Enabled = False
     Font.Charset = ANSI_CHARSET
     Font.Color = clWindowText
@@ -125,21 +125,30 @@ object frmSales: TfrmSales
     TabOrder = 2
     StyleElements = [seClient, seBorder]
   end
-  object lbledtCustomerName: TLabeledEdit
-    Left = 11
-    Top = 558
-    Width = 238
+  object btnRefund: TBitBtn
+    Left = 445
+    Top = 171
+    Width = 173
+    Height = 33
+    Caption = 'Refund Order'
+    Enabled = False
+    ImageIndex = 20
+    ImageName = 'Refund'
+    Images = frmMain.vrtlmglstMain
+    TabOrder = 2
+  end
+  object cmbCustomerSelect: TComboBox
+    Left = 445
+    Top = 84
+    Width = 173
     Height = 29
-    EditLabel.Width = 114
-    EditLabel.Height = 21
-    EditLabel.Caption = 'Customer Name'
     Enabled = False
     TabOrder = 3
     Text = ''
     TextHint = 'Enter your name'
     OnChange = lbledtCustomerNameChange
   end
-  object pnlProcessPayment: TPanel
+  object btnAddToOrder: TBitBtn
     Left = 11
     Top = 608
     Width = 614

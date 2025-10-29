@@ -18,6 +18,8 @@ int WINAPI _tWinMain(HINSTANCE, HINSTANCE, LPTSTR, int)
 		Application->MainFormOnTaskBar = true;
 		TStyleManager::TrySetStyle("Windows11 Polar Light");
 		Application->CreateForm(__classid(TfrmMain), &frmMain);
+		Application->CreateForm(__classid(TfrmAddPlant), &frmAddPlant);
+		Application->CreateForm(__classid(TfrmAddItem), &frmAddItem);
 		Application->Run();
 	}
 	catch (Exception &exception)
