@@ -508,15 +508,18 @@ void TfrmMain::PopulateSalesItemComboBox()
 // Updates the RichEdit on the Sales Frame to show the current order
 void TfrmMain::UpdateOrderDisplay()
 {
-    // Access the RichEdit on the Sales Frame instance (frmSales1)
+   // Access the RichEdit on the Sales Frame instance (frmSales1)
 	frmSales1->redtOrderDetails->Clear();
 	frmSales1->redtOrderDetails->Lines->Add("(Order is empty)"); // Initial message
 
-	// Disable controls that require an active order or customer name
+	// Disable controls
 	frmSales1->redtOrderDetails->Enabled = false;
 	frmSales1->lbledtCustomerName->Enabled = false;
 	frmSales1->btnProcessPayment->Enabled = false;
-	frmSales1->lbledtCustomerName->Text = ""; // Clear customer name
+	frmSales1->lbledtCustomerName->Text = "";
+
+    // Reset the frame's internal total counter
+    frmSales1->currentOrderTotal = 0.0;
 }
 void __fastcall TfrmMain::FormActivate(TObject *Sender)
 {
