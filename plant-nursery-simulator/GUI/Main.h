@@ -121,6 +121,7 @@ __published:	// IDE-managed Components
 	void __fastcall btnInventoryUpClick(TObject *Sender);
 	void __fastcall btnInventoryDownClick(TObject *Sender);
 	void __fastcall btnSaveInventoryClick(TObject *Sender);
+	void __fastcall FormActivate(TObject *Sender);
 
 private:	// User declarations
 	// --- Mediator Pattern ---

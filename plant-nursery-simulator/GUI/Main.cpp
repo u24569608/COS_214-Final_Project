@@ -508,27 +508,19 @@ void TfrmMain::PopulateSalesItemComboBox()
 // Updates the RichEdit on the Sales Frame to show the current order
 void TfrmMain::UpdateOrderDisplay()
 {
-    // Get the current order from the builder
-    Order* currentOrder = objOrderBuilder->getOrder();
-
     // Access the RichEdit on the Sales Frame instance (frmSales1)
 	frmSales1->redtOrderDetails->Clear();
+	frmSales1->redtOrderDetails->Lines->Add("(Order is empty)"); // Initial message
 
-    if (currentOrder) {
-		frmSales1->redtOrderDetails->Lines->Add("Current Order:");
-        // Loop through items in the order
-		for (const StockItem& item : currentOrder->getItems()) {
-			UnicodeString line = " - ";
-			line += item.getname().c_str(); // Item Name
-			line += " (";
-			line += FloatToStrF(item.getPrice(), ffCurrency, 8, 2); // Item Price
-			line += ")";
-			frmSales1->redtOrderDetails->Lines->Add(line);
-		}
-		// Display Total
-		frmSales1->redtOrderDetails->Lines->Add("--------------------");
-		frmSales1->redtOrderDetails->Lines->Add("Total: " + FloatToStrF(currentOrder->calculateTotal(), ffCurrency, 8, 2));
-	} else {
-        frmSales1->redtOrderDetails->Lines->Add("(Order is empty)");
-    }
+	// Disable controls that require an active order or customer name
+	frmSales1->redtOrderDetails->Enabled = false;
+	frmSales1->lbledtCustomerName->Enabled = false;
+	frmSales1->btnProcessPayment->Enabled = false;
+	frmSales1->lbledtCustomerName->Text = ""; // Clear customer name
 }
+void __fastcall TfrmMain::FormActivate(TObject *Sender)
+{
+     frmSales1->currentOrderTotal = 0.0;
+}
+//---------------------------------------------------------------------------
+

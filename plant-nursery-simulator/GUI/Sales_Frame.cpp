@@ -18,51 +18,65 @@ __fastcall TfrmSales::TfrmSales(TComponent* Owner)
 //---------------------------------------------------------------------------
 void __fastcall TfrmSales::btnAddToOrderClick(TObject *Sender)
 {
-	redtOrderDetails->Enabled = true;
-    lbledtCustomerName->Enabled = true;
-	// Add to Order
-
-    // 1. Get selected item name
+	// 1. Get selected item name from ComboBox
 	UnicodeString selectedItemNameU = cmbItemSelection->Text;
 	std::string selectedItemName = AnsiString(selectedItemNameU).c_str();
 
-	if (selectedItemName.empty()) {
+	// Validate selection (check for empty or placeholder text)
+	if (selectedItemName.empty() || selectedItemNameU == "Select an Item") {
 		ShowMessage("Please select an item to add.");
 		return;
 	}
 
 	// 2. Find the StockItem in the main form's inventory
-    // Access main form's inventory via the global frmMain pointer
-	StockItem* itemToAdd = frmMain->objInventory->findItem(selectedItemName); // ASSUMPTION: Inventory has findItem(string name) returning StockItem* [Likely based on Inventory.cpp/h]
+	// Access main form's inventory via the global frmMain pointer
+	StockItem* itemToAdd = frmMain->objInventory->findItem(selectedItemName); // ASSUMPTION: Inventory has findItem(string name) returning StockItem*
 
+	// Validate item found and available
 	if (!itemToAdd) {
 		ShowMessage("Error: Could not find '" + selectedItemNameU + "' in inventory.");
 		return;
 	}
-    if (!itemToAdd->getIsAvailible()) { //
-        ShowMessage("Sorry, '" + selectedItemNameU + "' is currently out of stock.");
-        return;
-    }
+	if (!itemToAdd->getIsAvailible()) { //
+		ShowMessage("Sorry, '" + selectedItemNameU + "' is currently out of stock.");
+		return;
+	}
 
 	// 3. Use the main form's OrderBuilder to add the item
-    // CustomOrderBuilder::addItem takes StockItem*
-    try {
-	    frmMain->objOrderBuilder->addItem(itemToAdd);
+	try {
+		// Call backend builder's addItem
+		frmMain->objOrderBuilder->addItem(itemToAdd);
 
-        // 4. Update the order display on this frame by calling main form's helper
-        frmMain->UpdateOrderDisplay(); // NOW we update the display
+		// 4. === Manually update the RichEdit display ===
+		// If this is the first item, clear the "(Order is empty)" text
+		if (redtOrderDetails->Text == "(Order is empty)") {
+			 redtOrderDetails->Clear();
+			 redtOrderDetails->Lines->Add("Current Order:");
+			 redtOrderDetails->Lines->Add("--------------------");
+		}
 
-        // 5. Enable downstream controls if they aren't already
-        redtOrderDetails->Enabled = true;
-        lbledtCustomerName->Enabled = true;
-        // Check if customer name allows payment button enable
-        lbledtCustomerNameChange(Sender); // Trigger check
-    }
-    catch (const std::exception& ex) {
-         ShowMessage("Error adding item to order: " + String(ex.what()));
-    }
+		// Add the newly added item's details to the display
+		UnicodeString line = " - ";
+		line += itemToAdd->getname().c_str(); //
+		line += " (";
+		// StockItem::getPrice returns int, cast to double for currency format
+		line += FloatToStrF(static_cast<double>(itemToAdd->getPrice()), ffCurrency, 8, 2);
+		line += ")";
+		redtOrderDetails->Lines->Add(line);
 
+		// NOTE: We cannot display the running total here without calling getOrder(),
+		// which would break subsequent adds. Total is calculated by Facade later.
 
+		// 5. Enable downstream controls now that order has items
+		redtOrderDetails->Enabled = true;
+		lbledtCustomerName->Enabled = true;
+		// Trigger the check for enabling the payment button based on customer name
+		lbledtCustomerNameChange(Sender);
+	}
+	catch (const std::exception& ex) {
+		 // Display any errors from the backend addItem call
+		 ShowMessage("Error adding item to order: " + String(ex.what()));
+	}
 }
 //---------------------------------------------------------------------------
 void __fastcall TfrmSales::lbledtCustomerNameChange(TObject *Sender)

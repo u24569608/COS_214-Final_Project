@@ -13,6 +13,7 @@ object frmMain: TfrmMain
   Menu = mmMain
   Position = poDesigned
   WindowState = wsMaximized
+  OnActivate = FormActivate
   OnCreate = FormCreate
   TextHeight = 21
   object pnlTop: TPanel
@@ -288,7 +289,7 @@ object frmMain: TfrmMain
         Left = 0
         Top = 0
         Width = 177
-        Height = 270
+        Height = 262
         Align = alLeft
         Indent = 19
         TabOrder = 0
@@ -306,12 +307,10 @@ object frmMain: TfrmMain
         BevelOuter = bvNone
         TabOrder = 1
         UseWheelForScrolling = True
-        ExplicitWidth = 666
-        ExplicitHeight = 270
         inline frmGreenhouseInformation1: TfrmGreenhouseInformation
           Left = 0
           Top = 0
-          Width = 641
+          Width = 639
           Height = 496
           Align = alTop
           Color = clWhite
@@ -324,7 +323,7 @@ object frmMain: TfrmMain
           ParentColor = False
           ParentFont = False
           TabOrder = 0
-          ExplicitWidth = 641
+          ExplicitWidth = 639
           inherited grpAction: TGroupBox
             inherited btnFertilise: TBitBtn
               Images = nil
@@ -343,8 +342,8 @@ object frmMain: TfrmMain
       object pgcSalesInventory: TPageControl
         Left = 0
         Top = 0
-        Width = 843
-        Height = 270
+        Width = 841
+        Height = 262
         ActivePage = tsSales
         Align = alClient
         Images = vrtlmglstMain
@@ -419,8 +418,8 @@ object frmMain: TfrmMain
           object scrlbxSales: TScrollBox
             Left = 0
             Top = 0
-            Width = 835
-            Height = 234
+            Width = 833
+            Height = 226
             VertScrollBar.Smooth = True
             Align = alClient
             TabOrder = 0
@@ -428,7 +427,7 @@ object frmMain: TfrmMain
             inline frmSales1: TfrmSales
               Left = 0
               Top = 0
-              Width = 810
+              Width = 808
               Height = 761
               Align = alTop
               Color = clWhite
@@ -441,7 +440,7 @@ object frmMain: TfrmMain
               ParentColor = False
               ParentFont = False
               TabOrder = 0
-              ExplicitWidth = 810
+              ExplicitWidth = 808
               inherited pnlAddToOrder: TPanel
                 Width = 619
                 ExplicitWidth = 619
