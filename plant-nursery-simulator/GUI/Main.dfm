@@ -42,12 +42,12 @@ object frmMain: TfrmMain
     Top = 347
     Width = 849
     Height = 261
-    ActivePage = tsMessages
+    ActivePage = tsLog
     Align = alBottom
     Images = vrtlmglstMain
     TabOrder = 1
+    ExplicitLeft = -8
     ExplicitTop = 339
-    ExplicitWidth = 847
     object tsMessages: TTabSheet
       Caption = 'Messages'
       ImageName = 'Messages'

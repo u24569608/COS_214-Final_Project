@@ -17,6 +17,23 @@ std::string makeStockId() {
 } // namespace
 
 /**
+ * @brief Copy Constructor implementation
+ */
+StockItem::StockItem(const StockItem& other)
+    : Observer(), // Call base constructor
+      id(other.id), // Copy ID
+      name(other.name), // Copy name
+      price(other.price), // Copy price
+      plant(nullptr), // <<< FIX: Set plant pointer to null in the copy
+      isAvailable(false), // <<< FIX: Copy represents item in order, not live availability
+      displayStatus("Item in Order") // Set appropriate status for the copy
+{
+	// IMPORTANT: Do NOT call bindToPlant() here.
+	// This copy is just data for the order/receipt and should not observe the original plant.
+	// std::cout << "[StockItem Copy Constructor] Copied: " << name << std::endl; // Optional debug msg
+}
+
+/**
  * @brief Constructor implementation
  */
 StockItem::StockItem(std::string n, double p, PlantInstance* pl)

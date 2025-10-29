@@ -24,6 +24,10 @@ public:
     StockItem(std::string n, double p, PlantInstance* pl);
 
     /**
+     * @brief Copy constructor
+     */
+	StockItem(const StockItem& other);
+    /**
      * @brief Ensures the stock item detaches from any observed plant.
      */
     ~StockItem() override;

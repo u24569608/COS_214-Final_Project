@@ -54,20 +54,24 @@ void __fastcall TfrmSales::btnAddToOrderClick(TObject *Sender)
 		currentOrderTotal += static_cast<double>(itemToAdd->getPrice());
 
 		// b) Manually update the RichEdit display
-		if (redtOrderDetails->Text == "(Order is empty)") {
-			 // First item added, setup the display
+		// Check if the RichEdit currently shows the placeholder
+		bool isFirstItem = (redtOrderDetails->Lines->Count == 1 &&
+						   redtOrderDetails->Lines->Strings[0] == "(Order is empty)");
+
+		if (isFirstItem) {
+			 // First item added, clear placeholder and setup header
 			 redtOrderDetails->Clear();
 			 redtOrderDetails->Lines->Add("Current Order:");
 			 redtOrderDetails->Lines->Add("--------------------");
 		} else {
-            // Remove the old total and separator lines before adding the new item
-            if (redtOrderDetails->Lines->Count > 0 && redtOrderDetails->Lines->Strings[redtOrderDetails->Lines->Count - 1].Pos("Total Due:") == 1) {
-                redtOrderDetails->Lines->Delete(redtOrderDetails->Lines->Count - 1); // Remove old total
-            }
-             if (redtOrderDetails->Lines->Count > 0 && redtOrderDetails->Lines->Strings[redtOrderDetails->Lines->Count - 1] == "--------------------") {
-                 redtOrderDetails->Lines->Delete(redtOrderDetails->Lines->Count - 1); // Remove old separator
-             }
-        }
+			// Remove the old total and separator lines before adding the new item
+			if (redtOrderDetails->Lines->Count > 0 && redtOrderDetails->Lines->Strings[redtOrderDetails->Lines->Count - 1].Pos("Total Due:") == 1) {
+				redtOrderDetails->Lines->Delete(redtOrderDetails->Lines->Count - 1); // Remove old total
+			}
+			 if (redtOrderDetails->Lines->Count > 0 && redtOrderDetails->Lines->Strings[redtOrderDetails->Lines->Count - 1] == "--------------------") {
+				 redtOrderDetails->Lines->Delete(redtOrderDetails->Lines->Count - 1); // Remove old separator
+			 }
+		}
 
 		// Add the newly added item's details
 		UnicodeString line = " - ";
@@ -77,16 +81,16 @@ void __fastcall TfrmSales::btnAddToOrderClick(TObject *Sender)
 		line += ")";
 		redtOrderDetails->Lines->Add(line);
 
-        // Add separator and the NEW running total line
-        redtOrderDetails->Lines->Add("--------------------");
+		// Add separator and the NEW running total line
+		redtOrderDetails->Lines->Add("--------------------");
 		redtOrderDetails->Lines->Add("Total Due: " + FloatToStrF(currentOrderTotal, ffCurrency, 8, 2));
 
 		// 5. Enable downstream controls now that order has items
 		redtOrderDetails->Enabled = true;
-        cmbCustomerSelect->Enabled = true; // Ensure customer selection is enabled
+		cmbCustomerSelect->Enabled = true; // Ensure customer selection is enabled
 
 		// Trigger the check for enabling the payment button based on customer selection AND order items
-		cmbCustomerSelectChange(Sender); // Checks both customer selection and order state
+		cmbCustomerSelectChange(Sender); //
 	}
 	catch (const std::exception& ex) {
 		 // Display any errors from the backend addItem call
@@ -123,9 +127,9 @@ void __fastcall TfrmSales::btnProcessPaymentClick(TObject *Sender)
 
 	// 3. Find the Customer* object by ID
 	Customer* customerPtr = nullptr;
-	for (const auto& colleague : frmMain->vtrColleagues) {
+	for (const auto& colleague : frmMain->vtrColleagues) { //
 		Customer* cust = dynamic_cast<Customer*>(colleague.get());
-		if (cust != nullptr && cust->getID() == customerIdSelected) {
+		if (cust != nullptr && cust->getID() == customerIdSelected) { //
 			customerPtr = cust;
 			break;
 		}
@@ -135,56 +139,74 @@ void __fastcall TfrmSales::btnProcessPaymentClick(TObject *Sender)
 		return;
 	}
 
-	// 4. === GET THE ORDER FROM THE BUILDER ===
-	// OrderBuilder::getOrder() returns a raw Order* and releases ownership [cite: OrderBuilder.cpp, OrderBuilder.h]
-	std::unique_ptr<Order> finalOrder(frmMain->objOrderBuilder->getOrder());
+	// 4. Get the Order from the Builder BEFORE calling Facade
+	std::unique_ptr<Order> finalOrder(frmMain->objOrderBuilder->getOrder()); //
 
 	// Check if the order is valid (e.g., has items)
-	if (!finalOrder || finalOrder->getItems().empty()) { // [cite: Order.h]
+	if (!finalOrder || finalOrder->getItems().empty()) { //
 		ShowMessage("Cannot process payment: The order is empty.");
-        // We took ownership, but it's empty, so reset the builder
-        frmMain->objOrderBuilder->createNewOrder(); // [cite: OrderBuilder.h]
+		frmMain->objOrderBuilder->createNewOrder(); // Reset builder
 		return;
 	}
 
-	// 5. === Call the Sales Facade with Customer*, items, and payment type ===
+	// 5. === Call the Sales Facade ===
 	bool success = false;
 	try {
-		// Pass Customer*, the vector of items from the order, and payment type string
+		// Pass Customer* and the vector of items
 		success = frmMain->objSalesFacade->buildAndFinalizeOrder(
 													customerPtr,
-													finalOrder->getItems() // Pass the vector [cite: SalesFacade.h, Order.h]
-													                  // Pass payment type
+													finalOrder->getItems() //
 													);
 
 		// 6. Handle the Result
 		if (success) {
 			ShowMessage("Payment successful! Order finalized.");
-			frmMain->redtLog->Lines->Add("[" + DateTimeToStr(Now()) + "] Order finalized for Customer ID " + customerIdU);
+			// Log simple success message
+			UnicodeString logMsg = "[" + DateTimeToStr(Now()) + "] Order finalized for Customer ID " + customerIdU;
+			frmMain->redtLog->Lines->Add(logMsg); //
+
+			// --- ADD RECEIPT TO LOG ---
+			frmMain->redtLog->Lines->Add("--- Receipt ---");
+			// Loop through items in the finalOrder object
+			for (const StockItem& item : finalOrder->getItems()) { //
+				UnicodeString logLine = "  - ";
+				logLine += item.getname().c_str(); //
+				logLine += " (";
+				// Cast price to double for formatting
+				logLine += FloatToStrF(static_cast<double>(item.getPrice()), ffCurrency, 8, 2); //
+				logLine += ")";
+				frmMain->redtLog->Lines->Add(logLine);
+			}
+			// Add Total PAID line using Order's total calculation
+			frmMain->redtLog->Lines->Add("  --------------------");
+			frmMain->redtLog->Lines->Add("  Total Due: " + FloatToStrF(finalOrder->calculateTotal(), ffCurrency, 8, 2) + " [PAID]"); //
+			frmMain->redtLog->Lines->Add("---------------");
+			// --- END RECEIPT LOG ---
 
 			// Reset UI, Refresh Inventory, Repopulate Combos
 			frmMain->UpdateOrderDisplay();       // Resets Sales Frame UI
-			frmMain->RefreshInventoryListView();
-			frmMain->PopulateSalesItemComboBox();
-			frmMain->PopulateCustomerComboBox();
-            // Builder is already empty because we called getOrder()
-            // We need to create a NEW empty order in the builder for the next customer
-            frmMain->objOrderBuilder->createNewOrder();
+			frmMain->RefreshInventoryListView(); //
+			frmMain->PopulateSalesItemComboBox(); //
+			frmMain->PopulateCustomerComboBox(); //
+			// Builder is already empty, create new one
+			frmMain->objOrderBuilder->createNewOrder(); //
 
 		} else {
+			// Facade indicated failure
 			ShowMessage("Order processing failed. Please check inventory or payment details.");
-            frmMain->redtLog->Lines->Add("[" + DateTimeToStr(Now()) + "] Order processing failed for Customer ID " + customerIdU);
-            // Builder is already empty because we called getOrder()
-            frmMain->objOrderBuilder->createNewOrder(); // Ensure builder is ready
+			frmMain->redtLog->Lines->Add("[" + DateTimeToStr(Now()) + "] Order processing failed for Customer ID " + customerIdU);
+			// Builder is already empty, create new one
+			frmMain->objOrderBuilder->createNewOrder();
 		}
-        // unique_ptr finalOrder goes out of scope and deletes the Order object here
+		// unique_ptr finalOrder is automatically deleted here
 	}
 	catch (const std::exception& ex) {
+		// Catch any unexpected C++ exceptions
 		ShowMessage("An error occurred during checkout: " + String(ex.what()));
-        frmMain->redtLog->Lines->Add("[" + DateTimeToStr(Now()) + "] EXCEPTION during checkout for Customer ID " + customerIdU + ": " + String(ex.what()));
-        // Builder is likely empty, ensure it's reset
-        frmMain->objOrderBuilder->createNewOrder();
-        // unique_ptr finalOrder will still delete if exception occurred after getOrder()
+		frmMain->redtLog->Lines->Add("[" + DateTimeToStr(Now()) + "] EXCEPTION during checkout for Customer ID " + customerIdU + ": " + String(ex.what()));
+		// Ensure builder is reset after exception
+		frmMain->objOrderBuilder->createNewOrder();
+        // unique_ptr finalOrder is automatically deleted here (if created before exception)
 	}
 }
 //---------------------------------------------------------------------------
