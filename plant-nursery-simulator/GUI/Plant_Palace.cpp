@@ -6,9 +6,10 @@
 //---------------------------------------------------------------------------
 #include <Vcl.Styles.hpp>
 #include <Vcl.Themes.hpp>
-USEFORM("Sales_Frame.cpp", frmSales); /* TFrame: File Type */
-USEFORM("Greenhouse_Information_Frame.cpp", frmGreenhouseInformation); /* TFrame: File Type */
 USEFORM("Main.cpp", frmMain);
+USEFORM("Greenhouse_Information_Frame.cpp", frmGreenhouseInformation); /* TFrame: File Type */
+USEFORM("Sales_Frame.cpp", frmSales); /* TFrame: File Type */
+USEFORM("Add_Plant.cpp", frmAddPlant);
 //---------------------------------------------------------------------------
 int WINAPI _tWinMain(HINSTANCE, HINSTANCE, LPTSTR, int)
 {
@@ -18,6 +19,7 @@ int WINAPI _tWinMain(HINSTANCE, HINSTANCE, LPTSTR, int)
 		Application->MainFormOnTaskBar = true;
 		TStyleManager::TrySetStyle("Windows11 Polar Light");
 		Application->CreateForm(__classid(TfrmMain), &frmMain);
+		Application->CreateForm(__classid(TfrmAddPlant), &frmAddPlant);
 		Application->Run();
 	}
 	catch (Exception &exception)

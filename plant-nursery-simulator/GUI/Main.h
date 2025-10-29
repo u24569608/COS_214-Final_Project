@@ -112,13 +112,13 @@ __published:	// IDE-managed Components
 	TButton *btnSimulate;
 	TFileOpenDialog *dlgOpenLoadInventory;
 	TFileSaveDialog *dlgSaveSaveInventory;
-	TPanel *Panel1;
-	TLabel *Label1;
+	TPanel *pnlGreenhouseListView;
+	TLabel *lblAddPlantToRegistryHeading;
 	TButton *btnAddPlantToRegistry;
-	TLabeledEdit *LabeledEdit1;
-	TLabel *Label2;
-	TButton *Button2;
-	TLabel *Label3;
+	TLabeledEdit *lblSetPrice;
+	TLabel *lblAddItemHeading;
+	TButton *btnAddItem;
+	TLabel *lblIOHeading;
 	void __fastcall edtMessageBodyChange(TObject *Sender);
 	void __fastcall FormCreate(TObject *Sender);
 	void __fastcall btnSendClick(TObject *Sender);
@@ -130,6 +130,7 @@ __published:	// IDE-managed Components
 	void __fastcall btnInventoryDownClick(TObject *Sender);
 	void __fastcall btnSaveInventoryClick(TObject *Sender);
 	void __fastcall FormActivate(TObject *Sender);
+	void __fastcall btnAddPlantToRegistryClick(TObject *Sender);
 
 private:	// User declarations
 	// --- Mediator Pattern ---
