@@ -365,11 +365,9 @@
         <CppCompile Include="..\src\WitheringState.cpp">
             <BuildOrder>51</BuildOrder>
         </CppCompile>
-        <FormResources Include="Main.dfm"/>
-        <FormResources Include="Greenhouse_Information_Frame.dfm"/>
         <FormResources Include="Sales_Frame.dfm"/>
-        <FormResources Include="Add_Plant.dfm"/>
-        <FormResources Include="Add_Item.dfm"/>
+        <FormResources Include="Greenhouse_Information_Frame.dfm"/>
+        <FormResources Include="Main.dfm"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>

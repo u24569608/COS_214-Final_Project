@@ -62,10 +62,6 @@ __fastcall TfrmMain::TfrmMain(TComponent* Owner)
 	PopulateColleagueComboBoxes();
 	// --- END Mediator Pattern Setup ---
 
-    // Populate the customer selection combobox on the Sales Frame
-	PopulateCustomerComboBox();
-    UpdateOrderDisplay();
-
 	// --- Core System Setup (Composite & Prototype) ---
 
 	// Create the Plant Prototype Registry
@@ -102,6 +98,10 @@ __fastcall TfrmMain::TfrmMain(TComponent* Owner)
     // Add another empty bed
 	objGreenhouse->add(new GreenhouseBed("Empty Bed"));
 
+	// === Populate the TreeView ===
+	tvGreenhouse->Items->Clear();
+	PopulateGreenhouseTree(nullptr, objGreenhouse.get());
+	tvGreenhouse->FullExpand();
 
 	// === Populate the TreeView ===
 	tvGreenhouse->Items->Clear();
@@ -117,36 +117,7 @@ __fastcall TfrmMain::TfrmMain(TComponent* Owner)
 
     // Give the Inventory pointers to the other systems it needs
     objInventory->setPlantRegistry(objPrototypeRegistry.get());
-	objInventory->setGreenhouseRoot(objGreenhouse.get());
-
-
-    // --- Sales System Setup ---
-	// Create Payment Processor
-	objPaymentProcessor = std::make_unique<PaymentProcessor>();
-
-	// Create the Order Builder (Concrete Builder)
-	objOrderBuilder = std::make_unique<CustomOrderBuilder>();
-
-    // Create an initial empty order for the builder to manage
-    objOrderBuilder->createNewOrder();
-
-	// Create the Sales Facade, passing pointers to subsystems
-	objSalesFacade = std::make_unique<SalesFacade>(
-		objInventory.get(),
-		objPaymentProcessor.get(),
-		objOrderBuilder.get(),
-		objGreenhouse.get(),
-		objPrototypeRegistry.get()
-	);
-
-    objInventory->setPlantRegistry(objPrototypeRegistry.get());
     objInventory->setGreenhouseRoot(objGreenhouse.get());
-
-
-    // ... (Populate TreeView, etc.) ...
-
-	// Populate the item selection combobox on the Sales Frame
-    PopulateSalesItemComboBox();
 }
 //---------------------------------------------------------------------------
 
@@ -340,8 +311,8 @@ void __fastcall TfrmMain::tvGreenhouseChange(TObject *Sender, TTreeNode *Node)
 
 	// --- If no node selected, or it wasn't a plant ---
 	// Clear the details and disable care buttons
-	frmGreenhouseInformation1->lbledtPlantName->Text = "—";
-	frmGreenhouseInformation1->lbledtPlantState->Text = "—";
+	frmGreenhouseInformation1->lbledtPlantName->Text = "Â—";
+	frmGreenhouseInformation1->lbledtPlantState->Text = "Â—";
 	frmGreenhouseInformation1->pbGrowth->Position = 0;
 	frmGreenhouseInformation1->pbWater->Position = 0;
 	frmGreenhouseInformation1->pbNutrients->Position = 0;
@@ -378,9 +349,6 @@ void __fastcall TfrmMain::btnLoadInventoryClick(TObject *Sender)
 
 				// Refresh the ListView display
 				RefreshInventoryListView();
-
-                // Populate the sales dropdown
-                PopulateSalesItemComboBox();
 
 				redtLog->Lines->Add("[" + DateTimeToStr(Now()) + "] Successfully Loaded Inventory from '" + uFileName + "'");
 			}
@@ -483,88 +451,6 @@ void __fastcall TfrmMain::btnSaveInventoryClick(TObject *Sender)
 			redtLog->Lines->Add("[" + DateTimeToStr(Now()) + "] ERROR: Could Not Determine File Type to Save");
 		}
 	}
-}
-//---------------------------------------------------------------------------
-
-// Populates the item selection dropdown on the Sales Frame
-void TfrmMain::PopulateSalesItemComboBox()
-{
-    // Access the combobox on the Sales Frame instance (frmSales1)
-	frmSales1->cmbItemSelection->Clear();
-
-	// Use Inventory Iterator to get available items
-	InventoryIterator* itRaw = objInventory->createIterator();
-    if (!itRaw) return; // Handle error if iterator fails
-    std::unique_ptr<InventoryIterator> it(itRaw);
-
-	// Loop and add item names to the combobox
-    for (StockItem* item = it->first(); it->hasNext(); item = it->next())
-	{
-        item = it->currentItem(); // Get current item
-        if (item && item->getIsAvailible()) // Only add available items
-        {
-			frmSales1->cmbItemSelection->Items->Add(item->getname().c_str());
-		}
-	}
-
-    frmSales1->cmbItemSelection->ItemIndex = -1;
-	frmSales1->cmbItemSelection->Text = "Select an Item";
-}
-
-// Updates the RichEdit on the Sales Frame to show the current order
-void TfrmMain::UpdateOrderDisplay()
-{
-   // Access the RichEdit on the Sales Frame instance (frmSales1)
-	frmSales1->redtOrderDetails->Clear();
-	frmSales1->redtOrderDetails->Lines->Add("(Order is empty)"); // Initial message
-
-	// Disable controls
-	frmSales1->redtOrderDetails->Enabled = false;
-   //	frmSales1->lbledtCustomerName->Enabled = false;
-	frmSales1->btnProcessPayment->Enabled = false;
-   //	frmSales1->lbledtCustomerName->Text = "";
-
-    // Reset the frame's internal total counter
-    frmSales1->currentOrderTotal = 0.0;
-}
-void __fastcall TfrmMain::FormActivate(TObject *Sender)
-{
-     frmSales1->currentOrderTotal = 0.0;
-}
-//---------------------------------------------------------------------------
-void TfrmMain::PopulateCustomerComboBox()
-{
-    frmSales1->cmbCustomerSelect->Clear(); // Use the new ComboBox name
-
-    for (const auto& colleague : vtrColleagues) {
-        // Try to cast to Customer*
-        Customer* cust = dynamic_cast<Customer*>(colleague.get());
-        if (cust != nullptr) { // Only add if it's actually a Customer
-            UnicodeString idString = cust->getID(); // Get the int ID
-            frmSales1->cmbCustomerSelect->Items->Add(idString);
-        }
-    }
-
-    // Set prompt text instead of selecting first item
-    frmSales1->cmbCustomerSelect->ItemIndex = -1;
-    frmSales1->cmbCustomerSelect->Text = "Select Customer ID";
-    // Disable payment button until customer is selected
-    frmSales1->btnProcessPayment->Enabled = false;
-}
-//---------------------------------------------------------------------------
-
-
-
-void __fastcall TfrmMain::btnAddPlantToRegistryClick(TObject *Sender)
-{
-    frmAddPlant->Show();
-}
-//---------------------------------------------------------------------------
-
-
-void __fastcall TfrmMain::btnAddItemClick(TObject *Sender)
-{
-    frmAddItem->Show();
 }
 //---------------------------------------------------------------------------
 

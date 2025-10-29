@@ -18,14 +18,13 @@ __published:	// IDE-managed Components
 	TLabel *lblBuildOrderHeading;
 	TComboBox *cmbItemSelection;
 	TLabel *lblItemSelectionHeading;
+	TPanel *pnlAddToOrder;
 	TBitBtn *btnAddToOrder;
 	TLabel *lblCheckoutHeading;
 	TRichEdit *redtOrderDetails;
 	TBitBtn *btnProcessPayment;
 	TLabel *lblOrderSummaryHeading;
 	TBitBtn *btnRefund;
-	TComboBox *cmbCustomerSelect;
-	TLabel *lblCustomerSelectionHeading;
 	void __fastcall btnAddToOrderClick(TObject *Sender);
 	void __fastcall cmbItemSelectionChange(TObject *Sender);
 	void __fastcall btnProcessPaymentClick(TObject *Sender);

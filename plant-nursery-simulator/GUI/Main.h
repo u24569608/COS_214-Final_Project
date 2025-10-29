@@ -21,15 +21,17 @@
 #include "Greenhouse_Information_Frame.h"
 #include "Sales_Frame.h"
 #include <Vcl.Dialogs.hpp>
-#include <Vcl.Mask.hpp>
 #include <vector>
 #include <memory>
 
+// MEDIATOR PATTERN
 #include "../include/NurseryMediator.h"
 #include "../include/Colleague.h"
 #include "../include/Staff.h"
 #include "../include/Customer.h"
 
+
+// --- COMPOSITE & PROTOTYPE & ITERATOR ---
 #include "../include/PlantPrototypeRegistry.h"
 #include "../include/Plant.h"
 #include "../include/GreenhouseBed.h"
@@ -38,21 +40,18 @@
 #include "../include/GreenhouseIterator.h"
 #include "../include/ConcreteGreenhouseIterator.h"
 
+
+// --- ADAPTER PATTERN ---
 #include "../include/Inventory.h"
 #include "../include/FileAdapter.h"
 #include "../include/CSVAdapter.h"
 #include "../include/TXTAdapter.h"
 
+// --- ITERATOR PATTERN (for displaying inventory) ---
 #include "../include/StockItem.h"
 #include "../include/InventoryIterator.h"
 #include "../include/InventoryCollection.h"
 #include "../include/ConcreteInventoryIterator.h"
-
-#include "../include/SalesFacade.h"
-#include "../include/OrderBuilder.h"
-#include "../include/CustomOrderBuilder.h"
-#include "../include/Order.h"
-#include "../include/PaymentProcessor.h"
 //---------------------------------------------------------------------------
 class TfrmMain : public TForm
 {
@@ -112,13 +111,6 @@ __published:	// IDE-managed Components
 	TButton *btnSimulate;
 	TFileOpenDialog *dlgOpenLoadInventory;
 	TFileSaveDialog *dlgSaveSaveInventory;
-	TPanel *pnlGreenhouseListView;
-	TLabel *lblAddPlantToRegistryHeading;
-	TButton *btnAddPlantToRegistry;
-	TLabeledEdit *lblSetPrice;
-	TLabel *lblAddItemHeading;
-	TButton *btnAddItem;
-	TLabel *lblIOHeading;
 	void __fastcall edtMessageBodyChange(TObject *Sender);
 	void __fastcall FormCreate(TObject *Sender);
 	void __fastcall btnSendClick(TObject *Sender);
@@ -129,17 +121,14 @@ __published:	// IDE-managed Components
 	void __fastcall btnInventoryUpClick(TObject *Sender);
 	void __fastcall btnInventoryDownClick(TObject *Sender);
 	void __fastcall btnSaveInventoryClick(TObject *Sender);
-	void __fastcall FormActivate(TObject *Sender);
-	void __fastcall btnAddPlantToRegistryClick(TObject *Sender);
-	void __fastcall btnAddItemClick(TObject *Sender);
 
 private:	// User declarations
 	// --- Mediator Pattern ---
 	// Mediator Object
 	std::unique_ptr<NurseryMediator> objMediator;
 
-
-
+	// A list to hold all colleagues (Staff and Customers)
+	std::vector<std::unique_ptr<Colleague>> vtrColleagues;
 
 	// A helper function to fill in the combo boxes
 	void PopulateColleagueComboBoxes();
@@ -151,26 +140,12 @@ private:	// User declarations
 	void PopulateGreenhouseTree(TTreeNode* parentNode, GreenhouseComponent* component);
 
 
-
-
-
+	std::unique_ptr<Inventory> objInventory;
+	void RefreshInventoryListView();
 
 public:		// User declarations
 	__fastcall TfrmMain(TComponent* Owner);
-    void PopulateSalesItemComboBox();
-	void UpdateOrderDisplay();
-     // --- Sales/Order Objects ---
-	std::unique_ptr<PaymentProcessor> objPaymentProcessor;
-	std::unique_ptr<OrderBuilder> objOrderBuilder;
-	std::unique_ptr<SalesFacade> objSalesFacade;
-	std::unique_ptr<Order> currentOrder;
-    std::unique_ptr<Inventory> objInventory;
-	void RefreshInventoryListView();
 
-	void PopulateCustomerComboBox();
-
-    // A list to hold all colleagues (Staff and Customers)
-    std::vector<std::unique_ptr<Colleague>> vtrColleagues;
 };
 //---------------------------------------------------------------------------
 extern PACKAGE TfrmMain *frmMain;
