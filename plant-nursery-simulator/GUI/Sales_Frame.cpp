@@ -87,7 +87,7 @@ void __fastcall TfrmSales::btnAddToOrderClick(TObject *Sender)
 
 		// 5. Enable downstream controls now that order has items
 		redtOrderDetails->Enabled = true;
-		cmbCustomerSelect->Enabled = true; // Ensure customer selection is enabled
+		cmbCustomerSelect->Enabled = true;
 
 		// Trigger the check for enabling the payment button based on customer selection AND order items
 		cmbCustomerSelectChange(Sender); //
@@ -160,13 +160,14 @@ void __fastcall TfrmSales::btnProcessPaymentClick(TObject *Sender)
 
 		// 6. Handle the Result
 		if (success) {
-			ShowMessage("Payment successful! Order finalized.");
+			// ShowMessage("Payment successful. Order finalized.");
 			// Log simple success message
-			UnicodeString logMsg = "[" + DateTimeToStr(Now()) + "] Order finalized for Customer ID " + customerIdU;
+
+			UnicodeString logMsg = "[" + DateTimeToStr(Now()) + "] Order Finalised for Customer (ID): " + customerIdU;
 			frmMain->redtLog->Lines->Add(logMsg); //
 
 			// --- ADD RECEIPT TO LOG ---
-			frmMain->redtLog->Lines->Add("--- Receipt ---");
+			frmMain->redtLog->Lines->Add("------ Receipt (" + customerIdU + ") ------");
 			// Loop through items in the finalOrder object
 			for (const StockItem& item : finalOrder->getItems()) { //
 				UnicodeString logLine = "  - ";
@@ -178,9 +179,9 @@ void __fastcall TfrmSales::btnProcessPaymentClick(TObject *Sender)
 				frmMain->redtLog->Lines->Add(logLine);
 			}
 			// Add Total PAID line using Order's total calculation
-			frmMain->redtLog->Lines->Add("  --------------------");
+			frmMain->redtLog->Lines->Add("  -------------------------");
 			frmMain->redtLog->Lines->Add("  Total Due: " + FloatToStrF(finalOrder->calculateTotal(), ffCurrency, 8, 2) + " [PAID]"); //
-			frmMain->redtLog->Lines->Add("---------------");
+			frmMain->redtLog->Lines->Add("  -------------------------");
 			// --- END RECEIPT LOG ---
 
 			// Reset UI, Refresh Inventory, Repopulate Combos

@@ -13,9 +13,6 @@ object frmSales: TfrmSales
   ParentColor = False
   ParentFont = False
   TabOrder = 0
-  DesignSize = (
-    640
-    761)
   object lblBuildOrderHeading: TLabel
     Left = 11
     Top = 8
@@ -45,8 +42,8 @@ object frmSales: TfrmSales
     StyleElements = [seClient, seBorder]
   end
   object lblCheckoutHeading: TLabel
-    Left = 11
-    Top = 202
+    Left = 258
+    Top = 8
     Width = 251
     Height = 37
     Caption = 'Complete your Order'
@@ -59,8 +56,8 @@ object frmSales: TfrmSales
     StyleElements = [seClient, seBorder]
   end
   object lblOrderSummaryHeading: TLabel
-    Left = 11
-    Top = 253
+    Left = 258
+    Top = 57
     Width = 96
     Height = 21
     Caption = 'Order Receipt'
@@ -73,8 +70,8 @@ object frmSales: TfrmSales
     StyleElements = [seClient, seBorder]
   end
   object lblCustomerSelectionHeading: TLabel
-    Left = 11
-    Top = 530
+    Left = 445
+    Top = 55
     Width = 113
     Height = 21
     Caption = 'Select Customer'
@@ -89,43 +86,17 @@ object frmSales: TfrmSales
   object cmbItemSelection: TComboBox
     Left = 11
     Top = 84
-    Width = 195
+    Width = 173
     Height = 29
     TabOrder = 0
     Text = 'Item'
     OnChange = cmbItemSelectionChange
   end
-  object pnlAddToOrder: TPanel
-    Left = 11
-    Top = 128
-    Width = 614
-    Height = 49
-    Anchors = [akLeft, akTop, akRight]
-    ParentBackground = False
-    TabOrder = 1
-    DesignSize = (
-      614
-      49)
-    object btnAddToOrder: TBitBtn
-      Left = 448
-      Top = 8
-      Width = 156
-      Height = 33
-      Anchors = [akTop, akRight]
-      Caption = 'Add to Order'
-      Enabled = False
-      ImageIndex = 12
-      ImageName = 'Add'
-      Images = frmMain.vrtlmglstMain
-      TabOrder = 0
-      OnClick = btnAddToOrderClick
-    end
-  end
   object redtOrderDetails: TRichEdit
-    Left = 11
-    Top = 280
-    Width = 238
-    Height = 241
+    Left = 258
+    Top = 84
+    Width = 173
+    Height = 120
     Enabled = False
     Font.Charset = ANSI_CHARSET
     Font.Color = clWindowText
@@ -136,55 +107,56 @@ object frmSales: TfrmSales
     PlainText = True
     ReadOnly = True
     ScrollBars = ssVertical
-    TabOrder = 2
+    TabOrder = 1
     StyleElements = [seClient, seBorder]
   end
-  object pnlProcessPayment: TPanel
-    Left = 11
-    Top = 608
-    Width = 614
-    Height = 49
-    Anchors = [akLeft, akTop, akRight]
-    ParentBackground = False
-    TabOrder = 3
-    DesignSize = (
-      614
-      49)
-    object btnProcessPayment: TBitBtn
-      Left = 448
-      Top = 8
-      Width = 156
-      Height = 33
-      Anchors = [akTop, akRight]
-      Caption = 'Process Payment'
-      Enabled = False
-      ImageIndex = 13
-      ImageName = 'Cash'
-      Images = frmMain.vrtlmglstMain
-      TabOrder = 0
-      OnClick = btnProcessPaymentClick
-    end
-  end
   object btnRefund: TBitBtn
-    Left = 459
-    Top = 672
-    Width = 156
+    Left = 445
+    Top = 171
+    Width = 173
     Height = 33
-    Anchors = [akTop, akRight]
     Caption = 'Refund Order'
+    Enabled = False
+    ImageIndex = 20
+    ImageName = 'Refund'
+    Images = frmMain.vrtlmglstMain
+    TabOrder = 2
+  end
+  object cmbCustomerSelect: TComboBox
+    Left = 445
+    Top = 84
+    Width = 173
+    Height = 29
+    Enabled = False
+    TabOrder = 3
+    Text = 'Customer'
+    OnChange = cmbCustomerSelectChange
+  end
+  object btnAddToOrder: TBitBtn
+    Left = 11
+    Top = 127
+    Width = 173
+    Height = 33
+    Caption = 'Add to Order'
+    Enabled = False
+    ImageIndex = 12
+    ImageName = 'Add'
+    Images = frmMain.vrtlmglstMain
+    TabOrder = 4
+    OnClick = btnAddToOrderClick
+  end
+  object btnProcessPayment: TBitBtn
+    AlignWithMargins = True
+    Left = 445
+    Top = 126
+    Width = 173
+    Height = 33
+    Caption = 'Process Payment'
     Enabled = False
     ImageIndex = 13
     ImageName = 'Cash'
     Images = frmMain.vrtlmglstMain
-    TabOrder = 4
-  end
-  object cmbCustomerSelect: TComboBox
-    Left = 11
-    Top = 559
-    Width = 195
-    Height = 29
     TabOrder = 5
-    Text = 'Customer'
-    OnChange = cmbCustomerSelectChange
+    OnClick = btnProcessPaymentClick
   end
 end

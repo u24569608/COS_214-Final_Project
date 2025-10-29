@@ -21,6 +21,7 @@
 #include "Greenhouse_Information_Frame.h"
 #include "Sales_Frame.h"
 #include <Vcl.Dialogs.hpp>
+#include <Vcl.Mask.hpp>
 #include <vector>
 #include <memory>
 
@@ -111,6 +112,13 @@ __published:	// IDE-managed Components
 	TButton *btnSimulate;
 	TFileOpenDialog *dlgOpenLoadInventory;
 	TFileSaveDialog *dlgSaveSaveInventory;
+	TPanel *Panel1;
+	TLabel *Label1;
+	TButton *btnAddPlantToRegistry;
+	TLabeledEdit *LabeledEdit1;
+	TLabel *Label2;
+	TButton *Button2;
+	TLabel *Label3;
 	void __fastcall edtMessageBodyChange(TObject *Sender);
 	void __fastcall FormCreate(TObject *Sender);
 	void __fastcall btnSendClick(TObject *Sender);

@@ -550,3 +550,5 @@ void TfrmMain::PopulateCustomerComboBox()
     frmSales1->btnProcessPayment->Enabled = false;
 }
 //---------------------------------------------------------------------------
+
+

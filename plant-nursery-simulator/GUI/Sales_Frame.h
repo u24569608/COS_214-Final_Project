@@ -18,11 +18,9 @@ __published:	// IDE-managed Components
 	TLabel *lblBuildOrderHeading;
 	TComboBox *cmbItemSelection;
 	TLabel *lblItemSelectionHeading;
-	TPanel *pnlAddToOrder;
 	TBitBtn *btnAddToOrder;
 	TLabel *lblCheckoutHeading;
 	TRichEdit *redtOrderDetails;
-	TPanel *pnlProcessPayment;
 	TBitBtn *btnProcessPayment;
 	TLabel *lblOrderSummaryHeading;
 	TBitBtn *btnRefund;
