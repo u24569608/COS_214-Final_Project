@@ -60,6 +60,10 @@ __fastcall TfrmMain::TfrmMain(TComponent* Owner)
 	PopulateColleagueComboBoxes();
 	// --- END Mediator Pattern Setup ---
 
+    // Populate the customer selection combobox on the Sales Frame
+	PopulateCustomerComboBox();
+    UpdateOrderDisplay();
+
 	// --- Core System Setup (Composite & Prototype) ---
 
 	// Create the Plant Prototype Registry
@@ -514,9 +518,9 @@ void TfrmMain::UpdateOrderDisplay()
 
 	// Disable controls
 	frmSales1->redtOrderDetails->Enabled = false;
-	frmSales1->lbledtCustomerName->Enabled = false;
+   //	frmSales1->lbledtCustomerName->Enabled = false;
 	frmSales1->btnProcessPayment->Enabled = false;
-	frmSales1->lbledtCustomerName->Text = "";
+   //	frmSales1->lbledtCustomerName->Text = "";
 
     // Reset the frame's internal total counter
     frmSales1->currentOrderTotal = 0.0;
@@ -526,4 +530,23 @@ void __fastcall TfrmMain::FormActivate(TObject *Sender)
      frmSales1->currentOrderTotal = 0.0;
 }
 //---------------------------------------------------------------------------
+void TfrmMain::PopulateCustomerComboBox()
+{
+    frmSales1->cmbCustomerSelect->Clear(); // Use the new ComboBox name
 
+    for (const auto& colleague : vtrColleagues) {
+        // Try to cast to Customer*
+        Customer* cust = dynamic_cast<Customer*>(colleague.get());
+        if (cust != nullptr) { // Only add if it's actually a Customer
+            UnicodeString idString = cust->getID(); // Get the int ID
+            frmSales1->cmbCustomerSelect->Items->Add(idString);
+        }
+    }
+
+    // Set prompt text instead of selecting first item
+    frmSales1->cmbCustomerSelect->ItemIndex = -1;
+    frmSales1->cmbCustomerSelect->Text = "Select Customer ID";
+    // Disable payment button until customer is selected
+    frmSales1->btnProcessPayment->Enabled = false;
+}
+//---------------------------------------------------------------------------

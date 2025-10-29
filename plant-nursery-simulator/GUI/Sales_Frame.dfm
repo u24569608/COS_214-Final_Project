@@ -72,6 +72,20 @@ object frmSales: TfrmSales
     ParentFont = False
     StyleElements = [seClient, seBorder]
   end
+  object lblCustomerSelectionHeading: TLabel
+    Left = 11
+    Top = 530
+    Width = 113
+    Height = 21
+    Caption = 'Select Customer'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = 9203809
+    Font.Height = -16
+    Font.Name = 'Segoe UI'
+    Font.Style = []
+    ParentFont = False
+    StyleElements = [seClient, seBorder]
+  end
   object cmbItemSelection: TComboBox
     Left = 11
     Top = 84
@@ -125,20 +139,6 @@ object frmSales: TfrmSales
     TabOrder = 2
     StyleElements = [seClient, seBorder]
   end
-  object lbledtCustomerName: TLabeledEdit
-    Left = 11
-    Top = 558
-    Width = 238
-    Height = 29
-    EditLabel.Width = 114
-    EditLabel.Height = 21
-    EditLabel.Caption = 'Customer Name'
-    Enabled = False
-    TabOrder = 3
-    Text = ''
-    TextHint = 'Enter your name'
-    OnChange = lbledtCustomerNameChange
-  end
   object pnlProcessPayment: TPanel
     Left = 11
     Top = 608
@@ -146,7 +146,7 @@ object frmSales: TfrmSales
     Height = 49
     Anchors = [akLeft, akTop, akRight]
     ParentBackground = False
-    TabOrder = 4
+    TabOrder = 3
     DesignSize = (
       614
       49)
@@ -162,6 +162,7 @@ object frmSales: TfrmSales
       ImageName = 'Cash'
       Images = frmMain.vrtlmglstMain
       TabOrder = 0
+      OnClick = btnProcessPaymentClick
     end
   end
   object btnRefund: TBitBtn
@@ -175,6 +176,15 @@ object frmSales: TfrmSales
     ImageIndex = 13
     ImageName = 'Cash'
     Images = frmMain.vrtlmglstMain
+    TabOrder = 4
+  end
+  object cmbCustomerSelect: TComboBox
+    Left = 11
+    Top = 559
+    Width = 195
+    Height = 29
     TabOrder = 5
+    Text = 'Customer'
+    OnChange = cmbCustomerSelectChange
   end
 end

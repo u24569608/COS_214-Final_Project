@@ -128,8 +128,8 @@ private:	// User declarations
 	// Mediator Object
 	std::unique_ptr<NurseryMediator> objMediator;
 
-	// A list to hold all colleagues (Staff and Customers)
-	std::vector<std::unique_ptr<Colleague>> vtrColleagues;
+
+
 
 	// A helper function to fill in the combo boxes
 	void PopulateColleagueComboBoxes();
@@ -156,6 +156,11 @@ public:		// User declarations
 	std::unique_ptr<Order> currentOrder;
     std::unique_ptr<Inventory> objInventory;
 	void RefreshInventoryListView();
+
+	void PopulateCustomerComboBox();
+
+    // A list to hold all colleagues (Staff and Customers)
+    std::vector<std::unique_ptr<Colleague>> vtrColleagues;
 };
 //---------------------------------------------------------------------------
 extern PACKAGE TfrmMain *frmMain;

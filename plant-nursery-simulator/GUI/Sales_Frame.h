@@ -22,14 +22,16 @@ __published:	// IDE-managed Components
 	TBitBtn *btnAddToOrder;
 	TLabel *lblCheckoutHeading;
 	TRichEdit *redtOrderDetails;
-	TLabeledEdit *lbledtCustomerName;
 	TPanel *pnlProcessPayment;
 	TBitBtn *btnProcessPayment;
 	TLabel *lblOrderSummaryHeading;
 	TBitBtn *btnRefund;
+	TComboBox *cmbCustomerSelect;
+	TLabel *lblCustomerSelectionHeading;
 	void __fastcall btnAddToOrderClick(TObject *Sender);
-	void __fastcall lbledtCustomerNameChange(TObject *Sender);
 	void __fastcall cmbItemSelectionChange(TObject *Sender);
+	void __fastcall btnProcessPaymentClick(TObject *Sender);
+	void __fastcall cmbCustomerSelectChange(TObject *Sender);
 private:	// User declarations
 
 public:		// User declarations
