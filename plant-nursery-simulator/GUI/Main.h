@@ -241,49 +241,39 @@ private:	// User declarations
 	 * @brief Adds a timestamped entry to the application log panel.
 	 * @param message Text to append.
 	 */
-	void AppendLog(const UnicodeString& message);
 	/**
 	 * @brief Connects UI logging callbacks to each staff member.
 	 */
-	void RegisterStaffLoggers();
 	/**
 	 * @brief Ensures the UI logging observer is attached to the specified plant.
 	 * @param plant Plant that should emit observer notifications to the UI.
 	 */
-	void AttachObserverToPlant(PlantInstance* plant);
 	/**
 	 * @brief Recursively attaches the UI logging observer to all plants in the greenhouse.
 	 */
-	void AttachLoggerToAllPlants();
 	/**
 	 * @brief Captures the current plant metrics for later comparisons.
 	 * @param plant Plant to sample.
 	 * @return Snapshot containing the latest metrics.
 	 */
-	PlantDisplaySnapshot BuildSnapshot(PlantInstance* plant) const;
 	/**
 	 * @brief Emits detailed log entries describing differences between two snapshots.
 	 * @param before Baseline snapshot.
 	 * @param after Updated snapshot.
 	 * @param plantLabel Label identifying the plant instance in logs.
 	 */
-	void LogSnapshotDelta(const PlantDisplaySnapshot& before, const PlantDisplaySnapshot& after, const UnicodeString& plantLabel);
 	/**
 	 * @brief Disconnects all staff log callbacks.
 	 */
-	void ResetStaffLoggers();
 	/**
 	 * @brief Removes the UI observer from every tracked plant instance.
 	 */
-	void DetachObserverFromAllPlants();
 	/**
 	 * @brief Helper to re-select a staff row after refreshing the list view.
 	 */
-	void SelectStaffRowById(int staffId);
 	/**
 	 * @brief Rebuilds greenhouse tree UI after inventory changes.
 	 */
-	void RefreshGreenhouseDisplay();
 
     // New
     void RefreshStaffTaskQueue();
@@ -295,6 +285,16 @@ public:		// User declarations
 	 * @brief Cleans up UI observers and log sinks before destruction.
 	 */
 	__fastcall ~TfrmMain();
+	void AppendLog(const UnicodeString& message);
+	void RegisterStaffLoggers();
+	void AttachObserverToPlant(PlantInstance* plant);
+	void AttachLoggerToAllPlants();
+	PlantDisplaySnapshot BuildSnapshot(PlantInstance* plant) const;
+	void LogSnapshotDelta(const PlantDisplaySnapshot& before, const PlantDisplaySnapshot& after, const UnicodeString& plantLabel);
+	void ResetStaffLoggers();
+	void DetachObserverFromAllPlants();
+	void SelectStaffRowById(int staffId);
+	void RefreshGreenhouseDisplay();
     void PopulateSalesItemComboBox();
 	void UpdateOrderDisplay();
      // --- Sales/Order Objects ---
