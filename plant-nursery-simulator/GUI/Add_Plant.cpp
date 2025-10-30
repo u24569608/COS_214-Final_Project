@@ -1,3 +1,7 @@
+/**
+ * @file Add_Plant.cpp
+ * @brief Implements the VCL frame logic for registering new plants.
+ */
 //---------------------------------------------------------------------------
 
 #include <vcl.h>

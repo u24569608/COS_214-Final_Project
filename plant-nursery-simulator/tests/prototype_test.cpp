@@ -1,3 +1,7 @@
+/**
+ * @file prototype_test.cpp
+ * @brief Validates prototype pattern cloning for plant definitions and registries.
+ */
 #include <iostream>
 #include <memory>
 #include <string>

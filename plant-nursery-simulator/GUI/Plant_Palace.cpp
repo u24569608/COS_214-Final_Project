@@ -1,3 +1,7 @@
+/**
+ * @file Plant_Palace.cpp
+ * @brief Hosts the main VCL frame for the plant palace dashboard UI.
+ */
 //---------------------------------------------------------------------------
 
 #include <vcl.h>

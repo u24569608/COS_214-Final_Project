@@ -1,3 +1,7 @@
+/**
+ * @file builder_test.cpp
+ * @brief Validates the builder pattern implementation using custom assertions.
+ */
 #include <iostream>
 #include <vector>
 #include <string>

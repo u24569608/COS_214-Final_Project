@@ -2,6 +2,10 @@
 #include "../include/Colleague.h"
 #include <string>
 #include <vector>
+/**
+ * @file mediator_test.cpp
+ * @brief Exercises the mediator pattern interactions between nursery colleagues.
+ */
 #include <iostream>
 
 /*

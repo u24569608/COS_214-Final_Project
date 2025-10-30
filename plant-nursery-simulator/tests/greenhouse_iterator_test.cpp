@@ -1,3 +1,7 @@
+/**
+ * @file greenhouse_iterator_test.cpp
+ * @brief Checks greenhouse iterators for correct traversal semantics.
+ */
 #include <iostream>
 #include <memory>
 #include <string>

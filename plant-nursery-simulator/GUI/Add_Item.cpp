@@ -1,3 +1,7 @@
+/**
+ * @file Add_Item.cpp
+ * @brief Implements the VCL frame handlers for adding stock items to the inventory.
+ */
 //---------------------------------------------------------------------------
 
 #include <vcl.h>

@@ -1,3 +1,7 @@
+/**
+ * @file composite_test.cpp
+ * @brief Tests the greenhouse composite tree structure with custom checks.
+ */
 #include <iostream>
 #include <string>
 

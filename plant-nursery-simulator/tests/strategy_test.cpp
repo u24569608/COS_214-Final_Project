@@ -7,6 +7,10 @@
 #include "../include/OrganicFertilizer.h"
 #include "../include/Plant.h"
 
+/**
+ * @file strategy_test.cpp
+ * @brief Checks watering and fertilizing strategy selections using manual validation.
+ */
 #include <iostream>
 #include <cassert>
 
