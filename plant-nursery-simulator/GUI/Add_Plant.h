@@ -17,10 +17,14 @@ __published:	// IDE-managed Components
 	TButton *btnCancel;
 	TButton *btnAdd;
 	TLabel *lblBuildOrderHeading;
-	TLabeledEdit *LabeledEdit1;
+	TLabeledEdit *lbledtPlantName;
 	TRadioGroup *rgFertiliseStrategy;
 	TRadioGroup *rgWaterStrategy;
 	void __fastcall btnCancelClick(TObject *Sender);
+	void __fastcall lbledtPlantNameChange(TObject *Sender);
+	void __fastcall rgWaterStrategyClick(TObject *Sender);
+	void __fastcall rgFertiliseStrategyClick(TObject *Sender);
+	void __fastcall btnAddClick(TObject *Sender);
 private:	// User declarations
 public:		// User declarations
 	__fastcall TfrmAddPlant(TComponent* Owner);

@@ -56,6 +56,17 @@
 
 
 #include "Add_Item.h"
+#include "Add_Plant.h"
+
+
+#include "../include/WaterStrategy.h"
+#include "../include/FrequentWatering.h"
+#include "../include/SparseWatering.h"
+#include "../include/SeasonalWatering.h"
+#include "../include/FertilizeStrategy.h"
+#include "../include/LiquidFertilizer.h"
+#include "../include/OrganicFertilizer.h"
+#include "../include/SlowReleaseFertilizer.h"
 //---------------------------------------------------------------------------
 class TfrmMain : public TForm
 {
@@ -118,10 +129,13 @@ __published:	// IDE-managed Components
 	TPanel *pnlGreenhouseListView;
 	TLabel *lblAddPlantToRegistryHeading;
 	TButton *btnAddPlantToRegistry;
-	TLabeledEdit *lblSetPrice;
+	TLabeledEdit *lbledtPlantPrice;
 	TLabel *lblAddItemHeading;
 	TButton *btnAddItem;
 	TLabel *lblIOHeading;
+	TComboBox *cmbGreenhouseSelection;
+	TLabel *Label1;
+	TLabel *Label2;
 	void __fastcall edtMessageBodyChange(TObject *Sender);
 	void __fastcall FormCreate(TObject *Sender);
 	void __fastcall btnSendClick(TObject *Sender);
@@ -135,6 +149,7 @@ __published:	// IDE-managed Components
 	void __fastcall FormActivate(TObject *Sender);
 	void __fastcall btnAddPlantToRegistryClick(TObject *Sender);
 	void __fastcall btnAddItemClick(TObject *Sender);
+	void __fastcall btnClonePlantClick(TObject *Sender);
 
 private:	// User declarations
 	// --- Mediator Pattern ---
@@ -154,8 +169,14 @@ private:	// User declarations
 	void PopulateGreenhouseTree(TTreeNode* parentNode, GreenhouseComponent* component);
 
 
+    std::unique_ptr<WaterStrategy> stratFreqWater;
+	std::unique_ptr<WaterStrategy> stratSparseWater;
+	std::unique_ptr<WaterStrategy> stratSeasonalWater;
+	std::unique_ptr<FertilizeStrategy> stratLiquidFert;
+	std::unique_ptr<FertilizeStrategy> stratOrganicFert;
+	std::unique_ptr<FertilizeStrategy> stratSlowFert;
 
-
+    void PopulatePrototypeComboBox();
 
 
 public:		// User declarations
@@ -173,7 +194,9 @@ public:		// User declarations
 	void PopulateCustomerComboBox();
 
     // A list to hold all colleagues (Staff and Customers)
-    std::vector<std::unique_ptr<Colleague>> vtrColleagues;
+	std::vector<std::unique_ptr<Colleague>> vtrColleagues;
+
+     void PopulateGreenhouseBedComboBox(GreenhouseComponent* component, const std::string& prefix = "");
 };
 //---------------------------------------------------------------------------
 extern PACKAGE TfrmMain *frmMain;
