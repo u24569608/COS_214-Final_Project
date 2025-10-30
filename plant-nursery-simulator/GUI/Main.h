@@ -157,19 +157,77 @@ __published:	// IDE-managed Components
 	void __fastcall FormActivate(TObject *Sender);
 	void __fastcall btnAddPlantToRegistryClick(TObject *Sender);
 	void __fastcall btnAddItemClick(TObject *Sender);
+	/**
+	 * @brief Handles the Clone Plant button click, initiating plant creation from a prototype.
+	 * @param Sender Component raising the event.
+	 */
 	void __fastcall btnClonePlantClick(TObject *Sender);
+	/**
+	 * @brief Enables greenhouse selection once a prototype is chosen.
+	 * @param Sender Component raising the event.
+	 */
 	void __fastcall cmbPrototypesChange(TObject *Sender);
+	/**
+	 * @brief Reacts to greenhouse selection changes and enables price input.
+	 * @param Sender Component raising the event.
+	 */
 	void __fastcall cmbGreenhouseSelectionChange(TObject *Sender);
+	/**
+	 * @brief Enables the clone button when a valid price is entered.
+	 * @param Sender Component raising the event.
+	 */
 	void __fastcall lbledtPlantPriceChange(TObject *Sender);
+	/**
+	 * @brief Processes the next queued staff task when the button is clicked.
+	 * @param Sender Component raising the event.
+	 */
 	void __fastcall btnProcessNextTaskClick(TObject *Sender);
+	/**
+	 * @brief Tracks list view selection changes to enable task processing.
+	 * @param Sender Component raising the event.
+	 * @param Item Newly focused list item.
+	 * @param Selected True if the item is selected.
+	 */
 	void __fastcall lvStaffTaskQueueSelectItem(TObject *Sender, TListItem *Item, bool Selected);
+	/**
+	 * @brief Runs a greenhouse growth tick when the simulate button is pressed.
+	 * @param Sender Component raising the event.
+	 */
 	void __fastcall btnSimulateClick(TObject *Sender);
+	/**
+	 * @brief Updates staff context when the observer combo selection changes.
+	 * @param Sender Component raising the event.
+	 */
 	void __fastcall cmbStaffMemberChange(TObject *Sender);
+	/**
+	 * @brief Queues a watering command for the current plant/staff selection.
+	 * @param Sender Component raising the event.
+	 */
 	void __fastcall btnWaterClick(TObject *Sender);
+	/**
+	 * @brief Queues a fertilising command for the current plant/staff selection.
+	 * @param Sender Component raising the event.
+	 */
 	void __fastcall btnFertiliseClick(TObject *Sender);
+	/**
+	 * @brief Assigns the selected staff member as an observer of the active plant.
+	 * @param Sender Component raising the event.
+	 */
 	void __fastcall btnAssignObserveClick(TObject *Sender);
+	/**
+	 * @brief Responds to watering strategy radio group clicks.
+	 * @param Sender Component raising the event.
+	 */
 	void __fastcall rgWaterStrategyClick(TObject *Sender);
+	/**
+	 * @brief Responds to fertilising strategy radio group clicks.
+	 * @param Sender Component raising the event.
+	 */
 	void __fastcall rgFertiliseStrategyClick(TObject *Sender);
+	/**
+	 * @brief Displays the pending task list for a staff member on double-click.
+	 * @param Sender Component raising the event.
+	 */
 	void __fastcall lvStaffTaskQueueDblClick(TObject *Sender);
 
 
@@ -182,12 +240,20 @@ private:	// User declarations
 
 
 	// A helper function to fill in the combo boxes
+	/**
+	 * @brief Populates sender/receiver combo boxes with available colleagues.
+	 */
 	void PopulateColleagueComboBoxes();
 
 
 	// --- Composite Pattern ---
 	std::unique_ptr<PlantPrototypeRegistry> objPrototypeRegistry;
 	std::unique_ptr<GreenhouseBed> objGreenhouse; // The (Composite) root
+	/**
+	 * @brief Recursively inserts greenhouse components into the tree view.
+	 * @param parentNode Parent node for insertion (nullptr for root).
+	 * @param component Composite component to add.
+	 */
 	void PopulateGreenhouseTree(TTreeNode* parentNode, GreenhouseComponent* component);
 
 
@@ -202,8 +268,17 @@ private:	// User declarations
 	PlantInstance* currentPlantSelection;
 	Staff* currentStaffSelection;
 
+	/**
+	 * @brief Refreshes the prototypes combo box with registry entries.
+	 */
 	void PopulatePrototypeComboBox();
+	/**
+	 * @brief Populates the staff selection combo box for observer assignment.
+	 */
 	void PopulateStaffMemberComboBox();
+	/**
+	 * @brief Hooks UI events for the greenhouse information frame controls.
+	 */
 	void AttachGreenhouseFrameHandlers();
 	/**
 	 * @brief Lightweight snapshot of plant metrics for change detection.
@@ -231,11 +306,41 @@ private:	// User declarations
 	 * @param logChanges When true, emits log entries for metric deltas.
 	 */
 	void UpdateSelectedPlantDisplay(bool logChanges);
+	/**
+	 * @brief Retrieves a staff pointer held in the combo-box object map.
+	 * @param index Combo box item index.
+	 * @return Matching staff pointer or nullptr.
+	 */
 	Staff* ResolveStaffFromCombo(int index) const;
+	/**
+	 * @brief Searches the colleague list for a staff member by identifier.
+	 * @param id Numeric staff identifier.
+	 * @return Matching staff pointer or nullptr.
+	 */
 	Staff* FindStaffById(int id) const;
+	/**
+	 * @brief Maps a radio-group index to a watering strategy instance.
+	 * @param index Radio-group index.
+	 * @return Strategy pointer or nullptr when unavailable.
+	 */
 	WaterStrategy* WaterStrategyFromIndex(int index) const;
+	/**
+	 * @brief Maps a radio-group index to a fertilising strategy instance.
+	 * @param index Radio-group index.
+	 * @return Strategy pointer or nullptr when unavailable.
+	 */
 	FertilizeStrategy* FertilizeStrategyFromIndex(int index) const;
+	/**
+	 * @brief Determines the radio index for a given watering strategy pointer.
+	 * @param strategy Strategy instance to evaluate.
+	 * @return Matching index or -1 when unknown.
+	 */
 	int WaterStrategyIndexFromPointer(WaterStrategy* strategy) const;
+	/**
+	 * @brief Determines the radio index for a given fertilising strategy pointer.
+	 * @param strategy Strategy instance to evaluate.
+	 * @return Matching index or -1 when unknown.
+	 */
 	int FertilizeStrategyIndexFromPointer(FertilizeStrategy* strategy) const;
 	/**
 	 * @brief Adds a timestamped entry to the application log panel.
@@ -276,7 +381,13 @@ private:	// User declarations
 	 */
 
     // New
-    void RefreshStaffTaskQueue();
+	/**
+	 * @brief Rebuilds the staff task queue list view from model data.
+	 */
+	void RefreshStaffTaskQueue();
+	/**
+	 * @brief Configures list view columns and hooks for staff task management.
+	 */
 	void WireStaffTaskEvents();
 
 public:		// User declarations
@@ -295,7 +406,13 @@ public:		// User declarations
 	void DetachObserverFromAllPlants();
 	void SelectStaffRowById(int staffId);
 	void RefreshGreenhouseDisplay();
+    /**
+     * @brief Repopulates the sales item combo with available stock.
+     */
     void PopulateSalesItemComboBox();
+	/**
+	 * @brief Resets the sales frame order display to its default state.
+	 */
 	void UpdateOrderDisplay();
      // --- Sales/Order Objects ---
 	std::unique_ptr<PaymentProcessor> objPaymentProcessor;
@@ -303,15 +420,33 @@ public:		// User declarations
 	std::unique_ptr<SalesFacade> objSalesFacade;
 	std::unique_ptr<Order> currentOrder;
 	std::unique_ptr<Inventory> objInventory;
+	/**
+	 * @brief Rebuilds the inventory list view from current stock.
+	 */
 	void RefreshInventoryListView();
+	/**
+	 * @brief Enables or disables care controls based on current selection state.
+	 */
 	void UpdateCareActionState();
 
+	/**
+	 * @brief Populates the customer combo box with known customer IDs.
+	 */
 	void PopulateCustomerComboBox();
+	/**
+	 * @brief Processes observer events raised by plant instances.
+	 * @param event Observer payload describing the state change.
+	 */
 	void HandlePlantObserverEvent(const ObserverEvent& event);
 
     // A list to hold all colleagues (Staff and Customers)
 	std::vector<std::unique_ptr<Colleague>> vtrColleagues;
 
+    /**
+     * @brief Populates the greenhouse bed combo box with available beds.
+     * @param component Current component to inspect.
+     * @param prefix Hierarchical label prefix for nested beds.
+     */
      void PopulateGreenhouseBedComboBox(GreenhouseComponent* component, const std::string& prefix = "");
 
 	std::optional<PlantDisplaySnapshot> currentPlantSnapshot;
