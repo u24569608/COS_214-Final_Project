@@ -130,6 +130,17 @@ Note: File paths point to headers in `include/` and implementations in `src/` wi
 - Functional requirements
   - FR25: Unified façade for sales flows
 
+- Why this pattern over alternatives
+  - Over Service Locator or direct subsystem calls: Facade narrows and stabilizes the API the GUI/tests use, while dependencies (`Inventory`, `PaymentProcessor`, builders) remain swappable and independently testable.
+  - Over turning `SalesFacade` into a God object: Facade keeps orchestration only; business rules live in subsystems, preventing bloat and maintaining separation of concerns.
+
+- Implementation evidence
+  - `SalesFacade` accepts subsystem pointers and coordinates operations like `purchaseItem`, `addItemToCart`, `buildAndFinalizeOrder`, `checkStock`, and `addItemToInventory`.
+  - It also propagates contextual configuration (greenhouse root, prototype registry) via `setGreenhouseRoot()`/`setPlantRegistry()` for consistent environment setup.
+
+- FR details
+  - FR25 (Unified sales): The facade exposes one cohesive entry point used in tests (e.g., `tests/facade_test.cpp`) to assemble orders, sell items, and sync inventory without clients needing to understand iterators, prototypes, or adapters.
+
 ---
 
 ## Builder - Orders
