@@ -262,6 +262,18 @@ Note: File paths point to headers in `include/` and implementations in `src/` wi
   - FR1: Register clonable plant prototypes
   - FR2: Create plants by cloning prototypes
 
+- Why this pattern over alternatives
+  - Over Abstract Factory/Factory Method: Plant types are data-driven and registered at runtime; Prototype allows cloning configured exemplars without centralizing construction logic for every type.
+  - Over copy constructors alone: The registry maps string keys to polymorphic prototypes with virtual `clone()`, avoiding slicing and keeping creation decoupled from concrete classes.
+
+- Implementation evidence
+  - `PlantPrototypeRegistry::addPrototype()` stores owned prototypes by name; `createPlant()` clones on demand.
+  - `Inventory::createPlantInstance()` requests a prototype and configures a `PlantInstance`, applying default strategies if present.
+
+- FR details
+  - FR1 (Register prototypes): The registry collects named prototypes so Sales/Inventory can ensure consistency across instances.
+  - FR2 (Clone plants): New `Plant` instances are created via `clone()` with optional type override; this isolates creation from client code.
+
 ---
 
 ## State - Plant Lifecycle
