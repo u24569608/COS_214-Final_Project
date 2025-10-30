@@ -691,6 +691,11 @@ void __fastcall TfrmMain::btnClonePlantClick(TObject *Sender)
 		// Log and clear price
 		redtLog->Lines->Add(UnicodeString("[") + DateTimeToStr(Now()) + "] New Plant '" + newStockItemName.c_str() + "' Created and Planted");
 		lbledtPlantPrice->Text = "";
+
+		lbledtPlantPrice->Enabled = false;
+		cmbGreenhouseSelection->Enabled = false;
+		cmbPrototypes->Text = "Plant";
+        cmbGreenhouseSelection->Text = "Greenhouse";
 	}
 	catch (const std::exception& ex)
 	{
