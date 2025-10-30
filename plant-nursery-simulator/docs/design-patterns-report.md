@@ -426,33 +426,36 @@ The Plant Nursery Simulator models a nursery business end‑to‑end:
 
 ## Chain of Responsibility - Care Routing
 
-- Intent and rationale
+### Intent and rationale
   - Route care requests through a chain of handlers so each handler either processes or delegates. Makes it easy to add new care types.
-- Where implemented
+### Where implemented
   - `include/CareRequestHandler.h` (Handler)
   - `include/WateringHandler.h`, `src/WateringHandler.cpp` (ConcreteHandler)
   - `include/FertilizingHandler.h`, `src/FertilizingHandler.cpp` (ConcreteHandler)
   - Client wiring: `include/Staff.h`, `src/Staff.cpp`
-- Participants
+### Participants
   - Handler: `CareRequestHandler`
   - ConcreteHandler: `WateringHandler`, `FertilizingHandler`
-- Key interactions
+### Key interactions
   - `Staff` composes the chain and submits requests; each handler checks `canHandle()` and either processes or delegates to `next`.
-- Functional requirements
+### Functional requirements (with code references and tests)
   - FR20: Route care requests through chain
+    - Code: include/CareRequestHandler.h:18-30; src/WateringHandler.cpp:24-42; src/FertilizingHandler.cpp:24-41
+    - Tests: exercised by staff request flows
   - FR21: Handlers process or delegate
+    - Code: src/WateringHandler.cpp:18-22,35-41; src/FertilizingHandler.cpp:18-22,34-41
+    - Tests: manual verification via Staff::makeCareRequest
 
-- Why this pattern over alternatives
+### Why this pattern
   - Over switch/case branching: The chain allows adding new care types without modifying a central dispatcher, respecting Open/Closed Principle.
   - Over Strategy: We need routing plus delegation to “next” when unsupported; CoR matches that responsibility better.
 
-- Implementation evidence
+### Implementation evidence
   - `CareRequestHandler::handleRequest()` checks `canHandle()` and delegates to `nextHandler` when necessary. `WateringHandler`/`FertilizingHandler` implement the care-specific logic.
   - `Staff` composes the chain and invokes `makeCareRequest()` with a textual request type.
 
-- FR details
-  - FR20 (Route care): Requests are sent to the chain’s head; appropriate handler performs the action.
-  - FR21 (Process or delegate): Each handler either executes or forwards, terminating at end-of-chain without side effects when unsupported.
+### Why efficient
+  - Worst-case O(h) where h is handler count; constant work per handler.
 
 ---
 
