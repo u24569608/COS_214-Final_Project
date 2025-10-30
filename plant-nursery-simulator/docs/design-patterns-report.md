@@ -140,29 +140,35 @@ The Plant Nursery Simulator models a nursery business end‑to‑end:
 
 ## Facade - Sales
 
-- Intent and rationale
+### Intent and rationale
   - Provide a single entry point for sales operations, decoupling UI/client code from inventory, payments, and order-building complexity.
-- Where implemented
+### Where implemented
   - `include/SalesFacade.h`, `src/SalesFacade.cpp`
   - Subsystems: `include/Inventory.h` (+ `src/Inventory.cpp`), `include/PaymentProcessor.h` (+ `src/PaymentProcessor.cpp`), `include/OrderBuilder.h` (+ builders and `Order`)
-- Participants
+### Participants
   - Facade: `SalesFacade`
   - Subsystems: `Inventory`, `PaymentProcessor`, `OrderBuilder`/`CustomOrderBuilder`, `Order`
-- Key interactions
+### Key interactions
   - `SalesFacade` orchestrates purchase, stock checks, returns, and order creation without leaking subsystem details to clients.
-- Functional requirements
+### Functional requirements (with code references and tests)
   - FR25: Unified façade for sales flows
+    - Check stock: src/SalesFacade.cpp:165 — tests/facade_test.cpp:63
+    - Add to inventory: src/SalesFacade.cpp:172-186 — tests/facade_test.cpp:67
+    - Purchase item: src/SalesFacade.cpp:192-235 — tests/facade_test.cpp:79,95
+    - Build+finalise order: src/SalesFacade.cpp:257-307 — tests/facade_test.cpp:111
+    - Process return: src/SalesFacade.cpp:320-357 — tests/facade_test.cpp:134
+    - Cart sync notify: src/SalesFacade.cpp:362-371 — tests/facade_test.cpp:164
 
-- Why this pattern over alternatives
+### Why this pattern
   - Over Service Locator or direct subsystem calls: Facade narrows and stabilizes the API the GUI/tests use, while dependencies (`Inventory`, `PaymentProcessor`, builders) remain swappable and independently testable.
   - Over turning `SalesFacade` into a God object: Facade keeps orchestration only; business rules live in subsystems, preventing bloat and maintaining separation of concerns.
 
-- Implementation evidence
+### Implementation evidence
   - `SalesFacade` accepts subsystem pointers and coordinates operations like `purchaseItem`, `addItemToCart`, `buildAndFinalizeOrder`, `checkStock`, and `addItemToInventory`.
   - It also propagates contextual configuration (greenhouse root, prototype registry) via `setGreenhouseRoot()`/`setPlantRegistry()` for consistent environment setup.
 
-- FR details
-  - FR25 (Unified sales): The facade exposes one cohesive entry point used in tests (e.g., `tests/facade_test.cpp`) to assemble orders, sell items, and sync inventory without clients needing to understand iterators, prototypes, or adapters.
+### Why efficient
+  - Orchestration is O(1) per item; leverages inventory IDs to avoid repeated lookups.
 
 ---
 
