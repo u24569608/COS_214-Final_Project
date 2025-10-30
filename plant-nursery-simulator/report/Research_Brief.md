@@ -46,4 +46,3 @@ Research into horticulture and business management directly shaped the simulator
 - Department of Agriculture. (2023). *Greenhouse Management and Plant Propagation Guide.* Pretoria.
 - Royal Horticultural Society. (2022). *Plant Care Best Practices.* London.
 - Garden Centre Magazine. (2024). *Trends in Customer Personalisation and Retail Nurseries.*
-- University of Pretoria COS214 Project Specification (2025)
