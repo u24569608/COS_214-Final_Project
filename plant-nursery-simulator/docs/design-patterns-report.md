@@ -67,6 +67,18 @@ Note: File paths point to headers in `include/` and implementations in `src/` wi
   - FR12: Iterator over greenhouse hierarchy
   - FR26: Controller executes growth tick by iterating plants
 
+- Why this pattern over alternatives
+  - Over manual recursive traversal: Encapsulating traversal into an iterator decouples the controller and any client code from the composite’s depth and shape (beds within beds). This prevents repeated reimplementation of DFS/BFS and reduces recursion risks.
+  - Over Visitor: The controller mostly needs enumeration; per-node double-dispatch is unnecessary and would overcomplicate the design.
+
+- Implementation evidence
+  - `ConcreteGreenhouseIterator::collectPlants()` performs a DFS over `GreenhouseBed::children`, collecting `PlantInstance` leaves in a flat order (`src/ConcreteGreenhouseIterator.cpp`).
+  - `GreenhouseBed::createIterator()` is the factory for a bed-scoped iterator, keeping creation close to the composite (`include/GreenhouseBed.h`).
+
+- FR details
+  - FR12 (Traverse bed hierarchy): The iterator guarantees that all `PlantInstance`s nested at any depth are visited exactly once. This supports downstream operations such as care or availability checks.
+  - FR26 (Controller growth tick): `GreenhouseController::runGrowthTick()` creates a fresh iterator from the configured `GreenhouseBed` and applies `applyGrowthTick()` for each plant, ensuring a single O(n) pass over plants per tick.
+
 ---
 
 ## Composite - Greenhouse Structure
