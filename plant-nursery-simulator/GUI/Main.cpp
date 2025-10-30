@@ -564,7 +564,18 @@ void __fastcall TfrmMain::btnAddPlantToRegistryClick(TObject *Sender)
 
 void __fastcall TfrmMain::btnAddItemClick(TObject *Sender)
 {
-    frmAddItem->Show();
+	frmAddItem->Show();
+    /* try
+    {
+        // Create a new instance of the form
+        std::unique_ptr<TfrmAddItem> AddItemForm = std::make_unique<TfrmAddItem>(Application);
+        // Show it
+        AddItemForm->ShowModal();
+    }
+    catch(Exception &exception)
+    {
+        Application->ShowException(&exception);
+    }              */
 }
 //---------------------------------------------------------------------------
 

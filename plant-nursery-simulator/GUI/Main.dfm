@@ -24,8 +24,7 @@ object frmMain: TfrmMain
     Align = alTop
     BevelOuter = bvNone
     TabOrder = 1
-    ExplicitLeft = 48
-    ExplicitTop = 8
+    ExplicitWidth = 847
     object btnSimulate: TButton
       Left = 8
       Top = 11
@@ -47,6 +46,8 @@ object frmMain: TfrmMain
     Align = alBottom
     Images = vrtlmglstMain
     TabOrder = 0
+    ExplicitTop = 339
+    ExplicitWidth = 847
     object tsLog: TTabSheet
       Caption = 'Log'
       ImageIndex = 1
@@ -71,6 +72,7 @@ object frmMain: TfrmMain
         ScrollBars = ssVertical
         TabOrder = 0
         StyleElements = [seBorder]
+        ExplicitWidth = 839
       end
     end
     object tsMessages: TTabSheet
@@ -84,7 +86,6 @@ object frmMain: TfrmMain
         Align = alTop
         BevelOuter = bvNone
         TabOrder = 0
-        ExplicitWidth = 839
         DesignSize = (
           841
           129)
@@ -195,7 +196,6 @@ object frmMain: TfrmMain
           TabOrder = 2
           TextHint = 'Enter your message'
           OnChange = edtMessageBodyChange
-          ExplicitWidth = 728
         end
         object btnSend: TBitBtn
           Left = 743
@@ -218,7 +218,6 @@ object frmMain: TfrmMain
           ParentFont = False
           TabOrder = 3
           OnClick = btnSendClick
-          ExplicitLeft = 741
         end
         object btnClearMessages: TBitBtn
           Left = 666
@@ -265,7 +264,6 @@ object frmMain: TfrmMain
         ScrollBars = ssVertical
         TabOrder = 1
         StyleElements = [seBorder]
-        ExplicitWidth = 839
       end
     end
   end
@@ -296,8 +294,8 @@ object frmMain: TfrmMain
         BevelOuter = bvNone
         TabOrder = 0
         UseWheelForScrolling = True
-        ExplicitLeft = 177
-        ExplicitWidth = 664
+        ExplicitWidth = 658
+        ExplicitHeight = 254
         inline frmGreenhouseInformation1: TfrmGreenhouseInformation
           Left = 0
           Top = 0
@@ -314,7 +312,7 @@ object frmMain: TfrmMain
           ParentColor = False
           ParentFont = False
           TabOrder = 0
-          ExplicitWidth = 635
+          ExplicitWidth = 633
           inherited grpAction: TGroupBox
             inherited btnFertilise: TBitBtn
               Images = nil
@@ -333,6 +331,7 @@ object frmMain: TfrmMain
         Align = alLeft
         Caption = 'Panel1'
         TabOrder = 1
+        ExplicitHeight = 254
         object tvGreenhouse: TTreeView
           Left = 1
           Top = 1
@@ -342,9 +341,7 @@ object frmMain: TfrmMain
           Indent = 19
           TabOrder = 0
           OnChange = tvGreenhouseChange
-          ExplicitLeft = -2
-          ExplicitTop = 2
-          ExplicitHeight = 223
+          ExplicitHeight = 252
         end
       end
     end
@@ -459,9 +456,11 @@ object frmMain: TfrmMain
               end
               inherited btnAddToOrder: TBitBtn
                 Anchors = [akLeft]
+                Images = nil
               end
               inherited btnProcessPayment: TBitBtn
                 AlignWithMargins = False
+                Images = nil
               end
             end
           end
@@ -481,8 +480,6 @@ object frmMain: TfrmMain
         Align = alClient
         Images = vrtlmglstMain
         TabOrder = 0
-        ExplicitWidth = 839
-        ExplicitHeight = 254
         object tsInventoryManagement: TTabSheet
           Caption = 'Inventory Management   '
           ImageIndex = 5
@@ -498,8 +495,6 @@ object frmMain: TfrmMain
             ParentBackground = False
             TabOrder = 0
             StyleElements = []
-            ExplicitWidth = 831
-            ExplicitHeight = 218
             object lblAddItemHeading: TLabel
               Left = 25
               Top = 135
@@ -584,7 +579,7 @@ object frmMain: TfrmMain
             object lblSelectPlantCloneHeading: TLabel
               Left = 227
               Top = 16
-              Width = 212
+              Width = 254
               Height = 21
               Caption = 'Select a Plant to Plant in Greenhouse'
               Font.Charset = DEFAULT_CHARSET

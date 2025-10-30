@@ -20,6 +20,9 @@ __published:	// IDE-managed Components
 	TLabeledEdit *lbledtItemName;
 	TLabeledEdit *lbledtItemPrice;
 	void __fastcall btnCancelClick(TObject *Sender);
+	void __fastcall btnAddClick(TObject *Sender);
+	void __fastcall lbledtItemNameChange(TObject *Sender);
+	void __fastcall lbledtItemPriceChange(TObject *Sender);
 private:	// User declarations
 public:		// User declarations
 	__fastcall TfrmAddItem(TComponent* Owner);
