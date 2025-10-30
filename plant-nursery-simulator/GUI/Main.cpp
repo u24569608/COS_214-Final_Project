@@ -340,10 +340,10 @@ void __fastcall TfrmMain::btnLoadInventoryClick(TObject *Sender)
 			objGreenhouseController->setRootBed(objGreenhouse.get());
 		}
 
-		AppendLog("Successfully loaded inventory from '" + uFileName + "'");
+		AppendLog(UnicodeString("Successfully loaded inventory from '") + uFileName + "'");
 	}
 	catch (const std::exception &ex) {
-		AppendLog("Error loading file: " + String(ex.what()));
+		AppendLog(UnicodeString("Error loading file: ") + String(ex.what()));
 	}
 	delete adapter;
 }
@@ -414,10 +414,10 @@ void __fastcall TfrmMain::btnSaveInventoryClick(TObject *Sender)
 		if (adapter != nullptr) {
 			try {
 				adapter->saveInventory(filePath, objInventory.get());
-				AppendLog("Successfully saved inventory to '" + uFileName + "'");
+				AppendLog(UnicodeString("Successfully saved inventory to '") + uFileName + "'");
 			}
 			catch (const std::exception &ex) {
-				AppendLog("Error saving file: " + String(ex.what()));
+				AppendLog(UnicodeString("Error saving file: ") + String(ex.what()));
 			}
 			delete adapter;
 		} else {
@@ -514,7 +514,7 @@ void __fastcall TfrmMain::btnAddPlantToRegistryClick(TObject *Sender)
 
 	PopulatePrototypeComboBox();
 
-		AppendLog("New Prototype Registered: '" + UnicodeString(plantName.c_str()) + "'");
+		AppendLog(UnicodeString("New Prototype Registered: '") + UnicodeString(plantName.c_str()) + "'");
 	}
 }
 //---------------------------------------------------------------------------
@@ -611,7 +611,7 @@ void __fastcall TfrmMain::btnClonePlantClick(TObject *Sender)
 		RefreshInventoryListView();
 		PopulateSalesItemComboBox();
 
-	AppendLog("New plant '" + UnicodeString(newStockItemName.c_str()) + "' created and planted");
+	AppendLog(UnicodeString("New plant '") + UnicodeString(newStockItemName.c_str()) + "' created and planted");
 		lbledtPlantPrice->Text = "";
 
 		lbledtPlantPrice->Enabled = false;
@@ -809,7 +809,7 @@ void __fastcall TfrmMain::btnAssignObserveClick(TObject *Sender)
 	}
 
 	currentStaffSelection->observePlant(currentPlantSelection);
-	AppendLog("Staff " + IntToStr(currentStaffSelection->getID()) + " now observing '" +
+	AppendLog(UnicodeString("Staff ") + IntToStr(currentStaffSelection->getID()) + " now observing '" +
 		UnicodeString(currentPlantSelection->getName().c_str()) + "'");
 
 	UpdateCareActionState();
@@ -833,7 +833,7 @@ void __fastcall TfrmMain::rgWaterStrategyClick(TObject *Sender)
 	}
 
 	currentPlantSelection->setWaterStrategy(strategy);
-	AppendLog("Updated watering strategy for '" + UnicodeString(currentPlantSelection->getName().c_str()) + "'");
+	AppendLog(UnicodeString("Updated watering strategy for '") + UnicodeString(currentPlantSelection->getName().c_str()) + "'");
 }
 //---------------------------------------------------------------------------
 void __fastcall TfrmMain::rgFertiliseStrategyClick(TObject *Sender)
@@ -854,7 +854,7 @@ void __fastcall TfrmMain::rgFertiliseStrategyClick(TObject *Sender)
 	}
 
 	currentPlantSelection->setFertilizeStrategy(strategy);
-	AppendLog("Updated fertilising strategy for '" + UnicodeString(currentPlantSelection->getName().c_str()) + "'");
+	AppendLog(UnicodeString("Updated fertilising strategy for '") + UnicodeString(currentPlantSelection->getName().c_str()) + "'");
 }
 //---------------------------------------------------------------------------
 void TfrmMain::PopulateStaffMemberComboBox()

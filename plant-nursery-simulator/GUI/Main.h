@@ -255,11 +255,6 @@ private:	// User declarations
 	 */
 	void AttachLoggerToAllPlants();
 	/**
-	 * @brief Processes observer callbacks triggered by plant state changes.
-	 * @param event Observer payload emitted by the plant.
-	 */
-	void HandlePlantObserverEvent(const ObserverEvent& event);
-	/**
 	 * @brief Captures the current plant metrics for later comparisons.
 	 * @param plant Plant to sample.
 	 * @return Snapshot containing the latest metrics.
@@ -291,6 +286,7 @@ public:		// User declarations
 	void UpdateCareActionState();
 
 	void PopulateCustomerComboBox();
+	void HandlePlantObserverEvent(const ObserverEvent& event);
 
     // A list to hold all colleagues (Staff and Customers)
 	std::vector<std::unique_ptr<Colleague>> vtrColleagues;
