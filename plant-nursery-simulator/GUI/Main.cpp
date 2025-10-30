@@ -42,8 +42,6 @@ class ConcretePlant : public Plant {
 __fastcall TfrmMain::TfrmMain(TComponent* Owner)
 	: TForm(Owner)
 {
-	// --- Create Strategy Instances ---
-    // Create one of each concrete strategy to be used as default prototypes
     stratFreqWater = std::make_unique<FrequentWatering>();
     stratSparseWater = std::make_unique<SparseWatering>();
     stratSeasonalWater = std::make_unique<SeasonalWatering>();
@@ -53,77 +51,48 @@ __fastcall TfrmMain::TfrmMain(TComponent* Owner)
 
 	PopulatePrototypeComboBox();
 
-
-	// --- BEGIN Mediator Pattern Setup ---
-	// Create the Mediator object
 	objMediator = std::make_unique<NurseryMediator>();
 
-	// Create Colleagues
-	//    The constructor is Colleague(int id, FloorMediator* mediator)
 	vtrColleagues.push_back(std::make_unique<Staff>(101, objMediator.get()));
 	vtrColleagues.push_back(std::make_unique<Customer>(201, objMediator.get()));
 	vtrColleagues.push_back(std::make_unique<Customer>(202, objMediator.get()));
 	vtrColleagues.push_back(std::make_unique<Staff>(102, objMediator.get()));
 
-	// Register all colleagues with the mediator
 	for (const auto& colleague : vtrColleagues) {
 		objMediator->addColleague(colleague.get());
 	}
 
-	// Fill GUI combo boxes with the IDs
 	PopulateColleagueComboBoxes();
-	// --- END Mediator Pattern Setup ---
 
-    // Populate the customer selection combobox on the Sales Frame
 	PopulateCustomerComboBox();
     UpdateOrderDisplay();
 
-	// --- Core System Setup (Composite & Prototype) ---
-
-	// Create the Plant Prototype Registry
 	objPrototypeRegistry = std::make_unique<PlantPrototypeRegistry>();
 
-    // THIS NEEDS TO BE POPULATED DIFFERNTLY -- NB
-	// Add concrete prototypes to the registry using ConcretePlant
 	objPrototypeRegistry->addPrototype("Rose", std::make_unique<ConcretePlant>("Rose", "Flower"));
 	objPrototypeRegistry->addPrototype("Fern", std::make_unique<ConcretePlant>("Fern", "Foliage"));
 	objPrototypeRegistry->addPrototype("Spruce", std::make_unique<ConcretePlant>("Spruce", "Conifer"));
 
-	// Create the main Greenhouse root
 	objGreenhouse = std::make_unique<GreenhouseBed>("Main Greenhouse");
 
-    // Add another empty bed
 	objGreenhouse->add(new GreenhouseBed("Empty Bed"));
 
-
-	// === Populate the TreeView ===
 	tvGreenhouse->Items->Clear();
 	PopulateGreenhouseTree(nullptr, objGreenhouse.get());
 	tvGreenhouse->FullExpand();
 
-	// === Populate the Prototype ComboBox ===
-	//    (We'll add this later when implementing the Clone button)
-	// PopulatePrototypeComboBox();
-
-    // --- Create Inventory Object ---
 	objInventory = std::make_unique<Inventory>();
 
-    // Give the Inventory pointers to the other systems it needs
-    objInventory->setPlantRegistry(objPrototypeRegistry.get());
+	objInventory->setPlantRegistry(objPrototypeRegistry.get());
 	objInventory->setGreenhouseRoot(objGreenhouse.get());
 
-
-    // --- Sales System Setup ---
-	// Create Payment Processor
 	objPaymentProcessor = std::make_unique<PaymentProcessor>();
 
-	// Create the Order Builder (Concrete Builder)
+
 	objOrderBuilder = std::make_unique<CustomOrderBuilder>();
 
-    // Create an initial empty order for the builder to manage
     objOrderBuilder->createNewOrder();
 
-	// Create the Sales Facade, passing pointers to subsystems
 	objSalesFacade = std::make_unique<SalesFacade>(
 		objInventory.get(),
 		objPaymentProcessor.get(),
@@ -135,12 +104,10 @@ __fastcall TfrmMain::TfrmMain(TComponent* Owner)
     objInventory->setPlantRegistry(objPrototypeRegistry.get());
     objInventory->setGreenhouseRoot(objGreenhouse.get());
 
-
 	tvGreenhouse->Items->Clear();
 	PopulateGreenhouseTree(nullptr, objGreenhouse.get());
 	tvGreenhouse->FullExpand();
 
-	// Populate the item selection combobox on the Sales Frame
 	PopulateSalesItemComboBox();
 
 	PopulateGreenhouseBedComboBox(objGreenhouse.get());
@@ -149,7 +116,6 @@ __fastcall TfrmMain::TfrmMain(TComponent* Owner)
 	RefreshStaffTaskQueue();
 }
 //---------------------------------------------------------------------------
-
 void __fastcall TfrmMain::edtMessageBodyChange(TObject *Sender)
 {
 	if (edtMessageBody->Text.Length() == 0) {
@@ -160,43 +126,36 @@ void __fastcall TfrmMain::edtMessageBodyChange(TObject *Sender)
 	}
 }
 //---------------------------------------------------------------------------
-
 void __fastcall TfrmMain::FormCreate(TObject *Sender)
 {
-	// Display Welcome Message in Log
 	redtLog->Lines->Add("[" + DateTimeToStr(Now()) + "] Welcome to Plant Palace!");
 }
 //---------------------------------------------------------------------------
-
 void TfrmMain::PopulateColleagueComboBoxes()
 {
-	// Clear any old items
 	cmbSender->Clear();
 	cmbReceiver->Clear();
 
 	cmbSender->Text = "Sender";
 	cmbReceiver->Text = "Receiver";
 
-	// Loop through list of Colleague objects
 	for (const auto& colleague : vtrColleagues)
 	{
-		// Get the INT ID and convert it to a UnicodeString
 		UnicodeString idString = colleague->getID();
 
-		// Add the ID string to both comboboxes
 		cmbSender->Items->Add(idString);
 		cmbReceiver->Items->Add(idString);
 	}
 }
-
+//---------------------------------------------------------------------------
 void __fastcall TfrmMain::btnSendClick(TObject *Sender)
 {
-    // Get all the data from the GUI
+
 	UnicodeString senderIdStr = cmbSender->Text;
 	UnicodeString receiverIdStr = cmbReceiver->Text;
 	std::string message = AnsiString(edtMessageBody->Text).c_str();
 
-	// Convert GUI strings back to INTs
+
 	int senderId = -1;
 	int receiverId = -1;
 
@@ -209,7 +168,6 @@ void __fastcall TfrmMain::btnSendClick(TObject *Sender)
 		return;
 	}
 
-	// Find the sender Colleague object in our list (using the INT ID)
 	Colleague* sender = nullptr;
 	for (const auto& colleague : vtrColleagues) {
 		if (colleague->getID() == senderId) {
@@ -218,30 +176,23 @@ void __fastcall TfrmMain::btnSendClick(TObject *Sender)
 		}
 	}
 
-	// Call the backend send() method
 	if (sender != nullptr) {
 		sender->send(message, receiverId);
 
-		// Log the message to the RichEdit (using ID strings)
 		UnicodeString logLine = senderIdStr + " -> " + receiverIdStr + ": " + message.c_str();
 		redtMessages->Lines->Add(logLine);
 
-		// Clear the message box
 		edtMessageBody->Text = "";
 	} else {
 		redtLog->Lines->Add("[" + DateTimeToStr(Now()) + "] ERROR: Could not find Sender Object");
 	}
 }
 //---------------------------------------------------------------------------
-
 void __fastcall TfrmMain::btnClearMessagesClick(TObject *Sender)
 {
-    // Clear the Message Output
     redtMessages->Clear();
 }
 //---------------------------------------------------------------------------
-
-
 void __fastcall TfrmMain::btnReverseClick(TObject *Sender)
 {
 	std::string sSender = AnsiString(cmbSender->Text).c_str();
@@ -251,95 +202,74 @@ void __fastcall TfrmMain::btnReverseClick(TObject *Sender)
 	cmbReceiver->Text = sSender.c_str();
 }
 //---------------------------------------------------------------------------
-
 void TfrmMain::PopulateGreenhouseTree(TTreeNode* parentNode, GreenhouseComponent* component)
 {
 	if (component == nullptr) {
 		return;
 	}
 
-	// Get the name from the component
 	std::string name = component->getName();
 
-	// Create a new TTreeNode
 	TTreeNode* node;
-	if (parentNode == nullptr) { // Root node
+	if (parentNode == nullptr) {
 		node = tvGreenhouse->Items->Add(nullptr, name.c_str());
-	} else { // Child node
+	} else {
 		node = tvGreenhouse->Items->AddChild(parentNode, name.c_str());
 	}
 
-	// Store the C++ object pointer in the node's Data property
 	node->Data = component;
 
-	// Check if the component is a GreenhouseBed (Composite)
 	GreenhouseBed* bed = dynamic_cast<GreenhouseBed*>(component);
 	if (bed != nullptr)
 	{
-		// It's a bed, so get its iterator
 		std::unique_ptr<GreenhouseIterator> it = bed->createIterator();
-
-		// Loop using the iterator
 		if (it) {
-			// Start at the first item
 			GreenhouseComponent* child = it->first();
-			// Loop while hasNext() is true
 			while (child != nullptr) {
-				// Recursively call this function for the child
 				PopulateGreenhouseTree(node, child);
-				// Advance to the next item
 				child = it->next();
 			}
 		}
 	}
 }
-
+//---------------------------------------------------------------------------
 void __fastcall TfrmMain::tvGreenhouseChange(TObject *Sender, TTreeNode *Node)
 {
-	// On Greenhouse List View Change
-	// Get the currently selected node in the TreeView
 	TTreeNode* selectedNode = tvGreenhouse->Selected;
 
-	// Check if a node is actually selected
 	if (selectedNode != nullptr && selectedNode->Data != nullptr)
 	{
-		// Get the C++ object stored in the node's Data property
+
 		GreenhouseComponent* component = static_cast<GreenhouseComponent*>(selectedNode->Data);
 
-		// Try to safely cast it to a PlantInstance*
 		PlantInstance* plant = dynamic_cast<PlantInstance*>(component);
 
-		// Check if the cast was successful (i.e., the user clicked a plant)
 		if (plant != nullptr)
 		{
-			// --- Update the Greenhouse Information Frame ---
-			// a) Plant Name: Use getName() from the base GreenhouseComponent
+
 			frmGreenhouseInformation1->lbledtPlantName->Text = plant->getName().c_str();
 
-			// b) Plant State: Get the state object and then its name
-			const PlantState* currentState = plant->getState(); //
+
+			const PlantState* currentState = plant->getState();
 			if (currentState != nullptr) {
 				frmGreenhouseInformation1->lbledtPlantState->Text = currentState->getName().c_str();
 			} else {
 				frmGreenhouseInformation1->lbledtPlantState->Text = "Unknown State";
 			}
 
-			// c) Growth Progress Bar. Using HEALTH for now...
-			int health = plant->getHealth(); //
+
+			int health = plant->getHealth();
 			frmGreenhouseInformation1->pbGrowth->Position = health;
 
-			// d) Enable care buttons (since a plant is selected)
+
 			frmGreenhouseInformation1->rgWaterStrategy->Enabled = true;
 			frmGreenhouseInformation1->rgFertiliseStrategy->Enabled = true;
 
 			frmGreenhouseInformation1->enableDisableCareButtons();
 
-			return; // Exit after updating for a plant
+			return;
 		}
 	}
-
-	// --- If no node selected, or it wasn't a plant ---
-	// Clear the details and disable care buttons
 	frmGreenhouseInformation1->lbledtPlantName->Text = "—";
 	frmGreenhouseInformation1->lbledtPlantState->Text = "—";
 	frmGreenhouseInformation1->pbGrowth->Position = 0;
@@ -351,19 +281,16 @@ void __fastcall TfrmMain::tvGreenhouseChange(TObject *Sender, TTreeNode *Node)
 	frmGreenhouseInformation1->btnFertilise->Enabled = false;
 }
 //---------------------------------------------------------------------------
-
 void __fastcall TfrmMain::btnLoadInventoryClick(TObject *Sender)
 {
-	// LOAD INVENTORY
-	// Show the Open Dialogue
 	if (dlgOpenLoadInventory->Execute())
 	{
-		// Get file path and extension
+
 		UnicodeString uFileName = dlgOpenLoadInventory->FileName;
 		UnicodeString uExt = ExtractFileExt(uFileName);
 		std::string filePath = AnsiString(uFileName).c_str();
 
-		// Create the correct Adapter
+
 		FileAdapter* adapter = nullptr;
 		if (uExt.LowerCase() == ".csv") {
 			adapter = new CSVAdapter();
@@ -371,15 +298,12 @@ void __fastcall TfrmMain::btnLoadInventoryClick(TObject *Sender)
 			adapter = new TXTAdapter();
 		}
 
-		// Load the file using the adapter
 		if (adapter != nullptr) {
 			try {
 				objInventory->loadFromFile(adapter, filePath);
 
-				// Refresh the ListView display
 				RefreshInventoryListView();
 
-                // Populate the sales dropdown
                 PopulateSalesItemComboBox();
 
 				redtLog->Lines->Add("[" + DateTimeToStr(Now()) + "] Successfully Loaded Inventory from '" + uFileName + "'");
@@ -394,14 +318,10 @@ void __fastcall TfrmMain::btnLoadInventoryClick(TObject *Sender)
 	}
 }
 //---------------------------------------------------------------------------
-
 void TfrmMain::RefreshInventoryListView()
 {
-    // ADD INVENTORY TO LIST VIEW
-	// Clear previous items
 	lvInventory->Items->Clear();
 
-	// Get iterator (returns InventoryIterator*)
 	InventoryIterator* itRaw = objInventory->createIterator();
     if (!itRaw) {
 		redtLog->Lines->Add("[" + DateTimeToStr(Now()) + "] ERROR: Could not get Inventory Iterator");
@@ -409,26 +329,23 @@ void TfrmMain::RefreshInventoryListView()
 	}
     std::unique_ptr<InventoryIterator> it(itRaw);
 
-	// Loop through inventory using first() / next() / hasNext()
 	for (StockItem* item = it->first(); it->hasNext(); item = it->next())
 	{
 		if (item) {
 			item = it->currentItem();
 			if (!item) continue;
 
-			// Create a new item in the TListView
 			TListItem *listItem = lvInventory->Items->Add();
 
-			// --- Populate ListView Columns ---
 			listItem->Caption = item->getname().c_str();
 			listItem->SubItems->Add(FloatToStrF(item->getPrice(), ffCurrency, 8, 2));
 			listItem->SubItems->Add(item->getDisplayStatus().c_str());
 		}
 	}
 }
+//---------------------------------------------------------------------------
 void __fastcall TfrmMain::btnInventoryUpClick(TObject *Sender)
 {
-    // Scroll Up
 	if (lvInventory->ItemIndex > -1) {
 		lvInventory->ItemIndex = lvInventory->ItemIndex - 1;
 	} else {
@@ -437,10 +354,8 @@ void __fastcall TfrmMain::btnInventoryUpClick(TObject *Sender)
     }
 }
 //---------------------------------------------------------------------------
-
 void __fastcall TfrmMain::btnInventoryDownClick(TObject *Sender)
 {
-    // Scroll Down
 	if (lvInventory->ItemIndex < lvInventory->Items->Count - 1) {
 		lvInventory->ItemIndex = lvInventory->ItemIndex + 1;
 	} else {
@@ -449,19 +364,14 @@ void __fastcall TfrmMain::btnInventoryDownClick(TObject *Sender)
     }
 }
 //---------------------------------------------------------------------------
-
 void __fastcall TfrmMain::btnSaveInventoryClick(TObject *Sender)
 {
-    // SAVE INVENTORY TO FILE
-	// Show the Save Dialogue
 	if (dlgSaveSaveInventory->Execute())
 	{
-		// Get the chosen file path and determine extension
 		UnicodeString uFileName = dlgSaveSaveInventory->FileName;
 		UnicodeString uExt = ExtractFileExt(uFileName);
 		std::string filePath = AnsiString(uFileName).c_str();
 
-		// Create the correct Adapter based on the file extension
 		FileAdapter* adapter = nullptr;
 		if (uExt.LowerCase() == ".csv") {
 			adapter = new CSVAdapter();
@@ -469,7 +379,7 @@ void __fastcall TfrmMain::btnSaveInventoryClick(TObject *Sender)
 			adapter = new TXTAdapter();
 		}
 
-		// Save inventory using the adapter
+
 		if (adapter != nullptr) {
 			try {
 				adapter->saveInventory(filePath, objInventory.get());
@@ -485,23 +395,18 @@ void __fastcall TfrmMain::btnSaveInventoryClick(TObject *Sender)
 	}
 }
 //---------------------------------------------------------------------------
-
-// Populates the item selection dropdown on the Sales Frame
 void TfrmMain::PopulateSalesItemComboBox()
 {
-    // Access the combobox on the Sales Frame instance (frmSales1)
 	frmSales1->cmbItemSelection->Clear();
 
-	// Use Inventory Iterator to get available items
 	InventoryIterator* itRaw = objInventory->createIterator();
-    if (!itRaw) return; // Handle error if iterator fails
+	if (!itRaw) return;
     std::unique_ptr<InventoryIterator> it(itRaw);
 
-	// Loop and add item names to the combobox
     for (StockItem* item = it->first(); it->hasNext(); item = it->next())
 	{
-        item = it->currentItem(); // Get current item
-        if (item && item->getIsAvailible()) // Only add available items
+		item = it->currentItem();
+		if (item && item->getIsAvailible())
         {
 			frmSales1->cmbItemSelection->Items->Add(item->getname().c_str());
 		}
@@ -510,23 +415,18 @@ void TfrmMain::PopulateSalesItemComboBox()
     frmSales1->cmbItemSelection->ItemIndex = -1;
 	frmSales1->cmbItemSelection->Text = "Select an Item";
 }
-
-// Updates the RichEdit on the Sales Frame to show the current order
+//---------------------------------------------------------------------------
 void TfrmMain::UpdateOrderDisplay()
 {
-   // Access the RichEdit on the Sales Frame instance (frmSales1)
 	frmSales1->redtOrderDetails->Clear();
-	frmSales1->redtOrderDetails->Lines->Add("(Order is empty)"); // Initial message
+	frmSales1->redtOrderDetails->Lines->Add("(Empty Order)");
 
-	// Disable controls
 	frmSales1->redtOrderDetails->Enabled = false;
-   //	frmSales1->lbledtCustomerName->Enabled = false;
 	frmSales1->btnProcessPayment->Enabled = false;
-   //	frmSales1->lbledtCustomerName->Text = "";
 
-    // Reset the frame's internal total counter
     frmSales1->currentOrderTotal = 0.0;
 }
+//---------------------------------------------------------------------------
 void __fastcall TfrmMain::FormActivate(TObject *Sender)
 {
 	 frmSales1->currentOrderTotal = 0.0;
@@ -535,70 +435,56 @@ void __fastcall TfrmMain::FormActivate(TObject *Sender)
 //---------------------------------------------------------------------------
 void TfrmMain::PopulateCustomerComboBox()
 {
-    frmSales1->cmbCustomerSelect->Clear(); // Use the new ComboBox name
+    frmSales1->cmbCustomerSelect->Clear();
 
-    for (const auto& colleague : vtrColleagues) {
-        // Try to cast to Customer*
-        Customer* cust = dynamic_cast<Customer*>(colleague.get());
-        if (cust != nullptr) { // Only add if it's actually a Customer
-            UnicodeString idString = cust->getID(); // Get the int ID
+	for (const auto& colleague : vtrColleagues) {
+		Customer* cust = dynamic_cast<Customer*>(colleague.get());
+		if (cust != nullptr) {
+			UnicodeString idString = cust->getID();
             frmSales1->cmbCustomerSelect->Items->Add(idString);
         }
     }
 
-    // Set prompt text instead of selecting first item
     frmSales1->cmbCustomerSelect->ItemIndex = -1;
     frmSales1->cmbCustomerSelect->Text = "Select Customer ID";
-    // Disable payment button until customer is selected
+
+
     frmSales1->btnProcessPayment->Enabled = false;
 }
 //---------------------------------------------------------------------------
-
-
-
 void __fastcall TfrmMain::btnAddPlantToRegistryClick(TObject *Sender)
 {
-	// frmAddPlant->Show();
-    // 1. Create the form instance
-    std::unique_ptr<TfrmAddPlant> AddForm = std::make_unique<TfrmAddPlant>(this);
+	std::unique_ptr<TfrmAddPlant> AddForm = std::make_unique<TfrmAddPlant>(this);
 
-    // 2. Show it as a modal dialog
-    if (AddForm->ShowModal() == mrOk)
-    {
-        // 3. User clicked "Add". Get the data from the form's properties
+	if (AddForm->ShowModal() == mrOk)
+	{
         std::string plantName = AnsiString(AddForm->lbledtPlantName->Text).c_str();
         int waterIndex = AddForm->rgWaterStrategy->ItemIndex;
         int fertIndex = AddForm->rgFertiliseStrategy->ItemIndex;
 
-        // 4. Create the new ConcretePlant prototype
-        // (ConcretePlant helper class is defined at top of Main.cpp)
-        auto newProto = std::make_unique<ConcretePlant>(plantName, "Plant"); // "Plant" as default type
+		auto newProto = std::make_unique<ConcretePlant>(plantName, "Plant");
 
-        // 5. Select the correct WaterStrategy* based on ItemIndex
+
         WaterStrategy* ws = nullptr;
         if (waterIndex == 0) ws = stratFreqWater.get();
         else if (waterIndex == 1) ws = stratSparseWater.get();
         else if (waterIndex == 2) ws = stratSeasonalWater.get();
 
-        // 6. Select the correct FertilizeStrategy* based on ItemIndex
         FertilizeStrategy* fs = nullptr;
         if (fertIndex == 0) fs = stratLiquidFert.get();
         else if (fertIndex == 1) fs = stratOrganicFert.get();
         else if (fertIndex == 2) fs = stratSlowFert.get();
 
-        // 7. Set the default strategies on the new prototype
         newProto->setDefaultWaterStrat(ws);
         newProto->setDefaultFertStrat(fs);
 
-        // 8. Add the new prototype to the main registry
         objPrototypeRegistry->addPrototype(plantName, std::move(newProto));
 
-        // 9. Refresh the prototype ComboBox to show the new addition
-        PopulatePrototypeComboBox();
-        // Also add the new item directly to the combobox
-        cmbPrototypes->Items->Add(plantName.c_str());
 
-        // 10. Log it
+		PopulatePrototypeComboBox();
+
+		cmbPrototypes->Items->Add(plantName.c_str());
+
         redtLog->Lines->Add("[" + DateTimeToStr(Now()) + "] New Prototype Registered: '" + plantName.c_str() + "'");
     }
 }
@@ -610,17 +496,16 @@ void __fastcall TfrmMain::btnAddItemClick(TObject *Sender)
 //---------------------------------------------------------------------------
 void TfrmMain::PopulatePrototypeComboBox()
 {
-    // Go to the "System Admin" tab's combobox
-    cmbPrototypes->Clear(); //
+	cmbPrototypes->Clear();
     cmbPrototypes->Text = "Plant";
     cmbPrototypes->Items->Add("Rose");
 	cmbPrototypes->Items->Add("Fern");
 	cmbPrototypes->Items->Add("Spruce");
 
 }
+//---------------------------------------------------------------------------
 void __fastcall TfrmMain::btnClonePlantClick(TObject *Sender)
 {
-	// VALIDATE PROTOTYPE SELECTION
 	std::string prototypeName = AnsiString(cmbPrototypes->Text).c_str();
 	if (cmbPrototypes->ItemIndex == -1 || prototypeName.empty() || cmbPrototypes->Text == "No Prototypes Registered") {
 		ShowMessage("Please select a plant prototype to clone.");
@@ -628,21 +513,18 @@ void __fastcall TfrmMain::btnClonePlantClick(TObject *Sender)
 		return;
 	}
 
-	// VALIDATE GREENHOUSE BED SELECTION
 	if (cmbGreenhouseSelection->ItemIndex == -1 || cmbGreenhouseSelection->Text == "Select a Bed...") {
 		ShowMessage("Please select a greenhouse bed from the dropdown.");
 		cmbGreenhouseSelection->SetFocus();
 		return;
 	}
 
-	// Get the GreenhouseBed* pointer from the ComboBox
 	GreenhouseBed* bed = reinterpret_cast<GreenhouseBed*>(cmbGreenhouseSelection->Items->Objects[cmbGreenhouseSelection->ItemIndex]);
 	if (bed == nullptr) {
 		ShowMessage("An error occurred. The selected bed is invalid.");
 		return;
 	}
 
-	// VALIDATE PRICE
 	double itemPrice = 0.0;
 	try {
 		itemPrice = StrToFloat(lbledtPlantPrice->Text);
@@ -660,31 +542,26 @@ void __fastcall TfrmMain::btnClonePlantClick(TObject *Sender)
 
 	try
 	{
-		// CLONE THE PROTOTYPE (Prototype Pattern - FR2)
 		Plant* prototypeClone = objPrototypeRegistry->createPlant(prototypeName, ""); //
 		if (!prototypeClone) {
-			ShowMessage(UnicodeString("Error: Could not clone prototype '") + prototypeName.c_str() + "'.");
+			ShowMessage(UnicodeString("Error: Could not Clone Prototype '") + prototypeName.c_str() + "'");
 			return;
 		}
 
-		// CREATE THE PLANT INSTANCE
 		PlantInstance* newPlant = new PlantInstance(prototypeClone, ""); //
 		delete prototypeClone;
         prototypeClone = nullptr;
 
-		// CREATE THE STOCK ITEM
 		auto newStockItem = std::make_unique<StockItem>(
 			newPlant->getName(),
 			itemPrice,
 			newPlant
-		); //
+		);
 		std::string newStockItemName = newStockItem->getname();
 
-		// ADD TO BACKEND SYSTEMS
 		bed->add(newPlant);
 		objInventory->additem(std::move(newStockItem));
 
-		// REFRESH ALL UIs
 		tvGreenhouse->Items->Clear();
 		PopulateGreenhouseTree(nullptr, objGreenhouse.get());
 		tvGreenhouse->FullExpand();
@@ -692,7 +569,6 @@ void __fastcall TfrmMain::btnClonePlantClick(TObject *Sender)
 		RefreshInventoryListView();
 		PopulateSalesItemComboBox();
 
-		// Log and clear price
 		redtLog->Lines->Add(UnicodeString("[") + DateTimeToStr(Now()) + "] New Plant '" + newStockItemName.c_str() + "' Created and Planted");
 		lbledtPlantPrice->Text = "";
 
@@ -728,24 +604,22 @@ void TfrmMain::PopulateGreenhouseBedComboBox(GreenhouseComponent* component, con
 		}
 	}
 }
+//---------------------------------------------------------------------------
 void __fastcall TfrmMain::cmbPrototypesChange(TObject *Sender)
 {
     cmbGreenhouseSelection->Enabled = true;
 }
 //---------------------------------------------------------------------------
-
 void __fastcall TfrmMain::cmbGreenhouseSelectionChange(TObject *Sender)
 {
     lbledtPlantPrice->Enabled = true;
 }
 //---------------------------------------------------------------------------
-
 void __fastcall TfrmMain::lbledtPlantPriceChange(TObject *Sender)
 {
     btnClonePlant->Enabled = true;
 }
 //---------------------------------------------------------------------------
-// NEW
 void TfrmMain::WireStaffTaskEvents()
 {
     lvStaffTaskQueue->ViewStyle = vsReport;
@@ -754,14 +628,14 @@ void TfrmMain::WireStaffTaskEvents()
     lvStaffTaskQueue->HideSelection = false;
 
     if (lvStaffTaskQueue->Columns->Count == 0) {
-        TListColumn* c1 = lvStaffTaskQueue->Columns->Add(); c1->Caption = "Staff ID";       c1->Width = 100;
-        TListColumn* c2 = lvStaffTaskQueue->Columns->Add(); c2->Caption = "Pending Tasks";  c2->Width = 120;
-		TListColumn* c3 = lvStaffTaskQueue->Columns->Add(); c3->Caption = "Reminders";      c3->Width = 100;
+		TListColumn* c1 = lvStaffTaskQueue->Columns->Add(); c1->Caption = "Staff ID";       c1->Width = 200;
+		TListColumn* c2 = lvStaffTaskQueue->Columns->Add(); c2->Caption = "Pending Tasks";  c2->Width = 200;
+		TListColumn* c3 = lvStaffTaskQueue->Columns->Add(); c3->Caption = "Reminders";      c3->Width = 200;
 	}
 
     btnProcessNextTask->OnClick = btnProcessNextTaskClick;
 }
-
+//---------------------------------------------------------------------------
 void TfrmMain::RefreshStaffTaskQueue()
 {
     lvStaffTaskQueue->Items->BeginUpdate();
@@ -785,22 +659,23 @@ void TfrmMain::RefreshStaffTaskQueue()
         lvStaffTaskQueue->Items->EndUpdate();
     }
 }
+//---------------------------------------------------------------------------
 void __fastcall TfrmMain::btnProcessNextTaskClick(TObject *Sender)
 {
     if (!lvStaffTaskQueue->Selected) {
-        ShowMessage("Select a staff row first.");
+        ShowMessage("Select a Staff Row First");
         return;
     }
 
     auto* selected = lvStaffTaskQueue->Selected;
     auto* staff = reinterpret_cast<Staff*>(selected->Data);
     if (!staff) {
-        ShowMessage("Invalid staff selection.");
+		ShowMessage("Invalid Staff Selection");
         return;
     }
 
 	if (staff->getTaskQueueSize() <= 0) {
-        ShowMessage("No tasks in this staff member's queue.");
+		ShowMessage("No Tasks in this Staff Member's Queue");
         return;
     }
 
@@ -813,7 +688,6 @@ void __fastcall TfrmMain::btnProcessNextTaskClick(TObject *Sender)
     RefreshStaffTaskQueue();
 }
 //---------------------------------------------------------------------------
-
 void __fastcall TfrmMain::lvStaffTaskQueueSelectItem(TObject *Sender, TListItem *Item,
           bool Selected)
 {
