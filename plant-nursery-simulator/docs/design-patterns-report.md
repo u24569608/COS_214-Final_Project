@@ -30,6 +30,20 @@ Note: File paths point to headers in `include/` and implementations in `src/` wi
   - FR15: Aggregate interface to create iterators
   - FR16: Iterate over inventory items for browsing and sales
 
+- Why this pattern over alternatives
+  - Over nested loops or exposing containers: The inventory manages multiple concerns (greenhouse-linked items, readiness, ID mapping). Exposing `items` would leak representation and allow incorrect traversal order. The iterator encapsulates a purpose-built ordering that prioritizes sale-ready plant-backed stock while hiding internal storage, as seen in `ConcreteInventoryIterator::rebuildTraversal()`.
+  - Over Visitor: We do not need double dispatch or per-element operations; we only need a traversal order and simple item access. Iterator keeps responsibilities minimal and testable.
+  - Over returning vectors: The iterator recalculates traversal lazily and can stay consistent as the inventory changes without materializing transient copies in client code.
+
+- Implementation evidence
+  - `Inventory` is the ConcreteAggregate that returns `InventoryIterator*` from `createIterator()` (`include/Inventory.h`).
+  - `ConcreteInventoryIterator` builds a stable traversal by first walking the greenhouse via `GreenhouseIterator` and selecting plant-backed, market-ready `StockItem`s, then appending remaining eligible stock (`src/ConcreteInventoryIterator.cpp`).
+  - Market readiness is checked through the associated `PlantInstance::isAvailableForSale()`, ensuring business rules drive traversal order.
+
+- FR details
+  - FR15 (Aggregate interface): `InventoryCollection::createIterator()` defines the contract to obtain iterators; `Inventory` implements it, allowing clients to traverse without knowledge of internals.
+  - FR16 (Iterate for workflows): Sales/customer browsing uses the iterator to produce a customer-friendly order (market-ready first). Tests under `tests/iterator_test.cpp` exercise this semantics; the iterator avoids exposing the combination of greenhouse and stock containers.
+
 ---
 
 ## Iterator - Greenhouse
