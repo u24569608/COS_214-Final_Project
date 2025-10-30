@@ -174,34 +174,37 @@ The Plant Nursery Simulator models a nursery business end‑to‑end:
 
 ## Builder - Orders
 
-- Intent and rationale
+### Intent and rationale
   - Construct complex `Order` objects step-by-step and support different compositions/presets via a director. Keeps `Order` immutable in shape while flexible in content.
-- Where implemented
+### Where implemented
   - `include/Order.h`, `src/Order.cpp` (Product)
   - `include/OrderBuilder.h` (Builder)
   - `include/CustomOrderBuilder.h`, `src/CustomOrderBuilder.cpp` (ConcreteBuilder)
   - `include/OrderDirector.h`, `src/OrderDirector.cpp` (Director)
-- Participants
+### Participants
   - Product: `Order` (contains `StockItem` parts)
   - Builder: `OrderBuilder`
   - ConcreteBuilder: `CustomOrderBuilder`
   - Director: `OrderDirector`
   - Part: `StockItem`
-- Key interactions
+### Key interactions
   - `SalesFacade` can use `OrderBuilder` directly or via `OrderDirector` to assemble orders.
-- Functional requirements
+### Functional requirements (with code references and tests)
   - FR24: Build orders with optional director presets
+    - Builder API: src/OrderBuilder.cpp:13,22; src/CustomOrderBuilder.cpp:17-24
+    - Facade usage: src/SalesFacade.cpp:257-307
+    - Test: tests/facade_test.cpp:111
 
-- Why this pattern over alternatives
+### Why this pattern
   - Over telescoping constructors: Orders vary in composition; using a builder avoids brittle large constructors and allows step-wise construction and validation.
   - Over simple factory: Builder supports variable numbers and combinations of `StockItem`s and evolving assembly policies; a factory would not capture sequences and optional steps cleanly.
 
-- Implementation evidence
+### Implementation evidence
   - `Order` contains a vector of `StockItem` parts and exposes `addItem()`/`calculateTotal()` used by builders and facade.
   - `OrderBuilder` defines the steps; `CustomOrderBuilder` implements them for general orders; `OrderDirector` encapsulates common presets when needed.
 
-- FR details
-  - FR24 (Build orders): The builder composes `Order` instances from selected `StockItem`s. The facade can either drive the builder directly for ad-hoc orders or reuse `OrderDirector` to standardize bundles.
+### Why efficient
+  - Linear in item count; uses simple copies of `StockItem` parts; no reflection or dynamic registration needed.
 
 ---
 
