@@ -284,32 +284,35 @@ The Plant Nursery Simulator models a nursery business end‑to‑end:
 
 ## Prototype (Data‑Driven) - Plants and Registry
 
-- Intent and rationale
+### Intent and rationale
   - Support data-driven creation of plant objects by cloning registered prototypes. Allows new plant types without changing creator code.
-- Where implemented
+### Where implemented
   - `include/Plant.h`, `src/Plant.cpp` (`Plant::clone()`)
   - `include/PlantPrototypeRegistry.h`, `src/PlantPrototypeRegistry.cpp` (stores and clones prototypes)
-- Participants
+### Participants
   - Prototype: `Plant`
   - Concrete Prototypes: specific `Plant` subtypes
   - Client/Registry: `PlantPrototypeRegistry`
-- Key interactions
+### Key interactions
   - Prototypes are registered under names; the registry clones on demand to create new instances.
-- Functional requirements
+### Functional requirements (with code references and tests)
   - FR1: Register clonable plant prototypes
+    - Code: src/PlantPrototypeRegistry.cpp:10-16
+    - Tests: prototype registration helpers e.g., tests/iterator_test.cpp:29; tests/adapter_test.cpp:54
   - FR2: Create plants by cloning prototypes
+    - Code: src/PlantPrototypeRegistry.cpp:18-34; src/Inventory.cpp:219-252
+    - Tests: used in adapter roundtrips and iterator tests
 
-- Why this pattern over alternatives
+### Why this pattern
   - Over Abstract Factory/Factory Method: Plant types are data-driven and registered at runtime; Prototype allows cloning configured exemplars without centralizing construction logic for every type.
   - Over copy constructors alone: The registry maps string keys to polymorphic prototypes with virtual `clone()`, avoiding slicing and keeping creation decoupled from concrete classes.
 
-- Implementation evidence
+### Implementation evidence
   - `PlantPrototypeRegistry::addPrototype()` stores owned prototypes by name; `createPlant()` clones on demand.
   - `Inventory::createPlantInstance()` requests a prototype and configures a `PlantInstance`, applying default strategies if present.
 
-- FR details
-  - FR1 (Register prototypes): The registry collects named prototypes so Sales/Inventory can ensure consistency across instances.
-  - FR2 (Clone plants): New `Plant` instances are created via `clone()` with optional type override; this isolates creation from client code.
+### Why efficient
+  - Clone cost is O(1); avoids reflection/RTTI factories and keeps ownership explicit.
 
 ---
 
