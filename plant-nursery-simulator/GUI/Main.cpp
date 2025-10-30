@@ -11,12 +11,31 @@
 #include "Add_Item.h"
 #include "../include/WaterPlant.h"
 #include "../include/FertilizePlant.h"
+#include "../include/Observer.h"
+#include <algorithm>
+#include <sstream>
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 #pragma link "Greenhouse_Information_Frame"
 #pragma link "Sales_Frame"
 #pragma resource "*.dfm"
 TfrmMain *frmMain;
+
+namespace {
+class UIPlantObserver : public Observer {
+public:
+	explicit UIPlantObserver(TfrmMain* owner) : owner(owner) {}
+
+	void update(const ObserverEvent& event) override {
+		if (owner != nullptr) {
+			owner->HandlePlantObserverEvent(event);
+		}
+	}
+
+private:
+	TfrmMain* owner;
+};
+} // namespace
 
 // --- Helper class to make the abstract Plant concrete ---
 class ConcretePlant : public Plant {
@@ -46,6 +65,9 @@ __fastcall TfrmMain::TfrmMain(TComponent* Owner)
 {
     currentPlantSelection = nullptr;
     currentStaffSelection = nullptr;
+    snapshotPlant = nullptr;
+    currentPlantSnapshot.reset();
+    plantLogObserver = std::make_unique<UIPlantObserver>(this);
 
     stratFreqWater = std::make_unique<FrequentWatering>();
     stratSparseWater = std::make_unique<SparseWatering>();
@@ -53,8 +75,6 @@ __fastcall TfrmMain::TfrmMain(TComponent* Owner)
     stratLiquidFert = std::make_unique<LiquidFertilizer>();
     stratOrganicFert = std::make_unique<OrganicFertilizer>();
 	stratSlowFert = std::make_unique<SlowReleaseFertilizer>();
-
-	PopulatePrototypeComboBox();
 
 	objMediator = std::make_unique<NurseryMediator>();
 
@@ -67,6 +87,8 @@ __fastcall TfrmMain::TfrmMain(TComponent* Owner)
 		objMediator->addColleague(colleague.get());
 	}
 
+	RegisterStaffLoggers();
+
 	PopulateColleagueComboBoxes();
 
 	PopulateCustomerComboBox();
@@ -77,6 +99,8 @@ __fastcall TfrmMain::TfrmMain(TComponent* Owner)
 	objPrototypeRegistry->addPrototype("Rose", std::make_unique<ConcretePlant>("Rose", "Flower"));
 	objPrototypeRegistry->addPrototype("Fern", std::make_unique<ConcretePlant>("Fern", "Foliage"));
 	objPrototypeRegistry->addPrototype("Spruce", std::make_unique<ConcretePlant>("Spruce", "Conifer"));
+
+	PopulatePrototypeComboBox();
 
 	objGreenhouse = std::make_unique<GreenhouseBed>("Main Greenhouse");
 
@@ -120,6 +144,7 @@ __fastcall TfrmMain::TfrmMain(TComponent* Owner)
 	PopulateGreenhouseBedComboBox(objGreenhouse.get());
 
 	AttachGreenhouseFrameHandlers();
+	AttachLoggerToAllPlants();
 
     WireStaffTaskEvents();
 	RefreshStaffTaskQueue();
@@ -138,7 +163,7 @@ void __fastcall TfrmMain::edtMessageBodyChange(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TfrmMain::FormCreate(TObject *Sender)
 {
-	redtLog->Lines->Add("[" + DateTimeToStr(Now()) + "] Welcome to Plant Palace!");
+	AppendLog("Welcome to Plant Palace!");
 }
 //---------------------------------------------------------------------------
 void TfrmMain::PopulateColleagueComboBoxes()
@@ -176,7 +201,7 @@ void __fastcall TfrmMain::btnSendClick(TObject *Sender)
 		receiverId = std::stoi(AnsiString(receiverIdStr).c_str());
 	}
 	catch(...) {
-        redtLog->Lines->Add("[" + DateTimeToStr(Now()) + "] ERROR: Invalid Sender or Receiver ID");
+		AppendLog("ERROR: Invalid Sender or Receiver ID");
 		return;
 	}
 
@@ -196,7 +221,7 @@ void __fastcall TfrmMain::btnSendClick(TObject *Sender)
 
 		edtMessageBody->Text = "";
 	} else {
-		redtLog->Lines->Add("[" + DateTimeToStr(Now()) + "] ERROR: Could not find Sender Object");
+		AppendLog("ERROR: Could not find Sender Object");
 	}
 }
 //---------------------------------------------------------------------------
@@ -256,7 +281,7 @@ void __fastcall TfrmMain::tvGreenhouseChange(TObject *Sender, TTreeNode *Node)
 
 	if (plant != nullptr) {
 		currentPlantSelection = plant;
-		LoadPlantDetails(plant);
+		UpdateSelectedPlantDisplay(false);
 	} else {
 		currentPlantSelection = nullptr;
 		ClearPlantDetails();
@@ -284,7 +309,7 @@ void __fastcall TfrmMain::btnLoadInventoryClick(TObject *Sender)
 	}
 
 	if (adapter == nullptr) {
-		redtLog->Lines->Add("[" + DateTimeToStr(Now()) + "] ERROR: Unsupported File Type Selected");
+		AppendLog("ERROR: Unsupported File Type Selected");
 		return;
 	}
 
@@ -306,6 +331,8 @@ void __fastcall TfrmMain::btnLoadInventoryClick(TObject *Sender)
 
 		RefreshInventoryListView();
 		PopulateSalesItemComboBox();
+		PopulatePrototypeComboBox();
+		AttachLoggerToAllPlants();
 		RefreshStaffTaskQueue();
 		UpdateCareActionState();
 
@@ -313,10 +340,10 @@ void __fastcall TfrmMain::btnLoadInventoryClick(TObject *Sender)
 			objGreenhouseController->setRootBed(objGreenhouse.get());
 		}
 
-		redtLog->Lines->Add("[" + DateTimeToStr(Now()) + "] Successfully Loaded Inventory from '" + uFileName + "'");
+		AppendLog("Successfully loaded inventory from '" + uFileName + "'");
 	}
 	catch (const std::exception &ex) {
-		redtLog->Lines->Add("[" + DateTimeToStr(Now()) + "] Error Loading File: " + String(ex.what()));
+		AppendLog("Error loading file: " + String(ex.what()));
 	}
 	delete adapter;
 }
@@ -328,7 +355,7 @@ void TfrmMain::RefreshInventoryListView()
 
 	InventoryIterator* itRaw = objInventory->createIterator();
     if (!itRaw) {
-		redtLog->Lines->Add("[" + DateTimeToStr(Now()) + "] ERROR: Could not get Inventory Iterator");
+		AppendLog("ERROR: Could not get Inventory Iterator");
 		return;
 	}
     std::unique_ptr<InventoryIterator> it(itRaw);
@@ -387,14 +414,14 @@ void __fastcall TfrmMain::btnSaveInventoryClick(TObject *Sender)
 		if (adapter != nullptr) {
 			try {
 				adapter->saveInventory(filePath, objInventory.get());
-				redtLog->Lines->Add("[" + DateTimeToStr(Now()) + "] Successfully Saved Inventory to '" + uFileName + "'");
+				AppendLog("Successfully saved inventory to '" + uFileName + "'");
 			}
 			catch (const std::exception &ex) {
-				redtLog->Lines->Add("[" + DateTimeToStr(Now()) + "] Error Saving File: " + String(ex.what()));
+				AppendLog("Error saving file: " + String(ex.what()));
 			}
 			delete adapter;
 		} else {
-			redtLog->Lines->Add("[" + DateTimeToStr(Now()) + "] ERROR: Could Not Determine File Type to Save");
+			AppendLog("ERROR: Could Not Determine File Type to Save");
 		}
 	}
 }
@@ -485,12 +512,10 @@ void __fastcall TfrmMain::btnAddPlantToRegistryClick(TObject *Sender)
         objPrototypeRegistry->addPrototype(plantName, std::move(newProto));
 
 
-		PopulatePrototypeComboBox();
+	PopulatePrototypeComboBox();
 
-		cmbPrototypes->Items->Add(plantName.c_str());
-
-        redtLog->Lines->Add("[" + DateTimeToStr(Now()) + "] New Prototype Registered: '" + plantName.c_str() + "'");
-    }
+		AppendLog("New Prototype Registered: '" + UnicodeString(plantName.c_str()) + "'");
+	}
 }
 //---------------------------------------------------------------------------
 void __fastcall TfrmMain::btnAddItemClick(TObject *Sender)
@@ -501,11 +526,23 @@ void __fastcall TfrmMain::btnAddItemClick(TObject *Sender)
 void TfrmMain::PopulatePrototypeComboBox()
 {
 	cmbPrototypes->Clear();
-    cmbPrototypes->Text = "Plant";
-    cmbPrototypes->Items->Add("Rose");
-	cmbPrototypes->Items->Add("Fern");
-	cmbPrototypes->Items->Add("Spruce");
+	if (!objPrototypeRegistry) {
+		cmbPrototypes->Text = "No Prototypes Registered";
+		return;
+	}
 
+	auto names = objPrototypeRegistry->listPrototypes();
+	std::sort(names.begin(), names.end());
+
+	for (const auto& name : names) {
+		cmbPrototypes->Items->Add(name.c_str());
+	}
+
+	if (cmbPrototypes->Items->Count == 0) {
+		cmbPrototypes->Text = "No Prototypes Registered";
+	} else {
+		cmbPrototypes->Text = "Select Prototype";
+	}
 }
 //---------------------------------------------------------------------------
 void __fastcall TfrmMain::btnClonePlantClick(TObject *Sender)
@@ -563,8 +600,9 @@ void __fastcall TfrmMain::btnClonePlantClick(TObject *Sender)
 		);
 		std::string newStockItemName = newStockItem->getname();
 
-		bed->add(newPlant);
-		objInventory->additem(std::move(newStockItem));
+	bed->add(newPlant);
+	objInventory->additem(std::move(newStockItem));
+	AttachObserverToPlant(newPlant);
 
 		tvGreenhouse->Items->Clear();
 		PopulateGreenhouseTree(nullptr, objGreenhouse.get());
@@ -573,7 +611,7 @@ void __fastcall TfrmMain::btnClonePlantClick(TObject *Sender)
 		RefreshInventoryListView();
 		PopulateSalesItemComboBox();
 
-		redtLog->Lines->Add(UnicodeString("[") + DateTimeToStr(Now()) + "] New Plant '" + newStockItemName.c_str() + "' Created and Planted");
+	AppendLog("New plant '" + UnicodeString(newStockItemName.c_str()) + "' created and planted");
 		lbledtPlantPrice->Text = "";
 
 		lbledtPlantPrice->Enabled = false;
@@ -631,10 +669,10 @@ void TfrmMain::WireStaffTaskEvents()
     lvStaffTaskQueue->RowSelect = true;
     lvStaffTaskQueue->HideSelection = false;
 
-    if (lvStaffTaskQueue->Columns->Count == 0) {
+	if (lvStaffTaskQueue->Columns->Count == 0) {
 		TListColumn* c1 = lvStaffTaskQueue->Columns->Add(); c1->Caption = "Staff ID";       c1->Width = 200;
 		TListColumn* c2 = lvStaffTaskQueue->Columns->Add(); c2->Caption = "Pending Tasks";  c2->Width = 200;
-		TListColumn* c3 = lvStaffTaskQueue->Columns->Add(); c3->Caption = "Reminders";      c3->Width = 200;
+		TListColumn* c3 = lvStaffTaskQueue->Columns->Add(); c3->Caption = "Alerts";         c3->Width = 200;
 	}
 
     btnProcessNextTask->OnClick = btnProcessNextTaskClick;
@@ -684,12 +722,11 @@ void __fastcall TfrmMain::btnProcessNextTaskClick(TObject *Sender)
     }
 
 
-	staff->processNextTask();
-
-	redtLog->Lines->Add("[" + DateTimeToStr(Now()) + "] Staff " + selected->Caption +
-						" processed one task.");
-
-    RefreshStaffTaskQueue();
+	PlantInstance* affectedPlant = staff->processNextTask();
+	RefreshStaffTaskQueue();
+	if (affectedPlant != nullptr && affectedPlant == currentPlantSelection) {
+		UpdateSelectedPlantDisplay(false);
+	}
 }
 //---------------------------------------------------------------------------
 void __fastcall TfrmMain::lvStaffTaskQueueSelectItem(TObject *Sender, TListItem *Item,
@@ -707,15 +744,15 @@ void __fastcall TfrmMain::lvStaffTaskQueueSelectItem(TObject *Sender, TListItem 
 void __fastcall TfrmMain::btnSimulateClick(TObject *Sender)
 {
 	if (!objGreenhouseController) {
-		redtLog->Lines->Add("[" + DateTimeToStr(Now()) + "] WARNING: Greenhouse controller unavailable");
+		AppendLog("WARNING: Greenhouse controller unavailable");
 		return;
 	}
 
 	objGreenhouseController->runGrowthTick();
-	redtLog->Lines->Add("[" + DateTimeToStr(Now()) + "] Simulation: Applied growth tick to all plants");
+	AppendLog("Simulation: Applied growth tick to all plants");
 
 	if (currentPlantSelection != nullptr) {
-		LoadPlantDetails(currentPlantSelection);
+		UpdateSelectedPlantDisplay(false);
 	}
 
 	RefreshInventoryListView();
@@ -749,14 +786,7 @@ void __fastcall TfrmMain::btnWaterClick(TObject *Sender)
 		return;
 	}
 
-	PlantCommand* command = new WaterPlant(currentPlantSelection);
-	currentStaffSelection->addCommandToQueue(command);
-
-	UnicodeString logLine = "[" + DateTimeToStr(Now()) + "] Task queued: Water '" +
-		UnicodeString(currentPlantSelection->getName().c_str()) + "' via Staff " +
-		IntToStr(currentStaffSelection->getID());
-	redtLog->Lines->Add(logLine);
-
+	currentStaffSelection->addCommandToQueue(std::make_unique<WaterPlant>(currentPlantSelection));
 	RefreshStaffTaskQueue();
 }
 //---------------------------------------------------------------------------
@@ -767,14 +797,7 @@ void __fastcall TfrmMain::btnFertiliseClick(TObject *Sender)
 		return;
 	}
 
-	PlantCommand* command = new FertilizePlant(currentPlantSelection);
-	currentStaffSelection->addCommandToQueue(command);
-
-	UnicodeString logLine = "[" + DateTimeToStr(Now()) + "] Task queued: Fertilise '" +
-		UnicodeString(currentPlantSelection->getName().c_str()) + "' via Staff " +
-		IntToStr(currentStaffSelection->getID());
-	redtLog->Lines->Add(logLine);
-
+	currentStaffSelection->addCommandToQueue(std::make_unique<FertilizePlant>(currentPlantSelection));
 	RefreshStaffTaskQueue();
 }
 //---------------------------------------------------------------------------
@@ -786,11 +809,8 @@ void __fastcall TfrmMain::btnAssignObserveClick(TObject *Sender)
 	}
 
 	currentStaffSelection->observePlant(currentPlantSelection);
-
-	UnicodeString logLine = "[" + DateTimeToStr(Now()) + "] Staff " +
-		IntToStr(currentStaffSelection->getID()) + " now observing '" +
-		UnicodeString(currentPlantSelection->getName().c_str()) + "'";
-	redtLog->Lines->Add(logLine);
+	AppendLog("Staff " + IntToStr(currentStaffSelection->getID()) + " now observing '" +
+		UnicodeString(currentPlantSelection->getName().c_str()) + "'");
 
 	UpdateCareActionState();
 }
@@ -813,9 +833,7 @@ void __fastcall TfrmMain::rgWaterStrategyClick(TObject *Sender)
 	}
 
 	currentPlantSelection->setWaterStrategy(strategy);
-	UnicodeString logLine = "[" + DateTimeToStr(Now()) + "] Updated watering strategy for '" +
-		UnicodeString(currentPlantSelection->getName().c_str()) + "'";
-	redtLog->Lines->Add(logLine);
+	AppendLog("Updated watering strategy for '" + UnicodeString(currentPlantSelection->getName().c_str()) + "'");
 }
 //---------------------------------------------------------------------------
 void __fastcall TfrmMain::rgFertiliseStrategyClick(TObject *Sender)
@@ -836,9 +854,7 @@ void __fastcall TfrmMain::rgFertiliseStrategyClick(TObject *Sender)
 	}
 
 	currentPlantSelection->setFertilizeStrategy(strategy);
-	UnicodeString logLine = "[" + DateTimeToStr(Now()) + "] Updated fertilising strategy for '" +
-		UnicodeString(currentPlantSelection->getName().c_str()) + "'";
-	redtLog->Lines->Add(logLine);
+	AppendLog("Updated fertilising strategy for '" + UnicodeString(currentPlantSelection->getName().c_str()) + "'");
 }
 //---------------------------------------------------------------------------
 void TfrmMain::PopulateStaffMemberComboBox()
@@ -882,24 +898,155 @@ void TfrmMain::AttachGreenhouseFrameHandlers()
 	frmGreenhouseInformation1->cmbStaffMember->OnChange = cmbStaffMemberChange;
 	frmGreenhouseInformation1->rgWaterStrategy->OnClick = rgWaterStrategyClick;
 	frmGreenhouseInformation1->rgFertiliseStrategy->OnClick = rgFertiliseStrategyClick;
-	btnAssignObserve->OnClick = btnAssignObserveClick;
-	btnSimulate->OnClick = btnSimulateClick;
+btnAssignObserve->OnClick = btnAssignObserveClick;
+btnSimulate->OnClick = btnSimulateClick;
 }
 //---------------------------------------------------------------------------
-void TfrmMain::LoadPlantDetails(PlantInstance* plant)
+void TfrmMain::AppendLog(const UnicodeString& message)
+{
+	redtLog->Lines->Add("[" + DateTimeToStr(Now()) + "] " + message);
+}
+//---------------------------------------------------------------------------
+void TfrmMain::RegisterStaffLoggers()
+{
+	for (const auto& colleague : vtrColleagues) {
+		Staff* staff = dynamic_cast<Staff*>(colleague.get());
+		if (!staff) {
+			continue;
+		}
+		staff->setLogSink([this](const std::string& message) {
+			AppendLog(UnicodeString(message.c_str()));
+			RefreshStaffTaskQueue();
+			UpdateSelectedPlantDisplay(false);
+		});
+	}
+}
+//---------------------------------------------------------------------------
+void TfrmMain::AttachObserverToPlant(PlantInstance* plant)
+{
+	if (!plant || !plantLogObserver) {
+		return;
+	}
+
+	if (loggedPlants.insert(plant).second) {
+		plant->attach(plantLogObserver.get());
+	}
+}
+//---------------------------------------------------------------------------
+void TfrmMain::AttachLoggerToAllPlants()
+{
+	if (!objGreenhouse) {
+		return;
+	}
+
+	std::unique_ptr<GreenhouseIterator> iterator = objGreenhouse->createIterator();
+	if (!iterator) {
+		return;
+	}
+
+	for (GreenhouseComponent* component = iterator->first(); component != nullptr; component = iterator->next()) {
+		if (auto* instance = dynamic_cast<PlantInstance*>(component)) {
+			AttachObserverToPlant(instance);
+		}
+	}
+}
+//---------------------------------------------------------------------------
+TfrmMain::PlantDisplaySnapshot TfrmMain::BuildSnapshot(PlantInstance* plant) const
+{
+	PlantDisplaySnapshot snapshot{};
+	snapshot.typeName = plant ? plant->getPlantTypeName() : "";
+	snapshot.stateName = plant && plant->getState() ? plant->getState()->getName() : "Unknown State";
+	snapshot.health = plant ? plant->getHealth() : 0;
+	snapshot.water = plant ? plant->getWaterLevel() : 0;
+	snapshot.nutrients = plant ? plant->getNutrientLevel() : 0;
+	snapshot.saleReady = plant ? plant->isAvailableForSale() : false;
+	return snapshot;
+}
+//---------------------------------------------------------------------------
+void TfrmMain::LogSnapshotDelta(const PlantDisplaySnapshot& before,
+	const PlantDisplaySnapshot& after,
+	const UnicodeString& plantLabel)
+{
+	auto logDelta = [this, &plantLabel](const UnicodeString& metric, int oldValue, int newValue) {
+		if (oldValue == newValue) {
+			return;
+		}
+		const int delta = newValue - oldValue;
+		UnicodeString message = plantLabel + ": " + metric + " changed to " + IntToStr(newValue);
+		if (delta != 0) {
+			message += " (" + ((delta > 0) ? "+" : "") + IntToStr(delta) + ")";
+		}
+		AppendLog(message);
+	};
+
+	logDelta("Health", before.health, after.health);
+	logDelta("Water level", before.water, after.water);
+	logDelta("Nutrient level", before.nutrients, after.nutrients);
+
+	if (before.saleReady != after.saleReady) {
+		AppendLog(plantLabel + ": Availability changed to " + UnicodeString(after.saleReady ? "Available" : "Unavailable"));
+	}
+}
+//---------------------------------------------------------------------------
+void TfrmMain::HandlePlantObserverEvent(const ObserverEvent& event)
+{
+	PlantInstance* plant = event.source ? dynamic_cast<PlantInstance*>(event.source) : nullptr;
+	if (!plant) {
+		return;
+	}
+
+	if (event.type == ObserverEventType::SubjectDestroyed) {
+		loggedPlants.erase(plant);
+	} else {
+		AttachObserverToPlant(plant);
+	}
+
+	UnicodeString plantLabel = UnicodeString(plant->getPlantTypeName().c_str()) + " (" + plant->getName().c_str() + ")";
+	UnicodeString message;
+	if (!event.message.empty()) {
+		message = UnicodeString(event.message.c_str());
+	} else if (event.type == ObserverEventType::AvailabilityChanged && event.availability.has_value()) {
+		message = UnicodeString((*event.availability == AvailabilityStatus::Available) ? "Available" : "Unavailable");
+	}
+
+	if (!message.IsEmpty()) {
+		AppendLog(plantLabel + ": " + message);
+	}
+
+	if (plant == currentPlantSelection) {
+		UpdateSelectedPlantDisplay(false);
+	}
+
+	RefreshStaffTaskQueue();
+	if (event.type == ObserverEventType::AvailabilityChanged) {
+		RefreshInventoryListView();
+	}
+}
+void TfrmMain::LoadPlantDetails(PlantInstance* plant, bool logChanges)
 {
 	if (!plant || !frmGreenhouseInformation1) {
 		return;
 	}
 
-	frmGreenhouseInformation1->lbledtPlantName->Text = plant->getName().c_str();
+	AttachObserverToPlant(plant);
 
-	const PlantState* currentState = plant->getState();
-	frmGreenhouseInformation1->lbledtPlantState->Text = currentState ? currentState->getName().c_str() : "Unknown State";
-	frmGreenhouseInformation1->lbledtSaleReadiness->Text = plant->isAvailableForSale() ? "Ready" : "Not Ready";
-	frmGreenhouseInformation1->pbGrowth->Position = plant->getHealth();
-	frmGreenhouseInformation1->pbWater->Position = plant->getWaterLevel();
-	frmGreenhouseInformation1->pbNutrients->Position = plant->getNutrientLevel();
+	const bool samePlant = snapshotPlant == plant && currentPlantSnapshot.has_value();
+	PlantDisplaySnapshot latest = BuildSnapshot(plant);
+	UnicodeString plantLabel = UnicodeString(latest.typeName.c_str()) + " (" + plant->getName().c_str() + ")";
+
+	if (logChanges && samePlant) {
+		LogSnapshotDelta(*currentPlantSnapshot, latest, plantLabel);
+	}
+
+	currentPlantSnapshot = latest;
+	snapshotPlant = plant;
+
+	frmGreenhouseInformation1->lbledtPlantName->Text = plant->getName().c_str();
+	frmGreenhouseInformation1->lbledtPlantState->Text = latest.stateName.c_str();
+	frmGreenhouseInformation1->lbledtSaleReadiness->Text = latest.saleReady ? "Ready" : "Not Ready";
+	frmGreenhouseInformation1->pbGrowth->Position = latest.health;
+	frmGreenhouseInformation1->pbWater->Position = latest.water;
+	frmGreenhouseInformation1->pbNutrients->Position = latest.nutrients;
 
 	frmGreenhouseInformation1->rgWaterStrategy->ItemIndex = WaterStrategyIndexFromPointer(plant->getWaterStrategy());
 	frmGreenhouseInformation1->rgFertiliseStrategy->ItemIndex = FertilizeStrategyIndexFromPointer(plant->getFertilizeStrategy());
@@ -923,6 +1070,15 @@ void TfrmMain::ClearPlantDetails()
 	frmGreenhouseInformation1->rgFertiliseStrategy->ItemIndex = -1;
 	frmGreenhouseInformation1->rgWaterStrategy->Enabled = false;
 	frmGreenhouseInformation1->rgFertiliseStrategy->Enabled = false;
+	currentPlantSnapshot.reset();
+	snapshotPlant = nullptr;
+}
+//---------------------------------------------------------------------------
+void TfrmMain::UpdateSelectedPlantDisplay(bool logChanges)
+{
+	if (currentPlantSelection != nullptr) {
+		LoadPlantDetails(currentPlantSelection, logChanges);
+	}
 }
 //---------------------------------------------------------------------------
 void TfrmMain::UpdateCareActionState()
@@ -1014,5 +1170,3 @@ int TfrmMain::FertilizeStrategyIndexFromPointer(FertilizeStrategy* strategy) con
 	return -1;
 }
 //---------------------------------------------------------------------------
-
-

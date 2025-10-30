@@ -22,8 +22,11 @@
 #include "Sales_Frame.h"
 #include <Vcl.Dialogs.hpp>
 #include <Vcl.Mask.hpp>
-#include <vector>
+#include <functional>
 #include <memory>
+#include <optional>
+#include <unordered_set>
+#include <vector>
 
 #include "../include/NurseryMediator.h"
 #include "../include/Colleague.h"
@@ -68,6 +71,9 @@
 #include "../include/OrganicFertilizer.h"
 #include "../include/SlowReleaseFertilizer.h"
 #include "../include/GreenhouseController.h"
+
+struct ObserverEvent;
+class Observer;
 //---------------------------------------------------------------------------
 class TfrmMain : public TForm
 {
@@ -198,14 +204,74 @@ private:	// User declarations
 	void PopulatePrototypeComboBox();
 	void PopulateStaffMemberComboBox();
 	void AttachGreenhouseFrameHandlers();
-	void LoadPlantDetails(PlantInstance* plant);
+	/**
+	 * @brief Lightweight snapshot of plant metrics for change detection.
+	 */
+	struct PlantDisplaySnapshot {
+		std::string typeName; ///< Human-friendly plant category name.
+		std::string stateName; ///< Current lifecycle state name.
+		int health; ///< Health progress value.
+		int water; ///< Water meter value.
+		int nutrients; ///< Nutrient meter value.
+		bool saleReady; ///< True when the plant is marked as market-ready.
+	};
+	/**
+	 * @brief Populates the details frame using the provided plant context.
+	 * @param plant Plant instance to inspect.
+	 * @param logChanges When true, delta information is written to the log.
+	 */
+	void LoadPlantDetails(PlantInstance* plant, bool logChanges = false);
+	/**
+	 * @brief Clears the plant detail frame to its default state.
+	 */
 	void ClearPlantDetails();
+	/**
+	 * @brief Refreshes the detail frame for the currently selected plant.
+	 * @param logChanges When true, emits log entries for metric deltas.
+	 */
+	void UpdateSelectedPlantDisplay(bool logChanges);
 	Staff* ResolveStaffFromCombo(int index) const;
 	Staff* FindStaffById(int id) const;
 	WaterStrategy* WaterStrategyFromIndex(int index) const;
 	FertilizeStrategy* FertilizeStrategyFromIndex(int index) const;
 	int WaterStrategyIndexFromPointer(WaterStrategy* strategy) const;
 	int FertilizeStrategyIndexFromPointer(FertilizeStrategy* strategy) const;
+	/**
+	 * @brief Adds a timestamped entry to the application log panel.
+	 * @param message Text to append.
+	 */
+	void AppendLog(const UnicodeString& message);
+	/**
+	 * @brief Connects UI logging callbacks to each staff member.
+	 */
+	void RegisterStaffLoggers();
+	/**
+	 * @brief Ensures the UI logging observer is attached to the specified plant.
+	 * @param plant Plant that should emit observer notifications to the UI.
+	 */
+	void AttachObserverToPlant(PlantInstance* plant);
+	/**
+	 * @brief Recursively attaches the UI logging observer to all plants in the greenhouse.
+	 */
+	void AttachLoggerToAllPlants();
+	/**
+	 * @brief Processes observer callbacks triggered by plant state changes.
+	 * @param event Observer payload emitted by the plant.
+	 */
+	void HandlePlantObserverEvent(const ObserverEvent& event);
+	/**
+	 * @brief Captures the current plant metrics for later comparisons.
+	 * @param plant Plant to sample.
+	 * @return Snapshot containing the latest metrics.
+	 */
+	PlantDisplaySnapshot BuildSnapshot(PlantInstance* plant) const;
+	/**
+	 * @brief Emits detailed log entries describing differences between two snapshots.
+	 * @param before Baseline snapshot.
+	 * @param after Updated snapshot.
+	 * @param plantLabel Label identifying the plant instance in logs.
+	 */
+	void LogSnapshotDelta(const PlantDisplaySnapshot& before, const PlantDisplaySnapshot& after, const UnicodeString& plantLabel);
 
     // New
     void RefreshStaffTaskQueue();
@@ -230,6 +296,11 @@ public:		// User declarations
 	std::vector<std::unique_ptr<Colleague>> vtrColleagues;
 
      void PopulateGreenhouseBedComboBox(GreenhouseComponent* component, const std::string& prefix = "");
+
+	std::optional<PlantDisplaySnapshot> currentPlantSnapshot;
+	PlantInstance* snapshotPlant;
+	std::unique_ptr<Observer> plantLogObserver;
+	std::unordered_set<PlantInstance*> loggedPlants;
 };
 //---------------------------------------------------------------------------
 extern PACKAGE TfrmMain *frmMain;
