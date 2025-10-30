@@ -1,3 +1,8 @@
+/**
+ * @file GreenhouseComponent.cpp
+ * @brief Implements the GreenhouseComponent behaviour defined in the corresponding header.
+ */
+
 #include "../include/GreenhouseComponent.h"
 
 #include <stdexcept>

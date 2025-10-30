@@ -1,3 +1,8 @@
+/**
+ * @file SeasonalWatering.cpp
+ * @brief Implements the SeasonalWatering behaviour defined in the corresponding header.
+ */
+
 #include "../include/SeasonalWatering.h"
 #include "../include/PlantInstance.h"
 #include <iostream>

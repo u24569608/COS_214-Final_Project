@@ -1,3 +1,8 @@
+/**
+ * @file SparseWatering.cpp
+ * @brief Implements the SparseWatering behaviour defined in the corresponding header.
+ */
+
 #include "../include/SparseWatering.h"
 #include "../include/PlantInstance.h"
 #include <iostream>

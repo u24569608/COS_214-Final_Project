@@ -3,6 +3,10 @@
 #include "../include/FertilizingHandler.h"
 #include "../include/PlantInstance.h"
 
+/**
+ * @file chain_of_responsibility_test.cpp
+ * @brief Exercises the care request chain-of-responsibility flow with manual tests.
+ */
 #include <iostream>
 #include <string>
 

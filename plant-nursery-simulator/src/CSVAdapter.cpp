@@ -1,3 +1,8 @@
+/**
+ * @file CSVAdapter.cpp
+ * @brief Implements the CSVAdapter behaviour defined in the corresponding header.
+ */
+
 #include "../include/CSVAdapter.h"
 #include "../include/CSVReaderWriter.h"
 #include "../include/Inventory.h"

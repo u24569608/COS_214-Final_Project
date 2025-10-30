@@ -1,3 +1,7 @@
+/**
+ * @file plant_state_test.cpp
+ * @brief Ensures individual plant state classes respond with expected behaviour.
+ */
 #include <iostream>
 #include <string>
 

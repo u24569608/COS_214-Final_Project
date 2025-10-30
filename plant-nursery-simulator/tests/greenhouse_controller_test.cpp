@@ -1,3 +1,7 @@
+/**
+ * @file greenhouse_controller_test.cpp
+ * @brief Verifies greenhouse controller coordination logic via manual assertions.
+ */
 #include <iostream>
 #include <memory>
 #include <vector>

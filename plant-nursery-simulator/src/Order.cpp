@@ -1,3 +1,8 @@
+/**
+ * @file Order.cpp
+ * @brief Implements the Order behaviour defined in the corresponding header.
+ */
+
 #include "../include/Order.h"
 #include <iostream>
 

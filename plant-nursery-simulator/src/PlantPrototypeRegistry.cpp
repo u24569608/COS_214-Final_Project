@@ -1,3 +1,8 @@
+/**
+ * @file PlantPrototypeRegistry.cpp
+ * @brief Implements the PlantPrototypeRegistry behaviour defined in the corresponding header.
+ */
+
 #include "../include/PlantPrototypeRegistry.h"
 #include "../include/Plant.h"
 

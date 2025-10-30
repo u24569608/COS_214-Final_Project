@@ -1,3 +1,7 @@
+/**
+ * @file facade_test.cpp
+ * @brief Ensures the sales facade orchestrates subsystem interactions correctly.
+ */
 #include <iostream>
 #include <memory>
 #include <string>

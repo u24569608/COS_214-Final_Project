@@ -1,3 +1,7 @@
+/**
+ * @file observer_test.cpp
+ * @brief Manually verifies observer notifications for greenhouse inventory events.
+ */
 #include <iostream>
 #include <memory>
 #include <string>

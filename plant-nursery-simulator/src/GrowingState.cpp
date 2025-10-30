@@ -1,3 +1,8 @@
+/**
+ * @file GrowingState.cpp
+ * @brief Implements the GrowingState behaviour defined in the corresponding header.
+ */
+
 #include "../include/GrowingState.h"
 #include "../include/DeadState.h"
 #include "../include/MatureState.h"

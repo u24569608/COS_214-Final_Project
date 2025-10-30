@@ -1,3 +1,8 @@
+/**
+ * @file ConcreteInventoryIterator.cpp
+ * @brief Implements the ConcreteInventoryIterator behaviour defined in the corresponding header.
+ */
+
 #include "../include/ConcreteInventoryIterator.h"
 #include "../include/Inventory.h"
 #include "../include/StockItem.h"

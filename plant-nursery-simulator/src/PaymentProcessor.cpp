@@ -1,3 +1,8 @@
+/**
+ * @file PaymentProcessor.cpp
+ * @brief Implements the PaymentProcessor behaviour defined in the corresponding header.
+ */
+
 #include "../include/PaymentProcessor.h"
 #include <iostream>
 

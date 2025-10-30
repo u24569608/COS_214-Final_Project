@@ -1,3 +1,7 @@
+/**
+ * @file Greenhouse_Information_Frame.cpp
+ * @brief Provides VCL UI logic for displaying greenhouse bed information.
+ */
 //---------------------------------------------------------------------------
 
 #include <vcl.h>

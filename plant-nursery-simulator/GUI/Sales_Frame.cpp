@@ -1,3 +1,7 @@
+/**
+ * @file Sales_Frame.cpp
+ * @brief Implements the VCL frame for processing customer sales orders.
+ */
 //---------------------------------------------------------------------------
 
 #include <vcl.h>

@@ -1,3 +1,8 @@
+/**
+ * @file WitheringState.cpp
+ * @brief Implements the WitheringState behaviour defined in the corresponding header.
+ */
+
 #include "../include/WitheringState.h"
 #include "../include/DeadState.h"
 #include "../include/GrowingState.h"

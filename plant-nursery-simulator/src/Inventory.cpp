@@ -1,3 +1,8 @@
+/**
+ * @file Inventory.cpp
+ * @brief Implements the Inventory behaviour defined in the corresponding header.
+ */
+
 #include "../include/Inventory.h"
 #include "../include/ConcreteInventoryIterator.h" // For createIterator()
 #include "../include/StockItem.h"                 // For item definitions

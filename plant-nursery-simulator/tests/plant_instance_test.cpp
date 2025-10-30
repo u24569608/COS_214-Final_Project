@@ -1,3 +1,7 @@
+/**
+ * @file plant_instance_test.cpp
+ * @brief Validates plant instance lifecycle transitions with custom assertions.
+ */
 #include <iostream>
 #include <string>
 

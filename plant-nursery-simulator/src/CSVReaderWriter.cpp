@@ -1,3 +1,8 @@
+/**
+ * @file CSVReaderWriter.cpp
+ * @brief Implements the CSVReaderWriter behaviour defined in the corresponding header.
+ */
+
 #include "../include/CSVReaderWriter.h"
 #include "../include/StockItem.h" // Needed for writing
 #include "../include/PlantInstance.h"

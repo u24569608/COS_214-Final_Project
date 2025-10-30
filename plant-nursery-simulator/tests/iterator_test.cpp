@@ -1,3 +1,7 @@
+/**
+ * @file iterator_test.cpp
+ * @brief Validates inventory iterator behaviour through custom traversal checks.
+ */
 #include <iostream>
 #include <string>
 #include <memory>

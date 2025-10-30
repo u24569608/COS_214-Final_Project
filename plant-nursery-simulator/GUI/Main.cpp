@@ -1,3 +1,7 @@
+/**
+ * @file Main.cpp
+ * @brief Bootstraps the VCL application and wires core GUI event handlers.
+ */
 //---------------------------------------------------------------------------
 
 #include <vcl.h>
