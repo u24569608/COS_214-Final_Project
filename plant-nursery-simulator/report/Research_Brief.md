@@ -1,7 +1,7 @@
 # Research Brief: Plant Nursery Management and Design Influence
 
 ## 1. Introduction
-The research phase of this project examined how real-world plant nurseries function, focusing on three core domains: plant cultivation, staff coordination, and customer interaction. A nursery operates as a dynamic ecosystem where biological growth, human management, and customer engagement coexist. Understanding these interdependent systems guided the conceptual modelling of the Plant Nursery Simulator, shaping both its class architecture and the selection of design patterns. The goal was to design a sim...
+The research phase of this project examined how real-world plant nurseries function, focusing on three core domains: plant cultivation, staff coordination, and customer interaction. A nursery operates as a dynamic ecosystem where biological growth, human management, and customer engagement coexist. Understanding these interdependent systems guided the conceptual modelling of the Plant Nursery Simulator, shaping both its class architecture and the selection of design patterns. The goal was to design a simulation that reflects the complexity and adaptability of a real nursery while maintaining software clarity and extensibility.
 
 ## 2. Plant Care and Growth Management
 Nurseries manage a wide diversity of plant species—annuals, perennials, succulents, shrubs, and trees—each with distinct water, soil, and sunlight requirements. According to horticultural sources (Department of Agriculture, 2023; Royal Horticultural Society, 2022), environmental control and scheduling are essential for sustainability.
