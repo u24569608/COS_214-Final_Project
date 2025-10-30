@@ -604,15 +604,19 @@ void __fastcall TfrmMain::btnClonePlantClick(TObject *Sender)
 
 	try
 	{
-		Plant* prototypeClone = objPrototypeRegistry->createPlant(prototypeName, ""); //
+		std::unique_ptr<Plant> prototypeClone(objPrototypeRegistry->createPlant(prototypeName, ""));
 		if (!prototypeClone) {
 			ShowMessage(UnicodeString("Error: Could not Clone Prototype '") + prototypeName.c_str() + "'");
 			return;
 		}
 
-		PlantInstance* newPlant = new PlantInstance(prototypeClone, ""); //
-		delete prototypeClone;
-        prototypeClone = nullptr;
+		PlantInstance* newPlant = new PlantInstance(prototypeClone.get(), "");
+		if (WaterStrategy* ws = prototypeClone->getDefaultWaterStrat()) {
+			newPlant->setWaterStrategy(ws);
+		}
+		if (FertilizeStrategy* fsProto = prototypeClone->getDefaultFertStrat()) {
+			newPlant->setFertilizeStrategy(fsProto);
+		}
 
 		auto newStockItem = std::make_unique<StockItem>(
 			newPlant->getName(),
@@ -621,9 +625,10 @@ void __fastcall TfrmMain::btnClonePlantClick(TObject *Sender)
 		);
 		std::string newStockItemName = newStockItem->getname();
 
-	bed->add(newPlant);
-	objInventory->additem(std::move(newStockItem));
-	AttachObserverToPlant(newPlant);
+		bed->add(newPlant);
+		objInventory->additem(std::move(newStockItem));
+		AttachObserverToPlant(newPlant);
+		ownedPrototypeClones.push_back(std::move(prototypeClone));
 
 		tvGreenhouse->Items->Clear();
 		PopulateGreenhouseTree(nullptr, objGreenhouse.get());

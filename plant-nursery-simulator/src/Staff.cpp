@@ -173,8 +173,12 @@ std::vector<std::string> Staff::describePendingTasks() const {
         }
         std::string line = command->getCommandName();
         if (PlantInstance* target = command->getTarget()) {
+            std::string typeName = target->getPlantTypeName();
+            if (typeName.empty()) {
+                typeName = target->getName();
+            }
             line += " - ";
-            line += target->getPlantTypeName();
+            line += typeName;
             line += " (";
             line += target->getName();
             line += ")";

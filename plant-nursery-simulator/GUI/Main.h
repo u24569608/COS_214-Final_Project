@@ -314,6 +314,7 @@ public:		// User declarations
 	PlantInstance* snapshotPlant;
 	std::unique_ptr<Observer> plantLogObserver;
 	std::unordered_set<PlantInstance*> loggedPlants;
+	std::vector<std::unique_ptr<Plant>> ownedPrototypeClones;
 };
 //---------------------------------------------------------------------------
 extern PACKAGE TfrmMain *frmMain;
