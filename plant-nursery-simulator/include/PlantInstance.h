@@ -219,6 +219,13 @@ private:
      * @brief Emits a care request notification if any critical resource is low.
      */
     void requestCareIfNeeded();
+    /**
+     * @brief Emits observer notifications describing stat adjustments.
+     * @param metric Human readable metric name (e.g. "Water level").
+     * @param oldValue Previous recorded value.
+     * @param newValue Updated value after the change.
+     */
+    void emitStatChange(const std::string& metric, int oldValue, int newValue);
 };
 
 #endif // PLANT_INSTANCE_H

@@ -22,6 +22,11 @@ public:
      * @brief Executes the fertilisation behaviour on the target plant.
      */
     void handleRequest() override;
+
+    /**
+     * @brief Describes the command for logging purposes.
+     */
+    std::string getCommandName() const override;
 };
 
 #endif // FERTILIZE_PLANT_H

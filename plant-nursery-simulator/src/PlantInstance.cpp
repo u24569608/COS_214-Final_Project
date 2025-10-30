@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <memory>
 #include <optional>
+#include <sstream>
 #include <unordered_map>
 
 namespace {
@@ -126,6 +127,17 @@ void PlantInstance::setState(std::unique_ptr<PlantState> nextState) {
             notify(availabilityEvent);
         }
 
+        if (!previousName.empty() && !currentName.empty()) {
+            std::ostringstream oss;
+            oss << "Lifecycle state changed from " << previousName << " to " << currentName;
+            const ObserverEvent stateEvent{
+                ObserverEventType::Generic,
+                this,
+                oss.str(),
+                std::nullopt};
+            notify(stateEvent);
+        }
+
         if (enteredWithering) {
             careAlertActive = true;
             const ObserverEvent careEvent{
@@ -185,7 +197,9 @@ int PlantInstance::getHealth() const {
 }
 
 void PlantInstance::setHealth(int newHealth) {
+    const int previous = health;
     this->health = clampStat(newHealth);
+    emitStatChange("Health", previous, health);
 }
 
 void PlantInstance::changeHealth(int delta) {
@@ -197,7 +211,9 @@ int PlantInstance::getWaterLevel() const {
 }
 
 void PlantInstance::setWaterLevel(int newLevel) {
+    const int previous = waterLevel;
     waterLevel = clampStat(newLevel);
+    emitStatChange("Water level", previous, waterLevel);
 }
 
 void PlantInstance::changeWaterLevel(int delta) {
@@ -209,7 +225,9 @@ int PlantInstance::getNutrientLevel() const {
 }
 
 void PlantInstance::setNutrientLevel(int newLevel) {
+    const int previous = nutrientLevel;
     nutrientLevel = clampStat(newLevel);
+    emitStatChange("Nutrient level", previous, nutrientLevel);
 }
 
 void PlantInstance::changeNutrientLevel(int delta) {
@@ -301,4 +319,24 @@ std::string PlantInstance::deriveInstanceName(Plant* plantPrototype, const std::
     int& counter = nameCounters[baseName];
     ++counter;
     return baseName + std::to_string(counter);
+}
+
+void PlantInstance::emitStatChange(const std::string& metric, int oldValue, int newValue) {
+    if (oldValue == newValue) {
+        return;
+    }
+
+    std::ostringstream oss;
+    const int delta = newValue - oldValue;
+    oss << metric << " changed to " << newValue;
+    if (delta != 0) {
+        oss << " (" << (delta > 0 ? "+" : "") << delta << ")";
+    }
+
+    const ObserverEvent statEvent{
+        ObserverEventType::Generic,
+        this,
+        oss.str(),
+        std::nullopt};
+    notify(statEvent);
 }

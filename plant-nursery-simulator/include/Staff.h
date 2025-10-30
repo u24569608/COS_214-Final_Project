@@ -3,6 +3,9 @@
 
 #include "Observer.h" // Is-a Observer
 #include "Colleague.h" // Is-a Colleague
+#include <deque>
+#include <functional>
+#include <memory>
 #include <string>
 #include <unordered_set>
 #include <vector>
@@ -80,12 +83,12 @@ public:
      * @brief Adds a command to the staff's task queue. (FR19)
      * @param cmd The command to add.
      */
-    void addCommandToQueue(PlantCommand* cmd);
+    void addCommandToQueue(std::unique_ptr<PlantCommand> cmd);
 
     /**
      * @brief Creative Function: Executes the next command in the queue.
      */
-    void processNextTask();
+    PlantInstance* processNextTask();
 
     /**
      * @brief Creative Function: Gets the number of pending tasks.
@@ -102,6 +105,12 @@ public:
      * @return Collection of reminder records.
      */
     const std::vector<StaffReminder>& getCareReminders() const;
+
+    /**
+     * @brief Installs a UI logging sink used for status updates.
+     * @param sink Functor invoked whenever the staff member needs to surface a message.
+     */
+    void setLogSink(std::function<void(const std::string&)> sink);
 
     /**
      * @brief Subscribes this staff member to a plant's observer feed.
@@ -146,16 +155,29 @@ public:
 private:
     int id;
     std::string name;
-    std::vector<PlantCommand*> taskQueue; ///< Command queue
+    std::deque<std::unique_ptr<PlantCommand>> taskQueue; ///< Command queue
     CareRequestHandler* handler; ///< Start of the CoR chain (non-owning)
     GreenhouseBed* assignedBed; ///< Bed this staff is responsible for (non-owning)
     std::vector<StaffReminder> careReminders; ///< Observer-generated reminders
     std::unordered_set<PlantInstance*> observedPlants; ///< Borrowed plant pointers currently observed
+    std::function<void(const std::string&)> logSink; ///< Optional logging callback for UI updates.
 
     /**
      * @brief Detaches from all currently observed plant subjects.
      */
     void stopObservingAll();
+
+    /**
+     * @brief Logs a formatted message if a sink has been configured.
+     * @param message Text to dispatch to the sink.
+     */
+    void log(const std::string& message) const;
+
+    /**
+     * @brief Enqueues concrete care commands based on the plant's needs.
+     * @param plant Target plant requesting assistance.
+     */
+    void enqueueCareTasks(PlantInstance* plant);
 };
 
 #endif // STAFF_H//

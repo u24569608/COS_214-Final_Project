@@ -11,6 +11,8 @@
 #include "../include/PlantPrototypeRegistry.h"
 #include "../include/PlantInstance.h"
 #include "../include/PlantState.h"
+#include "../include/FrequentWatering.h"
+#include "../include/LiquidFertilizer.h"
 #include "../include/Plant.h"
 #include "../include/SeedState.h"
 #include "../include/GrowingState.h"
@@ -54,11 +56,23 @@ double parsePrice(const std::string& raw, size_t lineNumber, const std::string& 
     }
 }
 
+WaterStrategy& defaultWaterStrategy() {
+    static FrequentWatering strategy;
+    return strategy;
+}
+
+FertilizeStrategy& defaultFertilizerStrategy() {
+    static LiquidFertilizer strategy;
+    return strategy;
+}
+
 class ImportedPlantPrototype : public Plant {
 public:
 	explicit ImportedPlantPrototype(const std::string& plantName) {
 		setName(plantName);
 		setType("Imported");
+		setDefaultWaterStrat(&defaultWaterStrategy());
+		setDefaultFertStrat(&defaultFertilizerStrategy());
 	}
 
 	ImportedPlantPrototype(const ImportedPlantPrototype& other) : Plant() {
