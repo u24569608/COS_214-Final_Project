@@ -1,3 +1,8 @@
+/**
+ * @file WaterPlant.cpp
+ * @brief Implements the WaterPlant behaviour defined in the corresponding header.
+ */
+
 #include "../include/PlantInstance.h"
 #include "../include/WaterPlant.h"
 #include <iostream>

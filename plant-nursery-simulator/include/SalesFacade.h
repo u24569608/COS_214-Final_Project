@@ -23,6 +23,14 @@ class PlantPrototypeRegistry;
  */
 class SalesFacade {
 public:
+    /**
+     * @brief Assembles the facade with pointers to its collaborating subsystems.
+     * @param inv Inventory providing stock data and persistence.
+     * @param pp Payment processor responsible for transactions.
+     * @param ob Builder used to assemble complex orders.
+     * @param greenhouse Optional greenhouse root for integrating plant instances.
+     * @param registry Optional prototype registry for cloning plants.
+     */
     SalesFacade(Inventory* inv,
                 PaymentProcessor* pp,
                 OrderBuilder* ob,
@@ -104,8 +112,22 @@ private:
      * @param itemName Human-readable name of the sold item.
      */
     void notifyItemSold(const std::string& itemId, const std::string& itemName);
+    /**
+     * @brief Propagates greenhouse and registry pointers into the inventory subsystem.
+     */
     void syncInventoryContext();
+
+    /**
+     * @brief Determines whether a stock name should create greenhouse plant instances.
+     * @param name Logical stock identifier.
+     * @return True when the name is treated as a plant.
+     */
     bool isPlantStock(const std::string& name) const;
+
+    /**
+     * @brief Registers the supplied plant type with the prototype registry if necessary.
+     * @param name Plant name to ensure availability for cloning.
+     */
     void ensurePrototypeRegistered(const std::string& name);
 
     Inventory* inventory; ///< Subsystem 1

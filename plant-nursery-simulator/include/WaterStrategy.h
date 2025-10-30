@@ -9,11 +9,18 @@ class PlantInstance;
  */
 class WaterStrategy {
 public:
+    /**
+     * @brief Virtual destructor to allow polymorphic cleanup.
+     */
     virtual ~WaterStrategy();
     /**
      * @brief Abstract method to execute the watering strategy.
      */
     virtual void water(PlantInstance& plant) const = 0;
+    /**
+     * @brief Produces a deep copy of the concrete watering strategy.
+     * @return Newly allocated strategy instance.
+     */
     virtual WaterStrategy* clone() const = 0;    
 };
 

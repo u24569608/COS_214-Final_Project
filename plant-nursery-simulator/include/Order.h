@@ -11,9 +11,20 @@
  */
 class Order {
 public:
+    /**
+     * @brief Creates an empty order ready to receive stock items.
+     */
     Order();
-    
+
+    /**
+     * @brief Appends a stock item copy to the order contents.
+     * @param item Stock entry describing the purchased product.
+     */
     void addItem(StockItem item);
+
+    /**
+     * @brief Writes a human-readable summary of the order to stdout.
+     */
     void printOrder() const;
 
     /**
@@ -34,7 +45,10 @@ public:
      */
     void setOrderStatus(std::string newStatus);
 
-    
+    /**
+     * @brief Provides read-only access to the contained order items.
+     * @return Const reference to the aggregated stock items.
+     */
     const std::vector<StockItem>& getItems() const;
 
 private:

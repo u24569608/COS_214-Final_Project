@@ -13,6 +13,9 @@ object frmSales: TfrmSales
   ParentColor = False
   ParentFont = False
   TabOrder = 0
+  DesignSize = (
+    640
+    761)
   object lblBuildOrderHeading: TLabel
     Left = 11
     Top = 8
@@ -69,20 +72,6 @@ object frmSales: TfrmSales
     ParentFont = False
     StyleElements = [seClient, seBorder]
   end
-  object lblCustomerSelectionHeading: TLabel
-    Left = 445
-    Top = 55
-    Width = 113
-    Height = 21
-    Caption = 'Select Customer'
-    Font.Charset = DEFAULT_CHARSET
-    Font.Color = 9203809
-    Font.Height = -16
-    Font.Name = 'Segoe UI'
-    Font.Style = []
-    ParentFont = False
-    StyleElements = [seClient, seBorder]
-  end
   object cmbItemSelection: TComboBox
     Left = 11
     Top = 84
@@ -90,7 +79,33 @@ object frmSales: TfrmSales
     Height = 29
     TabOrder = 0
     Text = 'Item'
-    OnChange = cmbItemSelectionChange
+  end
+  object pnlAddToOrder: TPanel
+    Left = 11
+    Top = 128
+    Width = 614
+    Height = 49
+    Anchors = [akLeft, akTop, akRight]
+    ParentBackground = False
+    TabOrder = 1
+    DesignSize = (
+      614
+      49)
+    object btnAddToOrder: TBitBtn
+      Left = 448
+      Top = 8
+      Width = 156
+      Height = 33
+      Anchors = [akTop, akRight]
+      Caption = 'Add to Order'
+      Enabled = False
+      ImageIndex = 12
+      ImageName = 'Add'
+      Images = frmMain.vrtlmglstMain
+      TabOrder = 0
+      OnClick = btnAddToOrderClick
+      ExplicitLeft = 440
+    end
   end
   object redtOrderDetails: TRichEdit
     Left = 258
@@ -107,7 +122,7 @@ object frmSales: TfrmSales
     PlainText = True
     ReadOnly = True
     ScrollBars = ssVertical
-    TabOrder = 1
+    TabOrder = 2
     StyleElements = [seClient, seBorder]
   end
   object btnRefund: TBitBtn
@@ -129,34 +144,47 @@ object frmSales: TfrmSales
     Height = 29
     Enabled = False
     TabOrder = 3
-    Text = 'Customer'
-    OnChange = cmbCustomerSelectChange
+    Text = ''
+    TextHint = 'Enter your name'
+    OnChange = lbledtCustomerNameChange
   end
   object btnAddToOrder: TBitBtn
     Left = 11
-    Top = 127
-    Width = 173
-    Height = 33
-    Caption = 'Add to Order'
-    Enabled = False
-    ImageIndex = 12
-    ImageName = 'Add'
-    Images = frmMain.vrtlmglstMain
+    Top = 608
+    Width = 614
+    Height = 49
+    Anchors = [akLeft, akTop, akRight]
+    ParentBackground = False
     TabOrder = 4
-    OnClick = btnAddToOrderClick
+    DesignSize = (
+      614
+      49)
+    object btnProcessPayment: TBitBtn
+      Left = 448
+      Top = 8
+      Width = 156
+      Height = 33
+      Anchors = [akTop, akRight]
+      Caption = 'Process Payment'
+      Enabled = False
+      ImageIndex = 13
+      ImageName = 'Cash'
+      Images = frmMain.vrtlmglstMain
+      TabOrder = 0
+      ExplicitLeft = 440
+    end
   end
-  object btnProcessPayment: TBitBtn
-    AlignWithMargins = True
-    Left = 445
-    Top = 126
-    Width = 173
+  object btnRefund: TBitBtn
+    Left = 459
+    Top = 672
+    Width = 156
     Height = 33
-    Caption = 'Process Payment'
+    Anchors = [akTop, akRight]
+    Caption = 'Refund Order'
     Enabled = False
     ImageIndex = 13
     ImageName = 'Cash'
     Images = frmMain.vrtlmglstMain
     TabOrder = 5
-    OnClick = btnProcessPaymentClick
   end
 end

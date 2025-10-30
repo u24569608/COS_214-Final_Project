@@ -35,6 +35,7 @@ object frmAddItem: TfrmAddItem
     Height = 45
     Align = alBottom
     TabOrder = 0
+    ExplicitTop = 247
     object btnCancel: TButton
       Left = 173
       Top = 9
@@ -58,7 +59,6 @@ object frmAddItem: TfrmAddItem
       ImageName = 'Add'
       Images = frmMain.vrtlmglstMain
       TabOrder = 1
-      OnClick = btnAddClick
     end
   end
   object lbledtItemName: TLabeledEdit
@@ -71,7 +71,6 @@ object frmAddItem: TfrmAddItem
     EditLabel.Caption = 'Item Name'
     TabOrder = 1
     Text = ''
-    OnChange = lbledtItemNameChange
   end
   object lbledtItemPrice: TLabeledEdit
     Left = 11
@@ -81,9 +80,7 @@ object frmAddItem: TfrmAddItem
     EditLabel.Width = 53
     EditLabel.Height = 15
     EditLabel.Caption = 'Item Price'
-    Enabled = False
     TabOrder = 2
     Text = ''
-    OnChange = lbledtItemPriceChange
   end
 end

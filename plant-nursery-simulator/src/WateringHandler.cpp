@@ -1,3 +1,8 @@
+/**
+ * @file WateringHandler.cpp
+ * @brief Implements the WateringHandler behaviour defined in the corresponding header.
+ */
+
 #include "../include/WateringHandler.h"
 #include "../include/PlantInstance.h"
 #include <algorithm>

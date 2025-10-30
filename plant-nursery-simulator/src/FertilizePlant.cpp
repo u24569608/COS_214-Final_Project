@@ -1,3 +1,8 @@
+/**
+ * @file FertilizePlant.cpp
+ * @brief Implements the FertilizePlant behaviour defined in the corresponding header.
+ */
+
 #include "../include/PlantInstance.h"
 #include "../include/FertilizePlant.h"
 #include <iostream>

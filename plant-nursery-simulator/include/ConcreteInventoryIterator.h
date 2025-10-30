@@ -17,12 +17,21 @@ class PlantInstance;
  */
 class ConcreteInventoryIterator : public InventoryIterator {
 public:
+    /**
+     * @brief Binds the iterator to an inventory aggregate for traversal.
+     * @param inv Inventory instance that owns the stock entries to iterate.
+     */
     ConcreteInventoryIterator(Inventory* inv);
 
+    /** @copydoc InventoryIterator::first */
     StockItem* first() override;
+    /** @copydoc InventoryIterator::next */
     StockItem* next() override;
+    /** @copydoc InventoryIterator::hasNext */
     bool hasNext() const override;
+    /** @copydoc InventoryIterator::currentItem */
     StockItem* currentItem() const override;
+    /** @copydoc InventoryIterator::reset */
     void reset() override;
 
 private:
@@ -31,6 +40,9 @@ private:
     mutable std::size_t currentIndex; ///< The current position within the traversal.
     mutable bool traversalDirty; ///< Marks when the cached traversal needs rebuilding.
 
+    /**
+     * @brief Recomputes the cached traversal order from the associated inventory.
+     */
     void rebuildTraversal() const;
 };
 

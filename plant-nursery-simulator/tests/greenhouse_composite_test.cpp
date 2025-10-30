@@ -1,3 +1,7 @@
+/**
+ * @file greenhouse_composite_test.cpp
+ * @brief Confirms composite greenhouse operations behave correctly for nested beds.
+ */
 #include <iostream>
 #include <memory>
 

@@ -1,3 +1,8 @@
+/**
+ * @file SlowReleaseFertilizer.cpp
+ * @brief Implements the SlowReleaseFertilizer behaviour defined in the corresponding header.
+ */
+
 #include "../include/SlowReleaseFertilizer.h"
 #include "../include/PlantInstance.h"
 #include <iostream>

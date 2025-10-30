@@ -13,11 +13,30 @@ class Inventory;
  */
 class Colleague {
 public:
+    /**
+     * @brief Constructs a colleague participant registered with the mediator.
+     * @param mediator Mediator responsible for coordinating colleague interaction.
+     */
     Colleague(FloorMediator* mediator);
     virtual ~Colleague();
 
+    /**
+     * @brief Sends a message through the mediator to a colleague.
+     * @param message The content to dispatch.
+     * @param colleagueID Identifier for the intended recipient.
+     */
     virtual void send(std::string message, int colleagueID) = 0;
+
+    /**
+     * @brief Receives a message routed by the mediator.
+     * @param message Text received from another colleague.
+     */
     virtual void receive(std::string message) = 0;
+
+    /**
+     * @brief Retrieves the identifier assigned to this colleague.
+     * @return Numeric ID used by the mediator for routing.
+     */
     virtual int getID() const = 0;
 
 protected:

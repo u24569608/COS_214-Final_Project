@@ -1,3 +1,7 @@
+/**
+ * @file prototype_state_test.cpp
+ * @brief Exercises cloning of plants and their states in the prototype registry.
+ */
 #include <iostream>
 #include <memory>
 

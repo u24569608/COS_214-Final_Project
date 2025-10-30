@@ -1,3 +1,8 @@
+/**
+ * @file DeadState.cpp
+ * @brief Implements the DeadState behaviour defined in the corresponding header.
+ */
+
 #include "../include/DeadState.h"
 #include "../include/PlantInstance.h"
 

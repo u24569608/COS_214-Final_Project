@@ -1,3 +1,8 @@
+/**
+ * @file PlantInstance.cpp
+ * @brief Implements the PlantInstance behaviour defined in the corresponding header.
+ */
+
 #include "../include/PlantInstance.h"
 #include "../include/Plant.h" // We need this for the getPlantTypeName()
 #include "../include/WaterStrategy.h"

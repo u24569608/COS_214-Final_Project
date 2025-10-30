@@ -1,3 +1,8 @@
+/**
+ * @file SeedState.cpp
+ * @brief Implements the SeedState behaviour defined in the corresponding header.
+ */
+
 #include "../include/SeedState.h"
 #include "../include/DeadState.h"
 #include "../include/GrowingState.h"

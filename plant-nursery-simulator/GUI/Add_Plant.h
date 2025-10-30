@@ -1,5 +1,3 @@
-//---------------------------------------------------------------------------
-
 #ifndef Add_PlantH
 #define Add_PlantH
 //---------------------------------------------------------------------------
@@ -9,7 +7,11 @@
 #include <Vcl.Forms.hpp>
 #include <Vcl.ExtCtrls.hpp>
 #include <Vcl.Mask.hpp>
-//---------------------------------------------------------------------------
+
+/**
+ * @file Add_Plant.h
+ * @brief VCL dialog that guides the user through adding a plant prototype.
+ */
 class TfrmAddPlant : public TForm
 {
 __published:	// IDE-managed Components
@@ -17,16 +19,20 @@ __published:	// IDE-managed Components
 	TButton *btnCancel;
 	TButton *btnAdd;
 	TLabel *lblBuildOrderHeading;
-	TLabeledEdit *lbledtPlantName;
+	TLabeledEdit *LabeledEdit1;
 	TRadioGroup *rgFertiliseStrategy;
 	TRadioGroup *rgWaterStrategy;
+    /**
+     * @brief Cancels the dialog and closes the form.
+     * @param Sender Component raising the event.
+     */
 	void __fastcall btnCancelClick(TObject *Sender);
-	void __fastcall lbledtPlantNameChange(TObject *Sender);
-	void __fastcall rgWaterStrategyClick(TObject *Sender);
-	void __fastcall rgFertiliseStrategyClick(TObject *Sender);
-	void __fastcall btnAddClick(TObject *Sender);
 private:	// User declarations
 public:		// User declarations
+    /**
+     * @brief Constructs the add-plant dialog and sets up radio groups.
+     * @param Owner Component responsible for the dialog lifetime.
+     */
 	__fastcall TfrmAddPlant(TComponent* Owner);
 };
 //---------------------------------------------------------------------------

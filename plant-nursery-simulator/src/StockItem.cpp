@@ -1,3 +1,8 @@
+/**
+ * @file StockItem.cpp
+ * @brief Implements the StockItem behaviour defined in the corresponding header.
+ */
+
 #include "../include/StockItem.h"
 #include "../include/PlantInstance.h"
 

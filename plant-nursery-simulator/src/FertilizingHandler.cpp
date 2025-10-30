@@ -1,3 +1,8 @@
+/**
+ * @file FertilizingHandler.cpp
+ * @brief Implements the FertilizingHandler behaviour defined in the corresponding header.
+ */
+
 #include "../include/FertilizingHandler.h"
 #include "../include/PlantInstance.h"
 #include <algorithm>

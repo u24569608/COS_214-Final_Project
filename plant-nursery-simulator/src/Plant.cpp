@@ -1,3 +1,8 @@
+/**
+ * @file Plant.cpp
+ * @brief Implements the Plant behaviour defined in the corresponding header.
+ */
+
 #include "../include/Plant.h"
 
 Plant::Plant() : defaultWaterStrat(nullptr), defaultFertilizerStrat(nullptr) {}

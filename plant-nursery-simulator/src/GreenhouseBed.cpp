@@ -1,3 +1,8 @@
+/**
+ * @file GreenhouseBed.cpp
+ * @brief Implements the GreenhouseBed behaviour defined in the corresponding header.
+ */
+
 #include "../include/GreenhouseBed.h"
 #include "../include/GreenhouseComponent.h"
 #include "../include/GreenhouseIterator.h"

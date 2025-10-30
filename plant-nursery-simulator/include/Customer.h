@@ -15,10 +15,30 @@ class StockItem;
  */
 class Customer : public Colleague {
 public:
+    /**
+     * @brief Creates a customer colleague with a mediator subscription.
+     * @param id Unique identifier assigned by the system.
+     * @param mediator Mediator responsible for coordinating communication.
+     */
     Customer(int id, FloorMediator* mediator);
 
+    /**
+     * @brief Retrieves the customer's unique identifier.
+     * @return Numeric colleague ID.
+     */
     int getID() const override;
+
+    /**
+     * @brief Sends a message to another colleague through the mediator.
+     * @param message Body of the message to dispatch.
+     * @param colleagueID Identifier of the intended recipient.
+     */
     void send(std::string message, int colleagueID) override;
+
+    /**
+     * @brief Handles an incoming message routed by the mediator.
+     * @param message Content received from another colleague.
+     */
     void receive(std::string message) override;
 
     /**
@@ -95,8 +115,19 @@ private:
         std::string displayStatus;
     };
 
+    /**
+     * @brief Checks if the cart already references the supplied stock item pointer.
+     */
     bool containsItem(StockItem* item) const;
+
+    /**
+     * @brief Determines whether the cart contains a specific stock identifier.
+     */
     bool containsItemId(const std::string& itemId) const;
+
+    /**
+     * @brief Checks whether the cart has an entry with the given name.
+     */
     bool containsItem(const std::string& itemName) const;
 
     int id;

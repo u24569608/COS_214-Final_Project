@@ -327,3 +327,13 @@ int main() {
         return 1; // FAILURE
     }
 }
+/**
+ * @file adapter_test.cpp
+ * @brief Exercises the adapter subsystem through custom integration-style tests.
+ */
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <string>
+#include <cmath> // For std::abs in ASSERT_NEAR
+#include <memory>

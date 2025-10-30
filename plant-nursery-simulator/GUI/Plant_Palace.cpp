@@ -1,3 +1,7 @@
+/**
+ * @file Plant_Palace.cpp
+ * @brief Hosts the main VCL frame for the plant palace dashboard UI.
+ */
 //---------------------------------------------------------------------------
 
 #include <vcl.h>
@@ -6,11 +10,9 @@
 //---------------------------------------------------------------------------
 #include <Vcl.Styles.hpp>
 #include <Vcl.Themes.hpp>
-USEFORM("Main.cpp", frmMain);
-USEFORM("Greenhouse_Information_Frame.cpp", frmGreenhouseInformation); /* TFrame: File Type */
 USEFORM("Sales_Frame.cpp", frmSales); /* TFrame: File Type */
-USEFORM("Add_Plant.cpp", frmAddPlant);
-USEFORM("Add_Item.cpp", frmAddItem);
+USEFORM("Greenhouse_Information_Frame.cpp", frmGreenhouseInformation); /* TFrame: File Type */
+USEFORM("Main.cpp", frmMain);
 //---------------------------------------------------------------------------
 int WINAPI _tWinMain(HINSTANCE, HINSTANCE, LPTSTR, int)
 {

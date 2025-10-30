@@ -4,6 +4,10 @@
 #include "PlantInstance.h"
 
 #include <type_traits>
+/**
+ * @file command_test.cpp
+ * @brief Manually verifies the command pattern execution and undo support.
+ */
 #include <iostream>
 #include <string>
 

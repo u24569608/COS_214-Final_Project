@@ -1,3 +1,8 @@
+/**
+ * @file OrganicFertilizer.cpp
+ * @brief Implements the OrganicFertilizer behaviour defined in the corresponding header.
+ */
+
 #include "../include/OrganicFertilizer.h"
 #include "../include/PlantInstance.h"
 #include <iostream>

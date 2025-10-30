@@ -24,7 +24,7 @@ public:
     StockItem(std::string n, double p, PlantInstance* pl);
 
     /**
-     * @brief Copy constructor
+     * @brief Creates a shallow copy suitable for order summaries (no observer binding).
      */
 	StockItem(const StockItem& other);
     /**
@@ -37,12 +37,43 @@ public:
      * @return Stable identifier usable for cart tracking.
      */
     const std::string& getId() const;
+
+    /**
+     * @brief Retrieves the display name of the stock item.
+     */
     std::string getname() const;
+
+    /**
+     * @brief Gets the retail price associated with the stock entry.
+     * @return Price rounded down to whole currency units.
+     */
     int getPrice() const;
+
+    /**
+     * @brief Accesses the underlying plant instance when the stock represents a plant.
+     * @return Borrowed pointer to the plant, or nullptr when not applicable.
+     */
     PlantInstance* getplant();
+
+    /**
+     * @brief Provides read-only access to the associated plant instance.
+     */
     const PlantInstance* getplant() const;
+
+    /**
+     * @brief Updates the retail price.
+     * @param price New unit price.
+     */
     void setPrice(double price);
+
+    /**
+     * @brief Reports whether this stock item represents a live plant.
+     */
     bool isPlant();
+
+    /**
+     * @brief Checks if the item is currently available for sale.
+     */
     bool getIsAvailible();
 
     /**
@@ -79,7 +110,14 @@ private:
     bool isAvailable;
     std::string displayStatus;
 
+    /**
+     * @brief Attaches observer hooks to the supplied plant.
+     */
     void bindToPlant(PlantInstance* newPlant);
+
+    /**
+     * @brief Removes observer hooks from the current plant.
+     */
     void detachFromPlant();
 };
 

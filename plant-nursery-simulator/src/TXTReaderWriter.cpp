@@ -1,3 +1,8 @@
+/**
+ * @file TXTReaderWriter.cpp
+ * @brief Implements the TXTReaderWriter behaviour defined in the corresponding header.
+ */
+
 #include "../include/TXTReaderWriter.h"
 #include "../include/StockItem.h" // Needed for writing
 #include "../include/PlantInstance.h"

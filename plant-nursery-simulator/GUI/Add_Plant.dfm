@@ -36,6 +36,8 @@ object frmAddPlant: TfrmAddPlant
     Height = 45
     Align = alBottom
     TabOrder = 0
+    ExplicitTop = 139
+    ExplicitWidth = 353
     object btnCancel: TButton
       Left = 173
       Top = 9
@@ -45,7 +47,6 @@ object frmAddPlant: TfrmAddPlant
       ImageIndex = 23
       ImageName = 'Cancel'
       Images = frmMain.vrtlmglstMain
-      ModalResult = 2
       TabOrder = 0
       OnClick = btnCancelClick
     end
@@ -59,12 +60,10 @@ object frmAddPlant: TfrmAddPlant
       ImageIndex = 12
       ImageName = 'Add'
       Images = frmMain.vrtlmglstMain
-      ModalResult = 1
       TabOrder = 1
-      OnClick = btnAddClick
     end
   end
-  object lbledtPlantName: TLabeledEdit
+  object LabeledEdit1: TLabeledEdit
     Left = 11
     Top = 79
     Width = 180
@@ -74,7 +73,6 @@ object frmAddPlant: TfrmAddPlant
     EditLabel.Caption = 'Plant Name'
     TabOrder = 1
     Text = ''
-    OnChange = lbledtPlantNameChange
   end
   object rgFertiliseStrategy: TRadioGroup
     Left = 206
@@ -88,7 +86,6 @@ object frmAddPlant: TfrmAddPlant
       'Organic'
       'Slow Release')
     TabOrder = 2
-    OnClick = rgFertiliseStrategyClick
   end
   object rgWaterStrategy: TRadioGroup
     Left = 11
@@ -102,6 +99,5 @@ object frmAddPlant: TfrmAddPlant
       'Sparse'
       'Seasonal')
     TabOrder = 3
-    OnClick = rgWaterStrategyClick
   end
 end

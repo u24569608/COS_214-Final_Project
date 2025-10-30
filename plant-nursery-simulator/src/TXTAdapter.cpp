@@ -1,3 +1,8 @@
+/**
+ * @file TXTAdapter.cpp
+ * @brief Implements the TXTAdapter behaviour defined in the corresponding header.
+ */
+
 #include "../include/TXTAdapter.h"
 #include "../include/TXTReaderWriter.h"
 #include "../include/Inventory.h"

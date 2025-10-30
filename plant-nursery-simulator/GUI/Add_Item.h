@@ -1,5 +1,3 @@
-//---------------------------------------------------------------------------
-
 #ifndef Add_ItemH
 #define Add_ItemH
 //---------------------------------------------------------------------------
@@ -9,7 +7,11 @@
 #include <Vcl.Forms.hpp>
 #include <Vcl.ExtCtrls.hpp>
 #include <Vcl.Mask.hpp>
-//---------------------------------------------------------------------------
+
+/**
+ * @file Add_Item.h
+ * @brief VCL form that captures details for adding a new inventory item.
+ */
 class TfrmAddItem : public TForm
 {
 __published:	// IDE-managed Components
@@ -19,12 +21,16 @@ __published:	// IDE-managed Components
 	TButton *btnAdd;
 	TLabeledEdit *lbledtItemName;
 	TLabeledEdit *lbledtItemPrice;
+    /**
+     * @brief Closes the dialog without applying changes.
+     */
 	void __fastcall btnCancelClick(TObject *Sender);
-	void __fastcall btnAddClick(TObject *Sender);
-	void __fastcall lbledtItemNameChange(TObject *Sender);
-	void __fastcall lbledtItemPriceChange(TObject *Sender);
 private:	// User declarations
 public:		// User declarations
+    /**
+     * @brief Constructs the add-item dialog and initialises controls.
+     * @param Owner Owning component, typically the main form.
+     */
 	__fastcall TfrmAddItem(TComponent* Owner);
 };
 //---------------------------------------------------------------------------

@@ -1,5 +1,3 @@
-//---------------------------------------------------------------------------
-
 #ifndef MainH
 #define MainH
 //---------------------------------------------------------------------------
@@ -21,15 +19,17 @@
 #include "Greenhouse_Information_Frame.h"
 #include "Sales_Frame.h"
 #include <Vcl.Dialogs.hpp>
-#include <Vcl.Mask.hpp>
 #include <vector>
 #include <memory>
 
+// MEDIATOR PATTERN
 #include "../include/NurseryMediator.h"
 #include "../include/Colleague.h"
 #include "../include/Staff.h"
 #include "../include/Customer.h"
 
+
+// --- COMPOSITE & PROTOTYPE & ITERATOR ---
 #include "../include/PlantPrototypeRegistry.h"
 #include "../include/Plant.h"
 #include "../include/GreenhouseBed.h"
@@ -38,36 +38,23 @@
 #include "../include/GreenhouseIterator.h"
 #include "../include/ConcreteGreenhouseIterator.h"
 
+
+// --- ADAPTER PATTERN ---
 #include "../include/Inventory.h"
 #include "../include/FileAdapter.h"
 #include "../include/CSVAdapter.h"
 #include "../include/TXTAdapter.h"
 
+// --- ITERATOR PATTERN (for displaying inventory) ---
 #include "../include/StockItem.h"
 #include "../include/InventoryIterator.h"
 #include "../include/InventoryCollection.h"
 #include "../include/ConcreteInventoryIterator.h"
 
-#include "../include/SalesFacade.h"
-#include "../include/OrderBuilder.h"
-#include "../include/CustomOrderBuilder.h"
-#include "../include/Order.h"
-#include "../include/PaymentProcessor.h"
-
-
-#include "Add_Item.h"
-#include "Add_Plant.h"
-
-
-#include "../include/WaterStrategy.h"
-#include "../include/FrequentWatering.h"
-#include "../include/SparseWatering.h"
-#include "../include/SeasonalWatering.h"
-#include "../include/FertilizeStrategy.h"
-#include "../include/LiquidFertilizer.h"
-#include "../include/OrganicFertilizer.h"
-#include "../include/SlowReleaseFertilizer.h"
-//---------------------------------------------------------------------------
+/**
+ * @file Main.h
+ * @brief Application main form hosting nursery management workflows.
+ */
 class TfrmMain : public TForm
 {
 __published:	// IDE-managed Components
@@ -126,44 +113,54 @@ __published:	// IDE-managed Components
 	TButton *btnSimulate;
 	TFileOpenDialog *dlgOpenLoadInventory;
 	TFileSaveDialog *dlgSaveSaveInventory;
-	TPanel *pnlGreenhouseListView;
-	TLabel *lblAddPlantToRegistryHeading;
-	TButton *btnAddPlantToRegistry;
-	TLabeledEdit *lbledtPlantPrice;
-	TLabel *lblAddItemHeading;
-	TButton *btnAddItem;
-	TLabel *lblIOHeading;
-	TComboBox *cmbGreenhouseSelection;
-	TLabel *Label1;
-	TLabel *Label2;
+    /**
+     * @brief Synchronises UI state with the current message body.
+     */
 	void __fastcall edtMessageBodyChange(TObject *Sender);
+    /**
+     * @brief Initialises runtime services after the form is created.
+     */
 	void __fastcall FormCreate(TObject *Sender);
+    /**
+     * @brief Sends a mediated message between colleagues.
+     */
 	void __fastcall btnSendClick(TObject *Sender);
+    /**
+     * @brief Clears the message history display.
+     */
 	void __fastcall btnClearMessagesClick(TObject *Sender);
+    /**
+     * @brief Reverses the selected mediator message conversation.
+     */
 	void __fastcall btnReverseClick(TObject *Sender);
+    /**
+     * @brief Updates greenhouse detail panels when a tree node changes.
+     */
 	void __fastcall tvGreenhouseChange(TObject *Sender, TTreeNode *Node);
+    /**
+     * @brief Loads inventory data from persistent storage.
+     */
 	void __fastcall btnLoadInventoryClick(TObject *Sender);
+    /**
+     * @brief Moves the selected inventory item upward in the display list.
+     */
 	void __fastcall btnInventoryUpClick(TObject *Sender);
+    /**
+     * @brief Moves the selected inventory item downward in the display list.
+     */
 	void __fastcall btnInventoryDownClick(TObject *Sender);
+    /**
+     * @brief Saves inventory data to persistent storage.
+     */
 	void __fastcall btnSaveInventoryClick(TObject *Sender);
-	void __fastcall FormActivate(TObject *Sender);
-	void __fastcall btnAddPlantToRegistryClick(TObject *Sender);
-	void __fastcall btnAddItemClick(TObject *Sender);
-	void __fastcall btnClonePlantClick(TObject *Sender);
-	void __fastcall cmbPrototypesChange(TObject *Sender);
-	void __fastcall cmbGreenhouseSelectionChange(TObject *Sender);
-	void __fastcall lbledtPlantPriceChange(TObject *Sender);
-	void __fastcall btnProcessNextTaskClick(TObject *Sender);
-	void __fastcall lvStaffTaskQueueSelectItem(TObject *Sender, TListItem *Item, bool Selected);
-
 
 private:	// User declarations
 	// --- Mediator Pattern ---
 	// Mediator Object
 	std::unique_ptr<NurseryMediator> objMediator;
 
-
-
+	// A list to hold all colleagues (Staff and Customers)
+	std::vector<std::unique_ptr<Colleague>> vtrColleagues;
 
 	// A helper function to fill in the combo boxes
 	void PopulateColleagueComboBoxes();
@@ -175,37 +172,16 @@ private:	// User declarations
 	void PopulateGreenhouseTree(TTreeNode* parentNode, GreenhouseComponent* component);
 
 
-    std::unique_ptr<WaterStrategy> stratFreqWater;
-	std::unique_ptr<WaterStrategy> stratSparseWater;
-	std::unique_ptr<WaterStrategy> stratSeasonalWater;
-	std::unique_ptr<FertilizeStrategy> stratLiquidFert;
-	std::unique_ptr<FertilizeStrategy> stratOrganicFert;
-	std::unique_ptr<FertilizeStrategy> stratSlowFert;
-
-	void PopulatePrototypeComboBox();
-
-    // New
-    void RefreshStaffTaskQueue();
-	void WireStaffTaskEvents();
-
-public:		// User declarations
-	__fastcall TfrmMain(TComponent* Owner);
-    void PopulateSalesItemComboBox();
-	void UpdateOrderDisplay();
-     // --- Sales/Order Objects ---
-	std::unique_ptr<PaymentProcessor> objPaymentProcessor;
-	std::unique_ptr<OrderBuilder> objOrderBuilder;
-	std::unique_ptr<SalesFacade> objSalesFacade;
-	std::unique_ptr<Order> currentOrder;
-    std::unique_ptr<Inventory> objInventory;
+	std::unique_ptr<Inventory> objInventory;
 	void RefreshInventoryListView();
 
-	void PopulateCustomerComboBox();
+public:		// User declarations
+    /**
+     * @brief Constructs the main form and wires VCL components.
+     * @param Owner Component that owns the form.
+     */
+	__fastcall TfrmMain(TComponent* Owner);
 
-    // A list to hold all colleagues (Staff and Customers)
-	std::vector<std::unique_ptr<Colleague>> vtrColleagues;
-
-     void PopulateGreenhouseBedComboBox(GreenhouseComponent* component, const std::string& prefix = "");
 };
 //---------------------------------------------------------------------------
 extern PACKAGE TfrmMain *frmMain;

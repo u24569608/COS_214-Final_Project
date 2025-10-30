@@ -2,7 +2,7 @@ object frmGreenhouseInformation: TfrmGreenhouseInformation
   Left = 0
   Top = 0
   Width = 640
-  Height = 417
+  Height = 496
   Color = clWhite
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -15,21 +15,21 @@ object frmGreenhouseInformation: TfrmGreenhouseInformation
   TabOrder = 0
   object lblGrowthLabelHeading: TLabel
     Left = 438
-    Top = 79
+    Top = 101
     Width = 85
     Height = 21
     Caption = 'Health Level'
   end
   object lblWaterLevelHeading: TLabel
     Left = 16
-    Top = 79
+    Top = 101
     Width = 81
     Height = 21
     Caption = 'Water Level'
   end
   object lblNutrientLevelHeading: TLabel
     Left = 226
-    Top = 79
+    Top = 101
     Width = 98
     Height = 21
     Caption = 'Nutrient Level'
@@ -60,7 +60,7 @@ object frmGreenhouseInformation: TfrmGreenhouseInformation
   end
   object pbGrowth: TProgressBar
     Left = 438
-    Top = 106
+    Top = 128
     Width = 180
     Height = 29
     Smooth = True
@@ -68,7 +68,7 @@ object frmGreenhouseInformation: TfrmGreenhouseInformation
   end
   object rgWaterStrategy: TRadioGroup
     Left = 16
-    Top = 150
+    Top = 192
     Width = 180
     Height = 227
     Caption = 'Watering Strategy'
@@ -81,7 +81,7 @@ object frmGreenhouseInformation: TfrmGreenhouseInformation
   end
   object rgFertiliseStrategy: TRadioGroup
     Left = 226
-    Top = 150
+    Top = 192
     Width = 180
     Height = 227
     Caption = 'Fertilising Strategy'
@@ -94,7 +94,7 @@ object frmGreenhouseInformation: TfrmGreenhouseInformation
   end
   object grpAction: TGroupBox
     Left = 438
-    Top = 150
+    Top = 192
     Width = 180
     Height = 227
     Caption = 'Care'
@@ -148,7 +148,7 @@ object frmGreenhouseInformation: TfrmGreenhouseInformation
   end
   object pbWater: TProgressBar
     Left = 16
-    Top = 106
+    Top = 128
     Width = 180
     Height = 29
     Smooth = True
@@ -156,7 +156,7 @@ object frmGreenhouseInformation: TfrmGreenhouseInformation
   end
   object pbNutrients: TProgressBar
     Left = 226
-    Top = 106
+    Top = 128
     Width = 180
     Height = 29
     Smooth = True

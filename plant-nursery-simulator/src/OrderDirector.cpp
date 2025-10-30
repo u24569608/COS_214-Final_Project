@@ -1,3 +1,8 @@
+/**
+ * @file OrderDirector.cpp
+ * @brief Implements the OrderDirector behaviour defined in the corresponding header.
+ */
+
 #include "../include/OrderDirector.h"
 #include "../include/CustomOrderBuilder.h" // Needs to create a concrete builder
 #include "../include/Order.h"              // For getOrder()
