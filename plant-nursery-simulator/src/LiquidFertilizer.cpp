@@ -1,3 +1,8 @@
+/**
+ * @file LiquidFertilizer.cpp
+ * @brief Implements the LiquidFertilizer behaviour defined in the corresponding header.
+ */
+
 #include "../include/LiquidFertilizer.h"
 #include "../include/PlantInstance.h"
 #include <iostream>

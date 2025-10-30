@@ -1,3 +1,8 @@
+/**
+ * @file ConcreteGreenhouseIterator.cpp
+ * @brief Implements the ConcreteGreenhouseIterator behaviour defined in the corresponding header.
+ */
+
 #include "../include/ConcreteGreenhouseIterator.h"
 
 #include "../include/GreenhouseBed.h"

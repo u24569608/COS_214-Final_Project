@@ -1,3 +1,8 @@
+/**
+ * @file FrequentWatering.cpp
+ * @brief Implements the FrequentWatering behaviour defined in the corresponding header.
+ */
+
 #include "../include/FrequentWatering.h"
 #include "../include/PlantInstance.h"
 #include <iostream>

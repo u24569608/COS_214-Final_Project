@@ -1,3 +1,8 @@
+/**
+ * @file MatureState.cpp
+ * @brief Implements the MatureState behaviour defined in the corresponding header.
+ */
+
 #include "../include/MatureState.h"
 #include "../include/DeadState.h"
 #include "../include/PlantInstance.h"

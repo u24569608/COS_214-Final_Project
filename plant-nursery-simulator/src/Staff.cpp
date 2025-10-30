@@ -1,3 +1,8 @@
+/**
+ * @file Staff.cpp
+ * @brief Implements the Staff behaviour defined in the corresponding header.
+ */
+
 #include "../include/Staff.h"
 
 #include "../include/CareRequestHandler.h"

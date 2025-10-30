@@ -1,3 +1,8 @@
+/**
+ * @file NurseryMediator.cpp
+ * @brief Implements the NurseryMediator behaviour defined in the corresponding header.
+ */
+
 #include "../include/NurseryMediator.h"
 #include "../include/Colleague.h"
 #include <iostream>

@@ -1,3 +1,8 @@
+/**
+ * @file CustomOrderBuilder.cpp
+ * @brief Implements the CustomOrderBuilder behaviour defined in the corresponding header.
+ */
+
 #include "../include/CustomOrderBuilder.h"
 #include "../include/Order.h"
 #include "../include/StockItem.h"

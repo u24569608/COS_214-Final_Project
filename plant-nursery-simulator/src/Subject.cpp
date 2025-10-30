@@ -1,3 +1,8 @@
+/**
+ * @file Subject.cpp
+ * @brief Implements the Subject behaviour defined in the corresponding header.
+ */
+
 #include "../include/Subject.h"
 
 #include <algorithm>

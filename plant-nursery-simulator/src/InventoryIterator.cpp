@@ -1,3 +1,8 @@
+/**
+ * @file InventoryIterator.cpp
+ * @brief Implements the InventoryIterator behaviour defined in the corresponding header.
+ */
+
 #include "../include/InventoryIterator.h"
 
 // Define the virtual destructor

@@ -1,3 +1,8 @@
+/**
+ * @file Customer.cpp
+ * @brief Implements the Customer behaviour defined in the corresponding header.
+ */
+
 #include <algorithm>
 #include <iostream>
 #include <utility>

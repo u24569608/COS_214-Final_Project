@@ -1,3 +1,8 @@
+/**
+ * @file OrderBuilder.cpp
+ * @brief Implements the OrderBuilder behaviour defined in the corresponding header.
+ */
+
 #include "../include/OrderBuilder.h"
 #include "../include/Order.h"
 

@@ -1,3 +1,8 @@
+/**
+ * @file GreenhouseController.cpp
+ * @brief Implements the GreenhouseController behaviour defined in the corresponding header.
+ */
+
 #include "../include/GreenhouseController.h"
 
 #include "../include/GreenhouseIterator.h"

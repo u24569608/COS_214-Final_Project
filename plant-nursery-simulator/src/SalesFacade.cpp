@@ -1,3 +1,8 @@
+/**
+ * @file SalesFacade.cpp
+ * @brief Implements the SalesFacade behaviour defined in the corresponding header.
+ */
+
 #include "../include/SalesFacade.h"
 #include "../include/Inventory.h"
 #include "../include/PaymentProcessor.h"

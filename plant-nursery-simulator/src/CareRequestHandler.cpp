@@ -1,3 +1,8 @@
+/**
+ * @file CareRequestHandler.cpp
+ * @brief Implements the CareRequestHandler behaviour defined in the corresponding header.
+ */
+
 #include "../include/CareRequestHandler.h"
 #include <iostream>
 
