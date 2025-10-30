@@ -250,35 +250,42 @@ The Plant Nursery Simulator models a nursery business end‑to‑end:
 
 ## Adapter - Inventory File I/O
 
-- Intent and rationale
+### Intent and rationale
   - Isolate inventory logic from specific storage formats. Enable pluggable readers/writers (CSV, TXT) without changing inventory code.
-- Where implemented
+
+### Where implemented
   - Target: `include/FileAdapter.h`
   - Adaptees: `include/CSVReaderWriter.h`, `src/CSVReaderWriter.cpp`; `include/TXTReaderWriter.h`, `src/TXTReaderWriter.cpp`
   - Adapters: `include/CSVAdapter.h`, `src/CSVAdapter.cpp`; `include/TXTAdapter.h`, `src/TXTAdapter.cpp`
-  - Client: `include/Inventory.h`, `src/Inventory.cpp` uses `FileAdapter`
-- Participants
+  - Client: `include/Inventory.h`, `src/Inventory.cpp` (uses `FileAdapter`)
+
+### Participants
   - Target: `FileAdapter`
   - Adaptee: `CSVReaderWriter`, `TXTReaderWriter`
   - Adapter: `CSVAdapter`, `TXTAdapter`
   - Client: `Inventory`
-- Key interactions
-  - `Inventory::loadFromFile()/saveToFile()` depend on the `FileAdapter` interface. Concrete adapters delegate to the corresponding reader/writer.
-- Functional requirements
-  - FR8: File I/O abstraction for inventory
-  - FR9: Load/save via pluggable adapters (CSV, TXT)
 
-- Why this pattern over alternatives
+### Key interactions
+  - `Inventory::loadFromFile()/saveToFile()` depend on the `FileAdapter` interface. Concrete adapters delegate to the corresponding reader/writer.
+
+### Functional requirements (with code references and tests)
+  - FR8: File I/O abstraction for inventory
+    - Code: src/Inventory.cpp:137-165
+    - Tests: tests/adapter_test.cpp:33 (CSV round‑trip), 112 (TXT round‑trip)
+  - FR9: Load/save via pluggable adapters (CSV, TXT)
+    - Code: src/CSVAdapter.cpp:58-117,122-140; src/TXTAdapter.cpp:58-130,136-153
+    - Tests: tests/adapter_test.cpp:180-238 (invalid/bad input handling)
+
+### Why this pattern
   - Over direct file I/O in `Inventory`: The adapter target allows `Inventory` to depend only on `FileAdapter`, enabling addition of new formats without edits to `Inventory`.
   - Over Strategy: While similar in pluggability, Adapter is the right choice since we adapt existing reader/writer interfaces (`CSVReaderWriter`, `TXTReaderWriter`) that do not match the expected `FileAdapter` API.
 
-- Implementation evidence
+### Implementation evidence
   - `CSVAdapter` and `TXTAdapter` wrap their respective `*ReaderWriter` and translate to the `FileAdapter` interface.
   - `Inventory::loadFromFile()` and `saveToFile()` simply call through to the adapter, keeping persistence concerns out of collection logic.
 
-- FR details
-  - FR8 (Abstraction): `FileAdapter` is the stable target that client code uses; inventory has no knowledge of CSV/TXT specifics.
-  - FR9 (Pluggable formats): Selecting `CSVAdapter` vs `TXTAdapter` at runtime switches persistence format with no inventory changes.
+### Why efficient
+  - Single‑pass encode/decode; uses `InventoryIterator` to stream items without copying containers; O(n) in item count.
 
 ---
 
