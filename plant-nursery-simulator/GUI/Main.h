@@ -200,7 +200,6 @@ private:	// User declarations
 	void AttachGreenhouseFrameHandlers();
 	void LoadPlantDetails(PlantInstance* plant);
 	void ClearPlantDetails();
-	void UpdateCareActionState();
 	Staff* ResolveStaffFromCombo(int index) const;
 	Staff* FindStaffById(int id) const;
 	WaterStrategy* WaterStrategyFromIndex(int index) const;
@@ -221,8 +220,9 @@ public:		// User declarations
 	std::unique_ptr<OrderBuilder> objOrderBuilder;
 	std::unique_ptr<SalesFacade> objSalesFacade;
 	std::unique_ptr<Order> currentOrder;
-    std::unique_ptr<Inventory> objInventory;
+	std::unique_ptr<Inventory> objInventory;
 	void RefreshInventoryListView();
+	void UpdateCareActionState();
 
 	void PopulateCustomerComboBox();
 
