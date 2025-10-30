@@ -1,6 +1,6 @@
 # Design Patterns Report
 
-Team: COS214 — The Tormentos
+Team: COS214 - The Tormentos
 
 This report documents every design pattern identified and used in the Plant Nursery Simulator. For each pattern we explain the intent and rationale (why we chose it), identify the concrete implementation in this codebase (where it is), list the participants, outline key interactions, and map the pattern to the functional requirements (FRs) in `plant-nursery-simulator/docs/Functional_and_non-functional_requirements.md`.
 
@@ -10,7 +10,7 @@ Note: File paths point to headers in `include/` and implementations in `src/` wi
 
 ---
 
-## Iterator — Inventory
+## Iterator - Inventory
 
 - Intent and rationale
   - Provide a uniform way to traverse inventory items without exposing the underlying container. Supports browsing and sales workflows cleanly and testably.
@@ -32,7 +32,7 @@ Note: File paths point to headers in `include/` and implementations in `src/` wi
 
 ---
 
-## Iterator — Greenhouse
+## Iterator - Greenhouse
 
 - Intent and rationale
   - Traverse all plants within a hierarchical greenhouse (Composite) without coupling traversal logic to the structure. Enables controller-driven growth ticks and batch care.
@@ -55,7 +55,7 @@ Note: File paths point to headers in `include/` and implementations in `src/` wi
 
 ---
 
-## Composite — Greenhouse Structure
+## Composite - Greenhouse Structure
 
 - Intent and rationale
   - Represent part–whole hierarchies (beds composed of beds and plants) and enable uniform treatment of leaves and composites. Simplifies applying operations (care, tick, display) to entire structures.
@@ -76,7 +76,7 @@ Note: File paths point to headers in `include/` and implementations in `src/` wi
 
 ---
 
-## Facade — Sales
+## Facade - Sales
 
 - Intent and rationale
   - Provide a single entry point for sales operations, decoupling UI/client code from inventory, payments, and order-building complexity.
@@ -93,7 +93,7 @@ Note: File paths point to headers in `include/` and implementations in `src/` wi
 
 ---
 
-## Builder — Orders
+## Builder - Orders
 
 - Intent and rationale
   - Construct complex `Order` objects step-by-step and support different compositions/presets via a director. Keeps `Order` immutable in shape while flexible in content.
@@ -114,7 +114,7 @@ Note: File paths point to headers in `include/` and implementations in `src/` wi
 
 ---
 
-## Observer — Plants, Staff, and Stock Items
+## Observer - Plants, Staff, and Stock Items
 
 - Intent and rationale
   - Decouple plant lifecycle events from dependent behaviours such as staff reminders and store display availability. Supports many observers without tight coupling.
@@ -136,7 +136,7 @@ Note: File paths point to headers in `include/` and implementations in `src/` wi
 
 ---
 
-## Adapter — Inventory File I/O
+## Adapter - Inventory File I/O
 
 - Intent and rationale
   - Isolate inventory logic from specific storage formats. Enable pluggable readers/writers (CSV, TXT) without changing inventory code.
@@ -158,7 +158,7 @@ Note: File paths point to headers in `include/` and implementations in `src/` wi
 
 ---
 
-## Prototype (Data‑Driven) — Plants and Registry
+## Prototype (Data‑Driven) - Plants and Registry
 
 - Intent and rationale
   - Support data-driven creation of plant objects by cloning registered prototypes. Allows new plant types without changing creator code.
@@ -177,7 +177,7 @@ Note: File paths point to headers in `include/` and implementations in `src/` wi
 
 ---
 
-## State — Plant Lifecycle
+## State - Plant Lifecycle
 
 - Intent and rationale
   - Encapsulate lifecycle stages and transitions for plants. Keeps per-state behaviour and thresholds modular and extendable.
@@ -198,7 +198,7 @@ Note: File paths point to headers in `include/` and implementations in `src/` wi
 
 ---
 
-## Command — Plant Care Tasks
+## Command - Plant Care Tasks
 
 - Intent and rationale
   - Encapsulate care actions (water, fertilize) as command objects queued by staff. Enables scheduling, undo/redo extensions, and testing.
@@ -221,7 +221,7 @@ Note: File paths point to headers in `include/` and implementations in `src/` wi
 
 ---
 
-## Mediator — Floor Coordination
+## Mediator - Floor Coordination
 
 - Intent and rationale
   - Centralize communication between colleagues (customers, staff) to avoid tight coupling and complex peer-to-peer links.
@@ -242,7 +242,7 @@ Note: File paths point to headers in `include/` and implementations in `src/` wi
 
 ---
 
-## Chain of Responsibility — Care Routing
+## Chain of Responsibility - Care Routing
 
 - Intent and rationale
   - Route care requests through a chain of handlers so each handler either processes or delegates. Makes it easy to add new care types.
@@ -262,7 +262,7 @@ Note: File paths point to headers in `include/` and implementations in `src/` wi
 
 ---
 
-## Strategy (+ Prototype) — Watering and Fertilizing
+## Strategy (+ Prototype) - Watering and Fertilizing
 
 - Intent and rationale
   - Vary watering and fertilizing algorithms independently of `PlantInstance` and swap them at runtime. We additionally prototype strategies to clone preconfigured policies when needed.
