@@ -16,6 +16,7 @@
 #include <string>
 #include <sstream>
 #include <utility>
+#include <vector>
 
 namespace {
 std::string buildReminderMessage(const ObserverEvent& event) {
@@ -161,6 +162,26 @@ int Staff::getCareReminderCount() const {
 
 const std::vector<StaffReminder>& Staff::getCareReminders() const {
     return careReminders;
+}
+
+std::vector<std::string> Staff::describePendingTasks() const {
+    std::vector<std::string> descriptions;
+    descriptions.reserve(taskQueue.size());
+    for (const auto& command : taskQueue) {
+        if (!command) {
+            continue;
+        }
+        std::string line = command->getCommandName();
+        if (PlantInstance* target = command->getTarget()) {
+            line += " - ";
+            line += target->getPlantTypeName();
+            line += " (";
+            line += target->getName();
+            line += ")";
+        }
+        descriptions.push_back(std::move(line));
+    }
+    return descriptions;
 }
 
 void Staff::setLogSink(std::function<void(const std::string&)> sink) {

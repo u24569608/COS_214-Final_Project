@@ -170,6 +170,7 @@ __published:	// IDE-managed Components
 	void __fastcall btnAssignObserveClick(TObject *Sender);
 	void __fastcall rgWaterStrategyClick(TObject *Sender);
 	void __fastcall rgFertiliseStrategyClick(TObject *Sender);
+	void __fastcall lvStaffTaskQueueDblClick(TObject *Sender);
 
 
 private:	// User declarations

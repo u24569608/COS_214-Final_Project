@@ -947,6 +947,7 @@ object frmMain: TfrmMain
               end>
             TabOrder = 0
             OnSelectItem = lvStaffTaskQueueSelectItem
+            OnDblClick = lvStaffTaskQueueDblClick
             ExplicitWidth = 831
             ExplicitHeight = 170
           end

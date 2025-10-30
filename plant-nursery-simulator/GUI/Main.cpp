@@ -750,6 +750,33 @@ void __fastcall TfrmMain::lvStaffTaskQueueSelectItem(TObject *Sender, TListItem 
 
 }
 //---------------------------------------------------------------------------
+void __fastcall TfrmMain::lvStaffTaskQueueDblClick(TObject *Sender)
+{
+	if (!lvStaffTaskQueue || !lvStaffTaskQueue->Selected) {
+		return;
+	}
+
+	TListItem* item = lvStaffTaskQueue->Selected;
+	auto* staff = item ? reinterpret_cast<Staff*>(item->Data) : nullptr;
+	if (!staff) {
+		ShowMessage("Invalid staff selection.");
+		return;
+	}
+
+	const auto tasks = staff->describePendingTasks();
+	UnicodeString header = "Tasks for Staff " + item->Caption;
+	if (tasks.empty()) {
+		ShowMessage(header + ": No pending tasks.");
+		return;
+	}
+
+	UnicodeString message = header + ":\n";
+	for (std::size_t i = 0; i < tasks.size(); ++i) {
+		message += IntToStr(static_cast<int>(i + 1)) + ". " + UnicodeString(tasks[i].c_str()) + "\n";
+	}
+	ShowMessage(message);
+}
+//---------------------------------------------------------------------------
 
 void __fastcall TfrmMain::btnSimulateClick(TObject *Sender)
 {

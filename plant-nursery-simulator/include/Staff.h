@@ -105,6 +105,11 @@ public:
      * @return Collection of reminder records.
      */
     const std::vector<StaffReminder>& getCareReminders() const;
+    /**
+     * @brief Describes the pending command queue without mutating it.
+     * @return Ordered list of human-readable task strings.
+     */
+    std::vector<std::string> describePendingTasks() const;
 
     /**
      * @brief Installs a UI logging sink used for status updates.
