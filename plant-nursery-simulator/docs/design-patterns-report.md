@@ -157,6 +157,7 @@ Note: File paths point to headers in `include/` and implementations in `src/` wi
   - Builder: `OrderBuilder`
   - ConcreteBuilder: `CustomOrderBuilder`
   - Director: `OrderDirector`
+  - Part: `StockItem`
 - Key interactions
   - `SalesFacade` can use `OrderBuilder` directly or via `OrderDirector` to assemble orders.
 - Functional requirements
