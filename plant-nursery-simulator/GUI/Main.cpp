@@ -972,9 +972,9 @@ void TfrmMain::LogSnapshotDelta(const PlantDisplaySnapshot& before,
 			return;
 		}
 		const int delta = newValue - oldValue;
-		UnicodeString message = plantLabel + ": " + metric + " changed to " + IntToStr(newValue);
+		UnicodeString message = plantLabel + UnicodeString(": ") + metric + UnicodeString(" changed to ") + IntToStr(newValue);
 		if (delta != 0) {
-			message += " (" + ((delta > 0) ? "+" : "") + IntToStr(delta) + ")";
+			message += UnicodeString(" (") + (delta > 0 ? UnicodeString("+") : UnicodeString("")) + IntToStr(delta) + UnicodeString(")");
 		}
 		AppendLog(message);
 	};
@@ -984,7 +984,7 @@ void TfrmMain::LogSnapshotDelta(const PlantDisplaySnapshot& before,
 	logDelta("Nutrient level", before.nutrients, after.nutrients);
 
 	if (before.saleReady != after.saleReady) {
-		AppendLog(plantLabel + ": Availability changed to " + UnicodeString(after.saleReady ? "Available" : "Unavailable"));
+		AppendLog(plantLabel + UnicodeString(": Availability changed to ") + UnicodeString(after.saleReady ? "Available" : "Unavailable"));
 	}
 }
 //---------------------------------------------------------------------------
