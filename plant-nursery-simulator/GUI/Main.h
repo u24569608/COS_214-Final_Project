@@ -1,5 +1,3 @@
-//---------------------------------------------------------------------------
-
 #ifndef MainH
 #define MainH
 //---------------------------------------------------------------------------
@@ -52,7 +50,11 @@
 #include "../include/InventoryIterator.h"
 #include "../include/InventoryCollection.h"
 #include "../include/ConcreteInventoryIterator.h"
-//---------------------------------------------------------------------------
+
+/**
+ * @file Main.h
+ * @brief Application main form hosting nursery management workflows.
+ */
 class TfrmMain : public TForm
 {
 __published:	// IDE-managed Components
@@ -111,15 +113,45 @@ __published:	// IDE-managed Components
 	TButton *btnSimulate;
 	TFileOpenDialog *dlgOpenLoadInventory;
 	TFileSaveDialog *dlgSaveSaveInventory;
+    /**
+     * @brief Synchronises UI state with the current message body.
+     */
 	void __fastcall edtMessageBodyChange(TObject *Sender);
+    /**
+     * @brief Initialises runtime services after the form is created.
+     */
 	void __fastcall FormCreate(TObject *Sender);
+    /**
+     * @brief Sends a mediated message between colleagues.
+     */
 	void __fastcall btnSendClick(TObject *Sender);
+    /**
+     * @brief Clears the message history display.
+     */
 	void __fastcall btnClearMessagesClick(TObject *Sender);
+    /**
+     * @brief Reverses the selected mediator message conversation.
+     */
 	void __fastcall btnReverseClick(TObject *Sender);
+    /**
+     * @brief Updates greenhouse detail panels when a tree node changes.
+     */
 	void __fastcall tvGreenhouseChange(TObject *Sender, TTreeNode *Node);
+    /**
+     * @brief Loads inventory data from persistent storage.
+     */
 	void __fastcall btnLoadInventoryClick(TObject *Sender);
+    /**
+     * @brief Moves the selected inventory item upward in the display list.
+     */
 	void __fastcall btnInventoryUpClick(TObject *Sender);
+    /**
+     * @brief Moves the selected inventory item downward in the display list.
+     */
 	void __fastcall btnInventoryDownClick(TObject *Sender);
+    /**
+     * @brief Saves inventory data to persistent storage.
+     */
 	void __fastcall btnSaveInventoryClick(TObject *Sender);
 
 private:	// User declarations
@@ -144,6 +176,10 @@ private:	// User declarations
 	void RefreshInventoryListView();
 
 public:		// User declarations
+    /**
+     * @brief Constructs the main form and wires VCL components.
+     * @param Owner Component that owns the form.
+     */
 	__fastcall TfrmMain(TComponent* Owner);
 
 };
