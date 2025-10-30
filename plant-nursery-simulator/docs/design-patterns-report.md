@@ -210,37 +210,41 @@ The Plant Nursery Simulator models a nursery business end‑to‑end:
 
 ## Observer - Plants, Staff, and Stock Items
 
-- Intent and rationale
+### Intent and rationale
   - Decouple plant lifecycle events from dependent behaviours such as staff reminders and store display availability. Supports many observers without tight coupling.
-- Where implemented
+### Where implemented
   - `include/Observer.h` (Observer interface)
   - `include/Subject.h`, `src/Subject.cpp` (Subject base and lifecycle)
   - Observers: `include/Staff.h`, `src/Staff.cpp`; `include/StockItem.h`, `src/StockItem.cpp`
   - Subject: `include/PlantInstance.h`, `src/PlantInstance.cpp` (publishes events on tick/state change)
-- Participants
+### Participants
   - Subject: `PlantInstance`
   - Observer: `Observer`
   - ConcreteObserver: `Staff`, `StockItem`
-- Key interactions
+### Key interactions
   - `PlantInstance` notifies observers after growth ticks/state transitions; `Staff::update()` schedules work; `StockItem::update()` syncs sale availability/display state.
-- Functional requirements
+### Functional requirements (with code references and tests)
   - FR13: Plant subjects notify observers
+    - Code: src/PlantInstance.cpp:116-135,142-153,245-260; src/Subject.cpp:6-16
+    - Tests: cart sync after sale (mediated by facade notification), tests/facade_test.cpp:164
   - FR14: Staff and stock observers react to events
+    - Code: src/Staff.cpp:66-83; src/StockItem.cpp:102-130,149-155
+    - Tests: adapter/state flows confirm availability and reminders; tests/adapter_test.cpp:119-137
   - FR27: Stock item availability mirrors plant readiness
+    - Code: src/PlantInstance.cpp:163-165; src/StockItem.cpp:149-155
+    - Tests: prioritised iterator order implies readiness, tests/iterator_test.cpp:62,104
 
-- Why this pattern over alternatives
+### Why this pattern
   - Over polling: Observers receive timely updates on state changes (care required, availability toggled) without periodic scans over all plants.
   - Over event buses: A lightweight Subject/Observer pair provides direct, typed notifications suitable for this domain; a generic bus would add complexity without benefit here.
 
-- Implementation evidence
+### Implementation evidence
   - `PlantInstance` inherits `Subject` and calls `notify()` on growth ticks or when `setState()` triggers availability changes.
   - `StockItem::update()` toggles availability and display status based on `ObserverEvent`.
   - `Staff::update()` accumulates care reminders when receiving `CareRequired` events.
 
-- FR details
-  - FR13 (Subjects notify): `Subject::~Subject()` also sends `SubjectDestroyed` to enable safe detachment, avoiding dangling pointers during shutdown.
-  - FR14 (Observers react): `Staff` adds reminders and can later schedule commands; `StockItem` updates `isAvailable` and user-facing status strings for storefront consistency.
-  - FR27 (Sync sale readiness): When a plant transitions to a market-ready state, `StockItem` immediately reflects that in `getDisplayStatus()` for the UI.
+### Why efficient
+  - O(k) notify where k is subscriber count; simple data payload; snapshot iteration avoids re-entrancy issues.
 
 ---
 
