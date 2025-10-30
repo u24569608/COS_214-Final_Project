@@ -1,0 +1,35 @@
+//---------------------------------------------------------------------------
+
+#ifndef Add_PlantH
+#define Add_PlantH
+//---------------------------------------------------------------------------
+#include <System.Classes.hpp>
+#include <Vcl.Controls.hpp>
+#include <Vcl.StdCtrls.hpp>
+#include <Vcl.Forms.hpp>
+#include <Vcl.ExtCtrls.hpp>
+#include <Vcl.Mask.hpp>
+//---------------------------------------------------------------------------
+class TfrmAddPlant : public TForm
+{
+__published:	// IDE-managed Components
+	TPanel *pnlBase;
+	TButton *btnCancel;
+	TButton *btnAdd;
+	TLabel *lblBuildOrderHeading;
+	TLabeledEdit *lbledtPlantName;
+	TRadioGroup *rgFertiliseStrategy;
+	TRadioGroup *rgWaterStrategy;
+	void __fastcall btnCancelClick(TObject *Sender);
+	void __fastcall lbledtPlantNameChange(TObject *Sender);
+	void __fastcall rgWaterStrategyClick(TObject *Sender);
+	void __fastcall rgFertiliseStrategyClick(TObject *Sender);
+	void __fastcall btnAddClick(TObject *Sender);
+private:	// User declarations
+public:		// User declarations
+	__fastcall TfrmAddPlant(TComponent* Owner);
+};
+//---------------------------------------------------------------------------
+extern PACKAGE TfrmAddPlant *frmAddPlant;
+//---------------------------------------------------------------------------
+#endif
