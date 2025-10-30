@@ -400,31 +400,51 @@ void __fastcall TfrmMain::btnSaveInventoryClick(TObject *Sender)
 {
 	if (dlgSaveSaveInventory->Execute())
 	{
-		UnicodeString uFileName = dlgSaveSaveInventory->FileName;
-		UnicodeString uExt = ExtractFileExt(uFileName);
-		std::string filePath = AnsiString(uFileName).c_str();
+	UnicodeString uFileName = dlgSaveSaveInventory->FileName;
+	UnicodeString uExt = ExtractFileExt(uFileName);
+	UnicodeString lowerExt = uExt.LowerCase();
 
-		FileAdapter* adapter = nullptr;
-		if (uExt.LowerCase() == ".csv") {
-			adapter = new CSVAdapter();
-		} else if (uExt.LowerCase() == ".txt") {
-			adapter = new TXTAdapter();
+	std::unique_ptr<FileAdapter> adapter;
+	UnicodeString enforcedExt;
+
+	if (lowerExt == ".csv") {
+		adapter = std::make_unique<CSVAdapter>();
+	} else if (lowerExt == ".txt") {
+		adapter = std::make_unique<TXTAdapter>();
+	} else {
+		int filterIndex = dlgSaveSaveInventory->FileTypeIndex;
+		if (filterIndex <= 0 || filterIndex > dlgSaveSaveInventory->FileTypes->Count) {
+			filterIndex = 1;
 		}
-
-
-		if (adapter != nullptr) {
-			try {
-				adapter->saveInventory(filePath, objInventory.get());
-				AppendLog(UnicodeString("Successfully saved inventory to '") + uFileName + UnicodeString("'"));
-			}
-			catch (const std::exception &ex) {
-				AppendLog(UnicodeString("Error saving file: ") + String(ex.what()));
-			}
-			delete adapter;
+		UnicodeString mask = dlgSaveSaveInventory->FileTypes->Items[filterIndex - 1].FileMask.LowerCase();
+		if (mask.Pos(".csv") > 0) {
+			adapter = std::make_unique<CSVAdapter>();
+			enforcedExt = ".csv";
 		} else {
-			AppendLog("ERROR: Could Not Determine File Type to Save");
+			adapter = std::make_unique<TXTAdapter>();
+			enforcedExt = ".txt";
 		}
 	}
+
+	if (!adapter) {
+		AppendLog("ERROR: Could Not Determine File Type to Save");
+		return;
+	}
+
+	if (uExt.IsEmpty() && !enforcedExt.IsEmpty()) {
+		uFileName += enforcedExt;
+	}
+
+	std::string filePath = AnsiString(uFileName).c_str();
+
+	try {
+		adapter->saveInventory(filePath, objInventory.get());
+		AppendLog(UnicodeString("Successfully saved inventory to '") + uFileName + UnicodeString("'"));
+	}
+	catch (const std::exception &ex) {
+		AppendLog(UnicodeString("Error saving file: ") + String(ex.what()));
+	}
+}
 }
 //---------------------------------------------------------------------------
 void TfrmMain::PopulateSalesItemComboBox()
@@ -1044,6 +1064,9 @@ TfrmMain::PlantDisplaySnapshot TfrmMain::BuildSnapshot(PlantInstance* plant) con
 {
 	PlantDisplaySnapshot snapshot{};
 	snapshot.typeName = plant ? plant->getPlantTypeName() : "";
+	if (snapshot.typeName.empty() && plant != nullptr) {
+		snapshot.typeName = plant->getName();
+	}
 	snapshot.stateName = plant && plant->getState() ? plant->getState()->getName() : "Unknown State";
 	snapshot.health = plant ? plant->getHealth() : 0;
 	snapshot.water = plant ? plant->getWaterLevel() : 0;
