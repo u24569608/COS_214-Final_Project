@@ -354,35 +354,38 @@ The Plant Nursery Simulator models a nursery business end‑to‑end:
 
 ## Command - Plant Care Tasks
 
-- Intent and rationale
+### Intent and rationale
   - Encapsulate care actions (water, fertilize) as command objects queued by staff. Enables scheduling, undo/redo extensions, and testing.
-- Where implemented
+### Where implemented
   - `include/PlantCommand.h` (Command interface)
   - `include/WaterPlant.h`, `src/WaterPlant.cpp` (ConcreteCommand)
   - `include/FertilizePlant.h`, `src/FertilizePlant.cpp` (ConcreteCommand)
   - Receiver: `include/PlantInstance.h`, `src/PlantInstance.cpp` (performs water/fertilize)
   - Invoker: `include/Staff.h`, `src/Staff.cpp` (queues and processes commands)
-- Participants
+### Participants
   - Command: `PlantCommand`
   - ConcreteCommand: `WaterPlant`, `FertilizePlant`
   - Receiver: `PlantInstance`
   - Invoker: `Staff`
-- Key interactions
+### Key interactions
   - `Staff` enqueues commands and later processes them; commands call receiver operations to carry out care.
-- Functional requirements
+### Functional requirements (with code references and tests)
   - FR18: Encapsulate plant care actions as commands
+    - Code: src/WaterPlant.cpp:9-16; src/FertilizePlant.cpp:9-16
+    - Tests: strategy invocation counts in tests/plant_state_test.cpp:136,160
   - FR19: Staff queue and invoke care commands
+    - Code: src/Staff.cpp:101-117,119-121
+    - Tests: used by integration flows
 
-- Why this pattern over alternatives
+### Why this pattern
   - Over direct method calls: Command objects let staff queue, schedule, and potentially undo/redo operations, decoupling request from execution time.
   - Over function pointers/lambdas: Dedicated command classes capture semantics, enable polymorphic queues, and remain serializable/traceable if needed.
 
-- Implementation evidence
+### Implementation evidence
   - `WaterPlant` and `FertilizePlant` extend `PlantCommand` and call receiver methods on `PlantInstance`. `Staff` maintains a queue and processes tasks later.
 
-- FR details
-  - FR18 (Encapsulate actions): Each care action is its own object with a single `handleRequest()` entry point.
-  - FR19 (Queue/invoke): `Staff::addCommandToQueue()` and `processNextTask()` demonstrate delayed execution over a polymorphic queue.
+### Why efficient
+  - O(1) enqueue/dequeue; direct receiver invocation.
 
 ---
 
