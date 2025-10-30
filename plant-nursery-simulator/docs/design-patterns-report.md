@@ -102,35 +102,39 @@ The Plant Nursery Simulator models a nursery business end‑to‑end:
 
 ## Composite - Greenhouse Structure
 
-- Intent and rationale
+### Intent and rationale
   - Represent part–whole hierarchies (beds composed of beds and plants) and enable uniform treatment of leaves and composites. Simplifies applying operations (care, tick, display) to entire structures.
-- Where implemented
+### Where implemented
   - `include/GreenhouseComponent.h` (Component abstraction)
   - `include/GreenhouseBed.h`, `src/GreenhouseBed.cpp` (Composite with child management and delegation)
   - `include/PlantInstance.h`, `src/PlantInstance.cpp` (Leaf)
-- Participants
+### Participants
   - Component: `GreenhouseComponent`
   - Composite: `GreenhouseBed`
   - Leaf: `PlantInstance`
-- Key interactions
+### Key interactions
   - Composite delegates `performCare()` and other operations to children; leaves implement concrete behaviour.
-- Functional requirements
+### Functional requirements (with code references and tests)
   - FR10: Composite greenhouse hierarchy
+    - Code: src/GreenhouseBed.cpp:21,28,66-81,83-117,58-64
+    - Tests: tests/greenhouse_iterator_test.cpp:70; tests/greenhouse_composite_test.cpp:43
   - FR11: Cascade care operations to all plants
+    - Code: src/GreenhouseBed.cpp:32-38; src/PlantInstance.cpp:168-175
+    - Tests: tests/greenhouse_composite_test.cpp:59
   - FR26: Works with Iterator for growth ticks
+    - Code: src/GreenhouseBed.cpp:62
+    - Tests: iterator tests above
 
-- Why this pattern over alternatives
+### Why this pattern
   - Over flat collections: The nursery requires grouping plants into beds and potentially nested beds. Composite allows treating beds and plants uniformly (`performCare()`, `createIterator()`), simplifying client code.
   - Over inheritance-only hierarchies without composition: Without Composite, propagating actions (care, traversal) across variable-depth structures would require conditionals and special cases in multiple places.
 
-- Implementation evidence
+### Implementation evidence
   - `GreenhouseComponent` declares uniform operations; `GreenhouseBed` owns `children` and delegates `performCare()` to them.
   - `PlantInstance` is the leaf implementing actual care logic, compatible with Composite and Iterator contracts.
 
-- FR details
-  - FR10 (Organize hierarchy): Beds hold either other beds or plants via owned `unique_ptr<GreenhouseComponent>`, enabling dynamic, memory-safe structures.
-  - FR11 (Cascade care): `GreenhouseBed::performCare()` iterates children and calls `performCare()` recursively, ensuring consistent propagation.
-  - FR26 (Iterator over Composite): The Composite provides the structural backbone that the iterator walks each tick.
+### Why efficient
+  - Care cascades in a single pass; ownership via `unique_ptr` keeps memory safe and local.
 
 ---
 
