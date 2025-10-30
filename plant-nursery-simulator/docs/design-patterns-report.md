@@ -427,6 +427,19 @@ Note: File paths point to headers in `include/` and implementations in `src/` wi
   - FR6: Interchangeable fertilizing strategies
   - FR7: Change strategies at runtime per plant
 
+- Why this pattern over alternatives
+  - Over flags/if-else: Encapsulating varying algorithms keeps `PlantInstance` free of branching and enables runtime swaps.
+  - Over Command: Strategies are algorithms applied by the plant, not queued actions; Command is used for staff tasking instead.
+  - Prototype addition: Concrete strategies implement `clone()` to allow copying configured strategies if needed by presets/director flows.
+
+- Implementation evidence
+  - Strategy interfaces define `water()`/`fertilize()`; concrete strategies implement different adjustments to vitals (e.g., frequent vs sparse watering).
+  - `PlantInstance::setWaterStrategy()` / `setFertilizeStrategy()` swap algorithms without reconstructing the plant.
+
+- FR details
+  - FR5/FR6 (Interchangeable algorithms): Different strategies (frequent/seasonal/sparse; liquid/slow-release/organic) encapsulate policies for care.
+  - FR7 (Runtime change): Plants can adopt different strategies based on species, environment, or user choice via setters.
+
 ---
 
 ## Cross‑cutting: StockItem in Sales and Observation
