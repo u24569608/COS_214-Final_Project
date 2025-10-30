@@ -4,6 +4,8 @@ Team: COS214 — The Tormentos
 
 This report documents every design pattern identified and used in the Plant Nursery Simulator. For each pattern we explain the intent and rationale (why we chose it), identify the concrete implementation in this codebase (where it is), list the participants, outline key interactions, and map the pattern to the functional requirements (FRs) in `plant-nursery-simulator/docs/Functional_and_non-functional_requirements.md`.
 
+See also: `plant-nursery-simulator/docs/GUI Requirements.md` for UI-focused items that the Facade and Iterator patterns help enable.
+
 Note: File paths point to headers in `include/` and implementations in `src/` within `plant-nursery-simulator/`.
 
 ---
@@ -318,4 +320,3 @@ Note: File paths point to headers in `include/` and implementations in `src/` wi
 - Extensibility: New care policies, file formats, plant states, and greenhouse structures can be added with minimal changes, leveraging Strategy, Adapter, State, and Composite.
 - Testability: Iterators, commands, and mediators make behaviour easy to drive from tests without deep setup.
 - Performance: Iterating over Composite structures is linear in the number of plants, satisfying FR/NFR scalability goals.
-
