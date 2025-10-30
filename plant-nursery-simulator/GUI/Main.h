@@ -267,6 +267,18 @@ private:	// User declarations
 	 * @param plantLabel Label identifying the plant instance in logs.
 	 */
 	void LogSnapshotDelta(const PlantDisplaySnapshot& before, const PlantDisplaySnapshot& after, const UnicodeString& plantLabel);
+	/**
+	 * @brief Disconnects all staff log callbacks.
+	 */
+	void ResetStaffLoggers();
+	/**
+	 * @brief Removes the UI observer from every tracked plant instance.
+	 */
+	void DetachObserverFromAllPlants();
+	/**
+	 * @brief Helper to re-select a staff row after refreshing the list view.
+	 */
+	void SelectStaffRowById(int staffId);
 
     // New
     void RefreshStaffTaskQueue();
@@ -274,6 +286,10 @@ private:	// User declarations
 
 public:		// User declarations
 	__fastcall TfrmMain(TComponent* Owner);
+	/**
+	 * @brief Cleans up UI observers and log sinks before destruction.
+	 */
+	__fastcall ~TfrmMain();
     void PopulateSalesItemComboBox();
 	void UpdateOrderDisplay();
      // --- Sales/Order Objects ---

@@ -944,10 +944,6 @@ object frmMain: TfrmMain
               item
                 Caption = 'Pending Tasks'
                 MinWidth = 200
-              end
-              item
-                Caption = 'Reminders'
-                MinWidth = 200
               end>
             TabOrder = 0
             OnSelectItem = lvStaffTaskQueueSelectItem
