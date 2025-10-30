@@ -13,6 +13,7 @@
 #include "../include/FertilizePlant.h"
 #include "../include/Observer.h"
 #include <algorithm>
+#include <exception>
 #include <sstream>
 #include <vector>
 //---------------------------------------------------------------------------
@@ -273,17 +274,34 @@ void TfrmMain::PopulateGreenhouseTree(TTreeNode* parentNode, GreenhouseComponent
 //---------------------------------------------------------------------------
 void __fastcall TfrmMain::tvGreenhouseChange(TObject *Sender, TTreeNode *Node)
 {
-	TTreeNode* selectedNode = tvGreenhouse->Selected;
-	PlantInstance* plant = nullptr;
-	if (selectedNode != nullptr && selectedNode->Data != nullptr) {
-		GreenhouseComponent* component = static_cast<GreenhouseComponent*>(selectedNode->Data);
-		plant = dynamic_cast<PlantInstance*>(component);
-	}
+	try {
+		TTreeNode* selectedNode = tvGreenhouse->Selected;
+		PlantInstance* plant = nullptr;
+		if (selectedNode != nullptr && selectedNode->Data != nullptr) {
+			GreenhouseComponent* component = static_cast<GreenhouseComponent*>(selectedNode->Data);
+			plant = dynamic_cast<PlantInstance*>(component);
+		}
 
-	if (plant != nullptr) {
-		currentPlantSelection = plant;
-		UpdateSelectedPlantDisplay(false);
-	} else {
+		if (plant != nullptr) {
+			currentPlantSelection = plant;
+			UpdateSelectedPlantDisplay(false);
+		} else {
+			currentPlantSelection = nullptr;
+			ClearPlantDetails();
+		}
+	}
+	catch (const Exception& ex) {
+		AppendLog(UnicodeString("Error selecting plant: ") + ex.Message);
+		currentPlantSelection = nullptr;
+		ClearPlantDetails();
+	}
+	catch (const std::exception& ex) {
+		AppendLog(UnicodeString("Error selecting plant: ") + String(ex.what()));
+		currentPlantSelection = nullptr;
+		ClearPlantDetails();
+	}
+	catch (...) {
+		AppendLog("Unexpected error while selecting plant.");
 		currentPlantSelection = nullptr;
 		ClearPlantDetails();
 	}
@@ -302,20 +320,20 @@ void __fastcall TfrmMain::btnLoadInventoryClick(TObject *Sender)
 	UnicodeString uExt = ExtractFileExt(uFileName);
 	std::string filePath = AnsiString(uFileName).c_str();
 
-	FileAdapter* adapter = nullptr;
+	std::unique_ptr<FileAdapter> adapter;
 	if (uExt.LowerCase() == ".csv") {
-		adapter = new CSVAdapter();
+		adapter = std::make_unique<CSVAdapter>();
 	} else if (uExt.LowerCase() == ".txt") {
-		adapter = new TXTAdapter();
+		adapter = std::make_unique<TXTAdapter>();
 	}
 
-	if (adapter == nullptr) {
+	if (!adapter) {
 		AppendLog("ERROR: Unsupported File Type Selected");
 		return;
 	}
 
 	try {
-		objInventory->loadFromFile(adapter, filePath);
+		objInventory->loadFromFile(adapter.get(), filePath);
 
 		tvGreenhouse->Items->BeginUpdate();
 		try {
@@ -343,10 +361,15 @@ void __fastcall TfrmMain::btnLoadInventoryClick(TObject *Sender)
 
 		AppendLog(UnicodeString("Successfully loaded inventory from '") + uFileName + UnicodeString("'"));
 	}
-	catch (const std::exception &ex) {
+	catch (const Exception& ex) {
+		AppendLog(UnicodeString("Error loading file: ") + ex.Message);
+	}
+	catch (const std::exception& ex) {
 		AppendLog(UnicodeString("Error loading file: ") + String(ex.what()));
 	}
-	delete adapter;
+	catch (...) {
+		AppendLog("Unknown error while loading inventory.");
+	}
 }
 
 //---------------------------------------------------------------------------
@@ -648,6 +671,12 @@ void __fastcall TfrmMain::btnClonePlantClick(TObject *Sender)
 	catch (const std::exception& ex)
 	{
 		ShowMessage("An error occurred: " + String(ex.what()));
+		AppendLog(UnicodeString("Error cloning plant: ") + String(ex.what()));
+	}
+	catch (const Exception& ex)
+	{
+		ShowMessage("An error occurred: " + ex.Message);
+		AppendLog(UnicodeString("Error cloning plant: ") + ex.Message);
 	}
 }
 //---------------------------------------------------------------------------
@@ -756,12 +785,23 @@ void __fastcall TfrmMain::btnProcessNextTaskClick(TObject *Sender)
 
 
 	const int staffId = staff->getID();
+try {
 	PlantInstance* affectedPlant = staff->processNextTask();
 	RefreshStaffTaskQueue();
 	SelectStaffRowById(staffId);
 	if (affectedPlant != nullptr && affectedPlant == currentPlantSelection) {
 		UpdateSelectedPlantDisplay(false);
 	}
+}
+catch (const Exception& ex) {
+	AppendLog(UnicodeString("Error processing task: ") + ex.Message);
+}
+catch (const std::exception& ex) {
+	AppendLog(UnicodeString("Error processing task: ") + String(ex.what()));
+}
+catch (...) {
+	AppendLog("Unknown error while processing task.");
+}
 }
 //---------------------------------------------------------------------------
 void __fastcall TfrmMain::lvStaffTaskQueueSelectItem(TObject *Sender, TListItem *Item,
@@ -777,29 +817,40 @@ void __fastcall TfrmMain::lvStaffTaskQueueSelectItem(TObject *Sender, TListItem 
 //---------------------------------------------------------------------------
 void __fastcall TfrmMain::lvStaffTaskQueueDblClick(TObject *Sender)
 {
-	if (!lvStaffTaskQueue || !lvStaffTaskQueue->Selected) {
-		return;
-	}
+	try {
+		if (!lvStaffTaskQueue || !lvStaffTaskQueue->Selected) {
+			return;
+		}
 
-	TListItem* item = lvStaffTaskQueue->Selected;
-	auto* staff = item ? reinterpret_cast<Staff*>(item->Data) : nullptr;
-	if (!staff) {
-		ShowMessage("Invalid staff selection.");
-		return;
-	}
+		TListItem* item = lvStaffTaskQueue->Selected;
+		auto* staff = item ? reinterpret_cast<Staff*>(item->Data) : nullptr;
+		if (!staff) {
+			ShowMessage("Invalid staff selection.");
+			return;
+		}
 
-	const auto tasks = staff->describePendingTasks();
-	UnicodeString header = "Tasks for Staff " + item->Caption;
-	if (tasks.empty()) {
-		ShowMessage(header + ": No pending tasks.");
-		return;
-	}
+		const auto tasks = staff->describePendingTasks();
+		UnicodeString header = "Tasks for Staff " + item->Caption;
+		if (tasks.empty()) {
+			ShowMessage(header + ": No pending tasks.");
+			return;
+		}
 
-	UnicodeString message = header + ":\n";
-	for (std::size_t i = 0; i < tasks.size(); ++i) {
-		message += IntToStr(static_cast<int>(i + 1)) + ". " + UnicodeString(tasks[i].c_str()) + "\n";
+		UnicodeString message = header + ":\n";
+		for (std::size_t i = 0; i < tasks.size(); ++i) {
+			message += IntToStr(static_cast<int>(i + 1)) + ". " + UnicodeString(tasks[i].c_str()) + "\n";
+		}
+		ShowMessage(message);
 	}
-	ShowMessage(message);
+	catch (const Exception& ex) {
+		AppendLog(UnicodeString("Error displaying staff tasks: ") + ex.Message);
+	}
+	catch (const std::exception& ex) {
+		AppendLog(UnicodeString("Error displaying staff tasks: ") + String(ex.what()));
+	}
+	catch (...) {
+		AppendLog("Unknown error while displaying staff tasks.");
+	}
 }
 //---------------------------------------------------------------------------
 
@@ -843,24 +894,46 @@ void __fastcall TfrmMain::cmbStaffMemberChange(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TfrmMain::btnWaterClick(TObject *Sender)
 {
-	if (!currentPlantSelection || !currentStaffSelection) {
-		ShowMessage("Select a plant and staff member first.");
-		return;
-	}
+	try {
+		if (!currentPlantSelection || !currentStaffSelection) {
+			ShowMessage("Select a plant and staff member first.");
+			return;
+		}
 
-	currentStaffSelection->addCommandToQueue(std::make_unique<WaterPlant>(currentPlantSelection));
-	RefreshStaffTaskQueue();
+		currentStaffSelection->addCommandToQueue(std::make_unique<WaterPlant>(currentPlantSelection));
+		RefreshStaffTaskQueue();
+	}
+	catch (const Exception& ex) {
+		AppendLog(UnicodeString("Error queuing water task: ") + ex.Message);
+	}
+	catch (const std::exception& ex) {
+		AppendLog(UnicodeString("Error queuing water task: ") + String(ex.what()));
+	}
+	catch (...) {
+		AppendLog("Unknown error while queuing water task.");
+	}
 }
 //---------------------------------------------------------------------------
 void __fastcall TfrmMain::btnFertiliseClick(TObject *Sender)
 {
-	if (!currentPlantSelection || !currentStaffSelection) {
-		ShowMessage("Select a plant and staff member first.");
-		return;
-	}
+	try {
+		if (!currentPlantSelection || !currentStaffSelection) {
+			ShowMessage("Select a plant and staff member first.");
+			return;
+		}
 
-	currentStaffSelection->addCommandToQueue(std::make_unique<FertilizePlant>(currentPlantSelection));
-	RefreshStaffTaskQueue();
+		currentStaffSelection->addCommandToQueue(std::make_unique<FertilizePlant>(currentPlantSelection));
+		RefreshStaffTaskQueue();
+	}
+	catch (const Exception& ex) {
+		AppendLog(UnicodeString("Error queuing fertilise task: ") + ex.Message);
+	}
+	catch (const std::exception& ex) {
+		AppendLog(UnicodeString("Error queuing fertilise task: ") + String(ex.what()));
+	}
+	catch (...) {
+		AppendLog("Unknown error while queuing fertilise task.");
+	}
 }
 //---------------------------------------------------------------------------
 void __fastcall TfrmMain::btnAssignObserveClick(TObject *Sender)
