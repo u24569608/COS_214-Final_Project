@@ -36,15 +36,43 @@ struct StaffReminder {
 
 class Staff : public Observer, public Colleague {
 public:
+    /**
+     * @brief Creates a staff colleague registered with the mediator.
+     * @param id Unique identifier assigned to the staff member.
+     * @param mediator Mediator that coordinates staff communication.
+     */
     Staff(int id, FloorMediator* mediator);
+
+    /**
+     * @brief Cleans up outstanding commands and observer links.
+     */
     ~Staff();
 
     // === Observer Method ===
+    /**
+     * @brief Reacts to observer notifications originating from plants.
+     * @param event Event payload emitted by the subject.
+     */
     void update(const ObserverEvent& event) override;
 
     // === Colleague Methods ===
+    /**
+     * @brief Retrieves the staff member's colleague identifier.
+     * @return Numeric ID.
+     */
     int getID() const override;
+
+    /**
+     * @brief Sends a mediated message to another colleague.
+     * @param message Content to dispatch.
+     * @param colleagueID Recipient colleague identifier.
+     */
     void send(std::string message, int colleagueID) override;
+
+    /**
+     * @brief Receives a message routed through the mediator.
+     * @param message Message body delivered to this staff member.
+     */
     void receive(std::string message) override;
 
     // === Command (Invoker) Methods ===
@@ -95,6 +123,12 @@ public:
      * @note Pointer is non-owning; callers manage handler lifetime.
      */
     void setCareHandler(CareRequestHandler* h);
+
+    /**
+     * @brief Issues a care request that will be processed by the handler chain.
+     * @param plant Plant instance needing attention.
+     * @param requestType Logical action identifier (e.g., \"water\").
+     */
     void makeCareRequest(PlantInstance* plant, std::string requestType);
 
     // === Creative Functions ===
@@ -118,6 +152,9 @@ private:
     std::vector<StaffReminder> careReminders; ///< Observer-generated reminders
     std::unordered_set<PlantInstance*> observedPlants; ///< Borrowed plant pointers currently observed
 
+    /**
+     * @brief Detaches from all currently observed plant subjects.
+     */
     void stopObservingAll();
 };
 

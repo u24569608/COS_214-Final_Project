@@ -14,7 +14,14 @@ class Plant;
  */
 class PlantPrototypeRegistry {
 public:
+    /**
+     * @brief Creates an empty registry ready to store plant prototypes.
+     */
     PlantPrototypeRegistry();
+
+    /**
+     * @brief Releases owned prototypes and clears the registry.
+     */
     ~PlantPrototypeRegistry();
 
     /**

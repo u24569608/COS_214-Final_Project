@@ -30,6 +30,10 @@ public:
      * @note `plantType` is non-owning; the prototype must outlive the instance.
      */
     PlantInstance(Plant* plantType, std::string instanceName = "");
+
+    /**
+     * @brief Default destructor; relies on Subject for observer teardown.
+     */
     ~PlantInstance();
 
     // === Strategy Pattern ===
@@ -47,7 +51,16 @@ public:
     void setFertilizeStrategy(FertilizeStrategy* fs);
 
     // === Command Pattern (Receiver methods) ===
+    /**
+     * @brief Executes the state-aware watering command.
+     * @note Invokes the observer notifications when thresholds change.
+     */
     void performWater();
+
+    /**
+     * @brief Executes the state-aware fertilising command.
+     * @note Invokes the observer notifications when thresholds change.
+     */
     void performFertilize();
     /**
      * @brief Executes the configured watering strategy, if present.
@@ -110,13 +123,26 @@ public:
     void performCare() override;
 
     // === Creative Functions (Getters/Setters) ===
+    /**
+     * @brief Retrieves the plant's current health metric.
+     * @return Integer value within the configured threshold limits.
+     */
     int getHealth() const;
+
+    /**
+     * @brief Overrides the health metric, clamping to valid bounds.
+     * @param newHealth Absolute health value to assign.
+     */
     void setHealth(int newHealth);
     /**
      * @brief Applies a delta to the health and clamps it within valid bounds.
      * @param delta Signed adjustment amount.
      */
     void changeHealth(int delta);
+    /**
+     * @brief Reports the current water level.
+     * @return Integer water saturation.
+     */
     int getWaterLevel() const;
     /**
      * @brief Overrides the stored water level, clamped to the valid range.
@@ -143,6 +169,10 @@ public:
      * @param delta Signed adjustment amount.
      */
     void changeNutrientLevel(int delta);
+    /**
+     * @brief Reads the prototype name associated with the plant.
+     * @return Human-readable prototype identifier.
+     */
     std::string getPlantTypeName() const;
     /**
      * @brief Updates the human-readable name of this plant instance.
@@ -151,6 +181,12 @@ public:
     void rename(const std::string& newName);
 
 private:
+    /**
+     * @brief Generates a default instance name when one is not provided.
+     * @param plantType Prototype describing the plant species.
+     * @param instanceName Optional caller-supplied name.
+     * @return Chosen instance name.
+     */
     static std::string deriveInstanceName(Plant* plantType, const std::string& instanceName);
 
     Plant* plantType; ///< Non-owning pointer to the prototype that supplied defaults.
@@ -164,6 +200,10 @@ private:
     bool replayingAction;
     bool careAlertActive; ///< Prevents duplicate care notifications while already flagged.
 
+    /**
+     * @brief Flags whether the next care invocation is a replay triggered internally.
+     * @param value True when replaying, false otherwise.
+     */
     void setReplayingAction(bool value);
     /**
      * @brief Emits a care request notification if any critical resource is low.

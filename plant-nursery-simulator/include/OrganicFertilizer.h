@@ -9,8 +9,21 @@
  */
 class OrganicFertilizer : public FertilizeStrategy {
 public:
+    /**
+     * @brief Configures a strategy that applies organic nutrients.
+     */
     OrganicFertilizer();
+
+    /**
+     * @brief Executes organic fertilisation logic for the given plant.
+     * @param plant Plant instance to enrich.
+     */
     void fertilize(PlantInstance& plant) const override;
+
+    /**
+     * @brief Clones the strategy implementation for reuse.
+     * @return Newly allocated strategy instance.
+     */
     FertilizeStrategy* clone() const override;
 };
 

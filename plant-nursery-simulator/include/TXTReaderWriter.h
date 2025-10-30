@@ -13,10 +13,24 @@ class StockItem;
  */
 class TXTReaderWriter {
 public:
+    /**
+     * @brief Constructs a TXT utility with default parsing rules.
+     */
     TXTReaderWriter();
-    // Returns lines read, handles basic errors
+
+    /**
+     * @brief Reads a plain-text inventory file into memory.
+     * @param filePath Path to the TXT file.
+     * @return Collection of lines extracted from the file.
+     */
     std::vector<std::string> readDataFromTxt(const std::string& filePath); 
-    // Takes data to write, returns true on success
+
+    /**
+     * @brief Writes stock item data to a plain-text file.
+     * @param filePath Destination file path.
+     * @param items Collection of stock items to serialise.
+     * @return True when the write succeeds.
+     */
     bool writeDataToTxt(const std::string& filePath, const std::vector<StockItem*>& items); 
 };
 

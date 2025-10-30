@@ -14,10 +14,24 @@ class StockItem;
  */
 class CSVReaderWriter {
 public:
+    /**
+     * @brief Constructs a CSV utility with default parsing configuration.
+     */
     CSVReaderWriter();
-    // Returns pairs read, handles basic errors
+
+    /**
+     * @brief Loads and tokenises comma-separated values from disk.
+     * @param filePath Path to the CSV file to read.
+     * @return Matrix of string tokens, one vector per row.
+     */
     std::vector<std::vector<std::string>> readCsv(const std::string& filePath);
-    // Takes data to write, returns true on success
+
+    /**
+     * @brief Persists stock item data as comma-separated rows.
+     * @param filePath Destination file path.
+     * @param items Collection of stock items to encode.
+     * @return True when all data is written successfully.
+     */
     bool writeDataToCSV(const std::string& filePath, const std::vector<StockItem*>& items);
 };
 

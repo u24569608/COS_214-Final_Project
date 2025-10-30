@@ -10,6 +10,9 @@ class InventoryIterator;
  */
 class InventoryCollection {
 public:
+    /**
+     * @brief Ensures derived aggregates clean up via base pointer deletion.
+     */
     virtual ~InventoryCollection();
     /**
      * @brief Creates an iterator to traverse the collection.
