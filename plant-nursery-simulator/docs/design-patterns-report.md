@@ -461,36 +461,41 @@ The Plant Nursery Simulator models a nursery business end‑to‑end:
 
 ## Strategy (+ Prototype) - Watering and Fertilizing
 
-- Intent and rationale
+### Intent and rationale
   - Vary watering and fertilizing algorithms independently of `PlantInstance` and swap them at runtime. We additionally prototype strategies to clone preconfigured policies when needed.
-- Where implemented
+### Where implemented
   - Strategy interfaces: `include/WaterStrategy.h`, `include/FertilizeStrategy.h`
   - Concrete strategies: `include/FrequentWatering.h`, `include/SeasonalWatering.h`, `include/SparseWatering.h`; `include/LiquidFertilizer.h`, `include/SlowReleaseFertilizer.h`, `include/OrganicFertilizer.h` (+ `src/*.cpp`)
   - Used by: `include/PlantInstance.h`, `src/PlantInstance.cpp` (setters and execution)
-- Participants
+### Participants
   - Strategy: `WaterStrategy`, `FertilizeStrategy`
   - ConcreteStrategy: frequent/seasonal/sparse watering; liquid/slow-release/organic fertilizing
   - Context: `PlantInstance`
   - Prototype (optional): strategies can be cloned when configured in presets
-- Key interactions
+### Key interactions
   - `PlantInstance` calls the current strategies during care or ticks; strategies update plant vitals according to policy.
-- Functional requirements
+### Functional requirements (with code references and tests)
   - FR5: Interchangeable watering strategies
+    - Code: include/WaterStrategy.h:15-20; src/FrequentWatering.cpp:7-15
+    - Tests: tests/plant_state_test.cpp:136
   - FR6: Interchangeable fertilizing strategies
+    - Code: include/FertilizeStrategy.h:15-20; src/SlowReleaseFertilizer.cpp:7-15
+    - Tests: tests/plant_state_test.cpp:160
   - FR7: Change strategies at runtime per plant
+    - Code: src/PlantInstance.cpp:41-47
+    - Tests: tests/plant_state_test.cpp:120-125 (inject tracking strategies)
 
-- Why this pattern over alternatives
+### Why this pattern
   - Over flags/if-else: Encapsulating varying algorithms keeps `PlantInstance` free of branching and enables runtime swaps.
   - Over Command: Strategies are algorithms applied by the plant, not queued actions; Command is used for staff tasking instead.
   - Prototype addition: Concrete strategies implement `clone()` to allow copying configured strategies if needed by presets/director flows.
 
-- Implementation evidence
+### Implementation evidence
   - Strategy interfaces define `water()`/`fertilize()`; concrete strategies implement different adjustments to vitals (e.g., frequent vs sparse watering).
   - `PlantInstance::setWaterStrategy()` / `setFertilizeStrategy()` swap algorithms without reconstructing the plant.
 
-- FR details
-  - FR5/FR6 (Interchangeable algorithms): Different strategies (frequent/seasonal/sparse; liquid/slow-release/organic) encapsulate policies for care.
-  - FR7 (Runtime change): Plants can adopt different strategies based on species, environment, or user choice via setters.
+### Why efficient
+  - Direct virtual dispatch; O(1) swaps; minimal per‑call overhead.
 
 ---
 
