@@ -10,6 +10,18 @@ Note: File paths point to headers in `include/` and implementations in `src/` wi
 
 ---
 
+## System Overview
+
+The Plant Nursery Simulator models a nursery business end‑to‑end:
+- Greenhouse: Plants are organised in a Composite of beds and leaves. A Greenhouse Iterator traverses all plants in depth‑first order to apply periodic growth ticks and care.
+- Plants and lifecycle: Each plant instance holds vitals (health, water, nutrients) and a lifecycle State (Seed → Growing → Mature → Withering → Dead). States encapsulate per‑stage behaviour; Strategy objects (watering, fertilising) update vitals.
+- Observation: Plants are Subjects and notify Observers (Staff, StockItem) about care needs and availability changes. This decouples lifecycle from UI/operations.
+- Inventory and sales: Inventory maintains StockItems (some linked to PlantInstances). An Inventory Iterator exposes a stable traversal prioritising market‑ready plant stock. SalesFacade orchestrates sales, orders, inventory updates, and uses the Builder to assemble orders.
+- Persistence: File Adapters (CSV/TXT) abstract I/O so Inventory remains independent of file formats; Adapters adapt Reader/Writers to the `FileAdapter` target.
+- Operations: Care actions are Commands queued and executed by Staff; care requests route through a Chain of Responsibility; Customer/Staff communication goes via a Mediator.
+
+---
+
 ## Iterator - Inventory
 
 - Intent and rationale
