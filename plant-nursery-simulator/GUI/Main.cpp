@@ -125,6 +125,36 @@ __fastcall TfrmMain::TfrmMain(TComponent* Owner)
 }
 //---------------------------------------------------------------------------
 
+	objPaymentProcessor = std::make_unique<PaymentProcessor>();
+
+
+	objOrderBuilder = std::make_unique<CustomOrderBuilder>();
+
+    objOrderBuilder->createNewOrder();
+
+	objSalesFacade = std::make_unique<SalesFacade>(
+		objInventory.get(),
+		objPaymentProcessor.get(),
+		objOrderBuilder.get(),
+		objGreenhouse.get(),
+		objPrototypeRegistry.get()
+	);
+
+    objInventory->setPlantRegistry(objPrototypeRegistry.get());
+    objInventory->setGreenhouseRoot(objGreenhouse.get());
+
+	tvGreenhouse->Items->Clear();
+	PopulateGreenhouseTree(nullptr, objGreenhouse.get());
+	tvGreenhouse->FullExpand();
+
+	PopulateSalesItemComboBox();
+
+	PopulateGreenhouseBedComboBox(objGreenhouse.get());
+
+    WireStaffTaskEvents();
+	RefreshStaffTaskQueue();
+}
+//---------------------------------------------------------------------------
 void __fastcall TfrmMain::edtMessageBodyChange(TObject *Sender)
 {
 	if (edtMessageBody->Text.Length() == 0) {
@@ -135,6 +165,30 @@ void __fastcall TfrmMain::edtMessageBodyChange(TObject *Sender)
 	}
 }
 //---------------------------------------------------------------------------
+void __fastcall TfrmMain::FormCreate(TObject *Sender)
+{
+	redtLog->Lines->Add("[" + DateTimeToStr(Now()) + "] Welcome to Plant Palace!");
+}
+//---------------------------------------------------------------------------
+void TfrmMain::PopulateColleagueComboBoxes()
+{
+	cmbSender->Clear();
+	cmbReceiver->Clear();
+
+	cmbSender->Text = "Sender";
+	cmbReceiver->Text = "Receiver";
+
+	for (const auto& colleague : vtrColleagues)
+	{
+		UnicodeString idString = colleague->getID();
+
+		cmbSender->Items->Add(idString);
+		cmbReceiver->Items->Add(idString);
+	}
+}
+//---------------------------------------------------------------------------
+void __fastcall TfrmMain::btnSendClick(TObject *Sender)
+{
 
 void __fastcall TfrmMain::FormCreate(TObject *Sender)
 {
@@ -215,6 +269,10 @@ void __fastcall TfrmMain::btnClearMessagesClick(TObject *Sender)
     redtMessages->Clear();
 }
 //---------------------------------------------------------------------------
+void __fastcall TfrmMain::btnReverseClick(TObject *Sender)
+{
+	std::string sSender = AnsiString(cmbSender->Text).c_str();
+	std::string sReceiver = AnsiString(cmbReceiver->Text).c_str();
 
 
 void __fastcall TfrmMain::btnReverseClick(TObject *Sender)
