@@ -166,6 +166,9 @@
         <LinkPackageImports>rtl.bpi;vcl.bpi;vclwinx.bpi;vclimg.bpi;bindengine.bpi</LinkPackageImports>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <VerInfo_Locale>1033</VerInfo_Locale>
+        <Icon_MainIcon>Plant_Palace_Icon1.ico</Icon_MainIcon>
+        <UWP_CppLogo44>Plant Palace Logo.png</UWP_CppLogo44>
+        <UWP_CppLogo150>Plant Palace Logo.png</UWP_CppLogo150>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win64x)'!=''">
         <AppDPIAwarenessMode>PerMonitorV2</AppDPIAwarenessMode>
@@ -365,11 +368,11 @@
         <CppCompile Include="..\src\WitheringState.cpp">
             <BuildOrder>51</BuildOrder>
         </CppCompile>
-        <FormResources Include="Main.dfm"/>
-        <FormResources Include="Greenhouse_Information_Frame.dfm"/>
         <FormResources Include="Sales_Frame.dfm"/>
+        <FormResources Include="Greenhouse_Information_Frame.dfm"/>
         <FormResources Include="Add_Plant.dfm"/>
         <FormResources Include="Add_Item.dfm"/>
+        <FormResources Include="Main.dfm"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>
@@ -557,6 +560,13 @@
                 <DeployFile LocalName=".\Win64\Debug\Plant_Palace.exe" Configuration="Debug" Class="ProjectOutput">
                     <Platform Name="Win64">
                         <RemoteName>Plant_Palace.exe</RemoteName>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployFile LocalName="Plant Palace Logo.png" Configuration="Debug" Class="UWP_CppLogo44">
+                    <Platform Name="Win64">
+                        <RemoteDir>Assets\</RemoteDir>
+                        <RemoteName>Logo44x44.png</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>

@@ -227,7 +227,7 @@ object frmMain: TfrmMain
   end
   object pgcBase: TPageControl
     Left = 0
-    Top = 328
+    Top = 347
     Width = 849
     Height = 261
     ActivePage = tsLog
@@ -459,8 +459,8 @@ object frmMain: TfrmMain
     Left = 0
     Top = 49
     Width = 849
-    Height = 279
-    ActivePage = tsGreenhouseManagement
+    Height = 298
+    ActivePage = tsSystemAdmin
     Align = alClient
     Images = vrtlmglstMain
     TabOrder = 2
@@ -474,7 +474,7 @@ object frmMain: TfrmMain
         Left = 181
         Top = 0
         Width = 660
-        Height = 243
+        Height = 262
         VertScrollBar.Smooth = True
         VertScrollBar.Tracking = True
         Align = alClient
@@ -515,7 +515,7 @@ object frmMain: TfrmMain
         Left = 0
         Top = 0
         Width = 181
-        Height = 243
+        Height = 262
         Align = alLeft
         Caption = 'Panel1'
         TabOrder = 1
@@ -524,7 +524,7 @@ object frmMain: TfrmMain
           Left = 1
           Top = 1
           Width = 179
-          Height = 241
+          Height = 260
           Align = alClient
           Indent = 19
           TabOrder = 0
@@ -541,11 +541,12 @@ object frmMain: TfrmMain
         Left = 0
         Top = 0
         Width = 841
-        Height = 243
+        Height = 262
         ActivePage = tsInventory
         Align = alClient
         Images = vrtlmglstMain
         TabOrder = 0
+        ExplicitHeight = 243
         object tsInventory: TTabSheet
           Caption = 'Inventory   '
           ImageIndex = 1
@@ -554,7 +555,7 @@ object frmMain: TfrmMain
             Left = 0
             Top = 0
             Width = 792
-            Height = 207
+            Height = 226
             Align = alClient
             Columns = <
               item
@@ -575,15 +576,17 @@ object frmMain: TfrmMain
             ReadOnly = True
             TabOrder = 0
             ViewStyle = vsReport
+            ExplicitHeight = 207
           end
           object pnlInventoryMovement: TPanel
             Left = 792
             Top = 0
             Width = 41
-            Height = 207
+            Height = 226
             Align = alRight
             BevelOuter = bvNone
             TabOrder = 1
+            ExplicitHeight = 207
             object btnInventoryUp: TBitBtn
               Left = 0
               Top = 0
@@ -617,11 +620,12 @@ object frmMain: TfrmMain
             Left = 0
             Top = 0
             Width = 833
-            Height = 207
+            Height = 226
             VertScrollBar.Smooth = True
             Align = alClient
             TabOrder = 0
             UseWheelForScrolling = True
+            ExplicitHeight = 207
             inline frmSales1: TfrmSales
               Left = 0
               Top = 0
@@ -663,11 +667,12 @@ object frmMain: TfrmMain
         Left = 0
         Top = 0
         Width = 841
-        Height = 243
-        ActivePage = tsInventoryManagement
+        Height = 262
+        ActivePage = tsStaffTasks
         Align = alClient
         Images = vrtlmglstMain
         TabOrder = 0
+        ExplicitHeight = 243
         object tsInventoryManagement: TTabSheet
           Caption = 'Inventory Management   '
           ImageIndex = 5
@@ -676,13 +681,14 @@ object frmMain: TfrmMain
             Left = 0
             Top = 0
             Width = 833
-            Height = 207
+            Height = 226
             Align = alClient
             BevelOuter = bvNone
             Color = clWhite
             ParentBackground = False
             TabOrder = 0
             StyleElements = []
+            ExplicitHeight = 207
             object lblAddItemHeading: TLabel
               Left = 25
               Top = 135
@@ -757,13 +763,14 @@ object frmMain: TfrmMain
             Left = 0
             Top = 0
             Width = 833
-            Height = 207
+            Height = 226
             Align = alClient
             BevelOuter = bvNone
             Color = clWhite
             ParentBackground = False
             TabOrder = 0
             StyleElements = []
+            ExplicitHeight = 207
             object lblSelectPlantCloneHeading: TLabel
               Left = 227
               Top = 16
@@ -885,7 +892,7 @@ object frmMain: TfrmMain
           ImageName = 'Staff'
           DesignSize = (
             833
-            207)
+            226)
           object lblStaffTaskQueueHeading: TLabel
             Left = 25
             Top = 16
@@ -904,11 +911,12 @@ object frmMain: TfrmMain
             Left = 0
             Top = 48
             Width = 833
-            Height = 159
+            Height = 178
             Align = alBottom
             Anchors = [akLeft, akTop, akRight, akBottom]
             Columns = <>
             TabOrder = 0
+            ExplicitHeight = 159
           end
           object btnProcessNextTask: TBitBtn
             Left = 632
@@ -925,15 +933,6 @@ object frmMain: TfrmMain
         end
       end
     end
-  end
-  object StatusBar1: TStatusBar
-    Left = 0
-    Top = 589
-    Width = 849
-    Height = 19
-    Panels = <>
-    ExplicitTop = 581
-    ExplicitWidth = 847
   end
   object mmMain: TMainMenu
     Left = 928
