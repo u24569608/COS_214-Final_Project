@@ -162,6 +162,17 @@ Note: File paths point to headers in `include/` and implementations in `src/` wi
 - Functional requirements
   - FR24: Build orders with optional director presets
 
+- Why this pattern over alternatives
+  - Over telescoping constructors: Orders vary in composition; using a builder avoids brittle large constructors and allows step-wise construction and validation.
+  - Over simple factory: Builder supports variable numbers and combinations of `StockItem`s and evolving assembly policies; a factory would not capture sequences and optional steps cleanly.
+
+- Implementation evidence
+  - `Order` contains a vector of `StockItem` parts and exposes `addItem()`/`calculateTotal()` used by builders and facade.
+  - `OrderBuilder` defines the steps; `CustomOrderBuilder` implements them for general orders; `OrderDirector` encapsulates common presets when needed.
+
+- FR details
+  - FR24 (Build orders): The builder composes `Order` instances from selected `StockItem`s. The facade can either drive the builder directly for ad-hoc orders or reuse `OrderDirector` to standardize bundles.
+
 ---
 
 ## Observer - Plants, Staff, and Stock Items
