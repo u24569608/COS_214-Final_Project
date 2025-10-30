@@ -24,37 +24,41 @@ The Plant Nursery Simulator models a nursery business end‑to‑end:
 
 ## Iterator - Inventory
 
-- Intent and rationale
-  - Provide a uniform way to traverse inventory items without exposing the underlying container. Supports browsing and sales workflows cleanly and testably.
-- Where implemented
+### Intent and rationale
+
+ - Provide a uniform way to traverse inventory items without exposing the underlying container. Supports browsing and sales workflows cleanly and testably while enforcing domain order.
+### Where implemented
   - `include/InventoryCollection.h` (Aggregate interface)
   - `include/InventoryIterator.h` (Iterator interface)
   - `include/ConcreteInventoryIterator.h`, `src/ConcreteInventoryIterator.cpp` (ConcreteIterator)
   - `include/Inventory.h`, `src/Inventory.cpp` (ConcreteAggregate creating iterators)
-- Participants
+### Participants
   - Iterator: `InventoryIterator`
   - ConcreteIterator: `ConcreteInventoryIterator`
   - Aggregate: `InventoryCollection`
   - ConcreteAggregate: `Inventory`
-- Key interactions
+### Key interactions
   - Client code obtains an iterator via `Inventory::createIterator()` and traverses items with `hasNext()/next()`.
-- Functional requirements
+### Functional requirements (with code references and tests)
   - FR15: Aggregate interface to create iterators
+    - Code: src/Inventory.cpp:33
+    - Test: tests/iterator_test.cpp:23 (testEmptyInventory)
   - FR16: Iterate over inventory items for browsing and sales
+    - Code: src/ConcreteInventoryIterator.cpp:20,29,42,47,60-129
+    - Tests: tests/iterator_test.cpp:46 (prioritisation), 82 (reset reflects state changes)
 
-- Why this pattern over alternatives
+### Why this pattern
   - Over nested loops or exposing containers: The inventory manages multiple concerns (greenhouse-linked items, readiness, ID mapping). Exposing `items` would leak representation and allow incorrect traversal order. The iterator encapsulates a purpose-built ordering that prioritizes sale-ready plant-backed stock while hiding internal storage, as seen in `ConcreteInventoryIterator::rebuildTraversal()`.
   - Over Visitor: We do not need double dispatch or per-element operations; we only need a traversal order and simple item access. Iterator keeps responsibilities minimal and testable.
   - Over returning vectors: The iterator recalculates traversal lazily and can stay consistent as the inventory changes without materializing transient copies in client code.
 
-- Implementation evidence
+### Implementation evidence
   - `Inventory` is the ConcreteAggregate that returns `InventoryIterator*` from `createIterator()` (`include/Inventory.h`).
   - `ConcreteInventoryIterator` builds a stable traversal by first walking the greenhouse via `GreenhouseIterator` and selecting plant-backed, market-ready `StockItem`s, then appending remaining eligible stock (`src/ConcreteInventoryIterator.cpp`).
   - Market readiness is checked through the associated `PlantInstance::isAvailableForSale()`, ensuring business rules drive traversal order.
 
-- FR details
-  - FR15 (Aggregate interface): `InventoryCollection::createIterator()` defines the contract to obtain iterators; `Inventory` implements it, allowing clients to traverse without knowledge of internals.
-  - FR16 (Iterate for workflows): Sales/customer browsing uses the iterator to produce a customer-friendly order (market-ready first). Tests under `tests/iterator_test.cpp` exercise this semantics; the iterator avoids exposing the combination of greenhouse and stock containers.
+### Why efficient
+  - O(n) rebuild on demand; reuses greenhouse iterator for plant order; avoids repeated vector materialisation in clients.
 
 ---
 
