@@ -362,6 +362,17 @@ Note: File paths point to headers in `include/` and implementations in `src/` wi
   - FR22: Coordinate communication via mediator
   - FR23: Customers and staff act as colleagues
 
+- Why this pattern over alternatives
+  - Over direct references between colleagues: Mediator avoids N² coupling and simplifies adding/removing colleagues without rewriting routing logic.
+  - Over Observer for chat-like messaging: We require directed messages (with optional recipient); Mediator’s `distribute()` with sender/recipient IDs matches this routing concern.
+
+- Implementation evidence
+  - `NurseryMediator` stores colleagues and routes messages via `distribute()`. `Staff` and `Customer` subclass `Colleague` and use `send()/receive()` to interact.
+
+- FR details
+  - FR22 (Coordinate): The mediator centralizes message routing and enables policies (e.g., broadcast or direct) without colleagues knowing each other.
+  - FR23 (Colleagues): Staff/customers integrate by conforming to the `Colleague` contract, enabling reuse with any `FloorMediator` implementation.
+
 ---
 
 ## Chain of Responsibility - Care Routing
