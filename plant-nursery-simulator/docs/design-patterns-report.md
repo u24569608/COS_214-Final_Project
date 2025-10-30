@@ -295,6 +295,18 @@ Note: File paths point to headers in `include/` and implementations in `src/` wi
   - FR3: Model lifecycle states and transitions
   - FR4: Identify market-ready plants for sale
 
+- Why this pattern over alternatives
+  - Over large conditional chains: Encapsulating per-state logic (`onTick`, `onWater`, `onFertilize`) reduces branching and isolates thresholds/transitions for maintainability.
+  - Over Strategy alone: Strategies handle how to perform care; State determines when and how states change and whether a plant is market-ready.
+
+- Implementation evidence
+  - `PlantState` defines lifecycle hooks; concrete states implement behaviour and transitions. `PlantInstance::setState()` owns state lifetime and centralizes observer notifications when availability changes.
+  - `isMarketReady()` is state-specific (true in `MatureState`) and drives sales availability checks.
+
+- FR details
+  - FR3 (States and transitions): On each tick, the current state updates vitals and may transition to a next state. This aligns with `PlantInstance::applyGrowthTick()` deferring to `PlantState::onTick()`.
+  - FR4 (Market readiness): `PlantInstance::isAvailableForSale()` consults `PlantState::isMarketReady()`, linking lifecycle directly to storefront visibility.
+
 ---
 
 ## Command - Plant Care Tasks
