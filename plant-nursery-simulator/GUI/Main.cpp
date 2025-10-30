@@ -416,7 +416,7 @@ void __fastcall TfrmMain::btnSaveInventoryClick(TObject *Sender)
 		if (filterIndex <= 0 || filterIndex > dlgSaveSaveInventory->FileTypes->Count) {
 			filterIndex = 1;
 		}
-		UnicodeString mask = dlgSaveSaveInventory->FileTypes->Items[filterIndex - 1].FileMask.LowerCase();
+		UnicodeString mask = dlgSaveSaveInventory->FileTypes->Items[filterIndex - 1]->FileMask.LowerCase();
 		if (mask.Pos(".csv") > 0) {
 			adapter = std::make_unique<CSVAdapter>();
 			enforcedExt = ".csv";

@@ -2,12 +2,12 @@
 #define CSV_ADAPTER_H
 
 #include "FileAdapter.h"
+#include "CSVReaderWriter.h"
 #include <string>
 #include <memory>
 
-// Forward declarations
+// Forward declaration
 class Inventory;
-class CSVReaderWriter;
 
 /**
  * @file CSVAdapter.h

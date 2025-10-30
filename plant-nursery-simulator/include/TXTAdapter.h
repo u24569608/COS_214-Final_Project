@@ -2,12 +2,12 @@
 #define TXT_ADAPTER_H
 
 #include "FileAdapter.h"
+#include "TXTReaderWriter.h"
 #include <string>
 #include <memory>
 
-// Forward declarations
+// Forward declaration
 class Inventory;
-class TXTReaderWriter;
 
 /**
  * @file TXTAdapter.h
