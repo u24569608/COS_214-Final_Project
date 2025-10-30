@@ -393,6 +393,18 @@ Note: File paths point to headers in `include/` and implementations in `src/` wi
   - FR20: Route care requests through chain
   - FR21: Handlers process or delegate
 
+- Why this pattern over alternatives
+  - Over switch/case branching: The chain allows adding new care types without modifying a central dispatcher, respecting Open/Closed Principle.
+  - Over Strategy: We need routing plus delegation to “next” when unsupported; CoR matches that responsibility better.
+
+- Implementation evidence
+  - `CareRequestHandler::handleRequest()` checks `canHandle()` and delegates to `nextHandler` when necessary. `WateringHandler`/`FertilizingHandler` implement the care-specific logic.
+  - `Staff` composes the chain and invokes `makeCareRequest()` with a textual request type.
+
+- FR details
+  - FR20 (Route care): Requests are sent to the chain’s head; appropriate handler performs the action.
+  - FR21 (Process or delegate): Each handler either executes or forwards, terminating at end-of-chain without side effects when unsupported.
+
 ---
 
 ## Strategy (+ Prototype) - Watering and Fertilizing
