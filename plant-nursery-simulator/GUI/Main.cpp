@@ -526,7 +526,8 @@ void TfrmMain::UpdateOrderDisplay()
 }
 void __fastcall TfrmMain::FormActivate(TObject *Sender)
 {
-     frmSales1->currentOrderTotal = 0.0;
+	 frmSales1->currentOrderTotal = 0.0;
+
 }
 //---------------------------------------------------------------------------
 void TfrmMain::PopulateCustomerComboBox()

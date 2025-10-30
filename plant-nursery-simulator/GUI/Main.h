@@ -136,6 +136,7 @@ __published:	// IDE-managed Components
 	TComboBox *cmbGreenhouseSelection;
 	TLabel *Label1;
 	TLabel *Label2;
+	TStatusBar *StatusBar1;
 	void __fastcall edtMessageBodyChange(TObject *Sender);
 	void __fastcall FormCreate(TObject *Sender);
 	void __fastcall btnSendClick(TObject *Sender);
