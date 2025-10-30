@@ -231,6 +231,18 @@ Note: File paths point to headers in `include/` and implementations in `src/` wi
   - FR8: File I/O abstraction for inventory
   - FR9: Load/save via pluggable adapters (CSV, TXT)
 
+- Why this pattern over alternatives
+  - Over direct file I/O in `Inventory`: The adapter target allows `Inventory` to depend only on `FileAdapter`, enabling addition of new formats without edits to `Inventory`.
+  - Over Strategy: While similar in pluggability, Adapter is the right choice since we adapt existing reader/writer interfaces (`CSVReaderWriter`, `TXTReaderWriter`) that do not match the expected `FileAdapter` API.
+
+- Implementation evidence
+  - `CSVAdapter` and `TXTAdapter` wrap their respective `*ReaderWriter` and translate to the `FileAdapter` interface.
+  - `Inventory::loadFromFile()` and `saveToFile()` simply call through to the adapter, keeping persistence concerns out of collection logic.
+
+- FR details
+  - FR8 (Abstraction): `FileAdapter` is the stable target that client code uses; inventory has no knowledge of CSV/TXT specifics.
+  - FR9 (Pluggable formats): Selecting `CSVAdapter` vs `TXTAdapter` at runtime switches persistence format with no inventory changes.
+
 ---
 
 ## Prototype (Data‑Driven) - Plants and Registry
