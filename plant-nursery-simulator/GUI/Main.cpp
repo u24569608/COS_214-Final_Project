@@ -335,23 +335,11 @@ void __fastcall TfrmMain::btnLoadInventoryClick(TObject *Sender)
 	try {
 		objInventory->loadFromFile(adapter.get(), filePath);
 
-		tvGreenhouse->Items->BeginUpdate();
-		try {
-			tvGreenhouse->Items->Clear();
-			PopulateGreenhouseTree(nullptr, objGreenhouse.get());
-			tvGreenhouse->FullExpand();
-		}
-		__finally {
-			tvGreenhouse->Items->EndUpdate();
-		}
-
-		currentPlantSelection = nullptr;
-		ClearPlantDetails();
+		RefreshGreenhouseDisplay();
 
 		RefreshInventoryListView();
 		PopulateSalesItemComboBox();
 		PopulatePrototypeComboBox();
-		AttachLoggerToAllPlants();
 		RefreshStaffTaskQueue();
 		UpdateCareActionState();
 
@@ -1210,6 +1198,35 @@ void TfrmMain::HandlePlantObserverEvent(const ObserverEvent& event)
 	RefreshStaffTaskQueue();
 	if (event.type == ObserverEventType::AvailabilityChanged) {
 		RefreshInventoryListView();
+	}
+}
+//---------------------------------------------------------------------------
+void TfrmMain::RefreshGreenhouseDisplay()
+{
+	try {
+		tvGreenhouse->Items->BeginUpdate();
+		try {
+			tvGreenhouse->Items->Clear();
+			PopulateGreenhouseTree(nullptr, objGreenhouse.get());
+			tvGreenhouse->FullExpand();
+		}
+		__finally {
+			tvGreenhouse->Items->EndUpdate();
+		}
+
+		AttachLoggerToAllPlants();
+		currentPlantSelection = nullptr;
+		ClearPlantDetails();
+		UpdateCareActionState();
+	}
+	catch (const Exception& ex) {
+		AppendLog(UnicodeString("Error refreshing greenhouse display: ") + ex.Message);
+	}
+	catch (const std::exception& ex) {
+		AppendLog(UnicodeString("Error refreshing greenhouse display: ") + String(ex.what()));
+	}
+	catch (...) {
+		AppendLog("Unknown error while refreshing greenhouse display.");
 	}
 }
 //---------------------------------------------------------------------------

@@ -280,6 +280,10 @@ private:	// User declarations
 	 * @brief Helper to re-select a staff row after refreshing the list view.
 	 */
 	void SelectStaffRowById(int staffId);
+	/**
+	 * @brief Rebuilds greenhouse tree UI after inventory changes.
+	 */
+	void RefreshGreenhouseDisplay();
 
     // New
     void RefreshStaffTaskQueue();

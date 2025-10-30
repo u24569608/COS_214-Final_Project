@@ -108,108 +108,92 @@ void __fastcall TfrmSales::cmbItemSelectionChange(TObject *Sender)
 
 void __fastcall TfrmSales::btnProcessPaymentClick(TObject *Sender)
 {
-	// 1. Get Customer ID string and validate
-	UnicodeString customerIdU = cmbCustomerSelect->Text;
-	std::string customerIdStr = AnsiString(customerIdU).c_str();
-	if (cmbCustomerSelect->ItemIndex == -1 || customerIdStr.empty() || customerIdU == "Select Customer ID") {
-		ShowMessage("Please select a Customer ID.");
-		return;
-	}
+    try {
+        UnicodeString customerIdU = cmbCustomerSelect->Text;
+        std::string customerIdStr = AnsiString(customerIdU).c_str();
+        if (cmbCustomerSelect->ItemIndex == -1 || customerIdStr.empty() || customerIdU == "Select Customer ID") {
+            ShowMessage("Please select a Customer ID.");
+            return;
+        }
 
-	// 2. Convert ID string to INT
-	int customerIdSelected = -1;
-	try {
-		 customerIdSelected = std::stoi(customerIdStr);
-	} catch (...) {
-		 ShowMessage("Error: Invalid Customer ID selected.");
-		 return;
-	}
+        int customerIdSelected = -1;
+        try {
+            customerIdSelected = std::stoi(customerIdStr);
+        } catch (...) {
+            ShowMessage("Error: Invalid Customer ID selected.");
+            return;
+        }
 
-	// 3. Find the Customer* object by ID
-	Customer* customerPtr = nullptr;
-	for (const auto& colleague : frmMain->vtrColleagues) { //
-		Customer* cust = dynamic_cast<Customer*>(colleague.get());
-		if (cust != nullptr && cust->getID() == customerIdSelected) { //
-			customerPtr = cust;
-			break;
-		}
-	}
-	if (customerPtr == nullptr) {
-		ShowMessage("Error: Could not find selected customer object (ID: " + customerIdU + ").");
-		return;
-	}
+        Customer* customerPtr = nullptr;
+        for (const auto& colleague : frmMain->vtrColleagues) {
+            Customer* cust = dynamic_cast<Customer*>(colleague.get());
+            if (cust != nullptr && cust->getID() == customerIdSelected) {
+                customerPtr = cust;
+                break;
+            }
+        }
+        if (customerPtr == nullptr) {
+            ShowMessage("Error: Could not find selected customer object (ID: " + customerIdU + ").");
+            return;
+        }
 
-	// 4. Get the Order from the Builder BEFORE calling Facade
-	std::unique_ptr<Order> finalOrder(frmMain->objOrderBuilder->getOrder()); //
+        std::unique_ptr<Order> finalOrder(frmMain->objOrderBuilder->getOrder());
+        if (!finalOrder || finalOrder->getItems().empty()) {
+            ShowMessage("Cannot process payment: The order is empty.");
+            frmMain->objOrderBuilder->createNewOrder();
+            return;
+        }
 
-	// Check if the order is valid (e.g., has items)
-	if (!finalOrder || finalOrder->getItems().empty()) { //
-		ShowMessage("Cannot process payment: The order is empty.");
-		frmMain->objOrderBuilder->createNewOrder(); // Reset builder
-		return;
-	}
+        bool success = frmMain->objSalesFacade->buildAndFinalizeOrder(
+            customerPtr,
+            finalOrder->getItems());
 
-	// 5. === Call the Sales Facade ===
-	bool success = false;
-	try {
-		// Pass Customer* and the vector of items
-		success = frmMain->objSalesFacade->buildAndFinalizeOrder(
-													customerPtr,
-													finalOrder->getItems() //
-													);
+        if (success) {
+            UnicodeString logMsg = "[" + DateTimeToStr(Now()) + "] Order Finalised for Customer (ID): " + customerIdU;
+            frmMain->redtLog->Lines->Add(logMsg);
 
-		// 6. Handle the Result
-		if (success) {
-			// ShowMessage("Payment successful. Order finalized.");
-			// Log simple success message
+            frmMain->redtLog->Lines->Add("------ Receipt (" + customerIdU + ") ------");
+            for (const StockItem& item : finalOrder->getItems()) {
+                UnicodeString logLine = "  - ";
+                logLine += item.getname().c_str();
+                logLine += " (";
+                logLine += FloatToStrF(static_cast<double>(item.getPrice()), ffCurrency, 8, 2);
+                logLine += ")";
+                frmMain->redtLog->Lines->Add(logLine);
+            }
+            frmMain->redtLog->Lines->Add("  -------------------------");
+            frmMain->redtLog->Lines->Add("  Total Due: " + FloatToStrF(finalOrder->calculateTotal(), ffCurrency, 8, 2) + " [PAID]");
+            frmMain->redtLog->Lines->Add("  -------------------------");
 
-			UnicodeString logMsg = "[" + DateTimeToStr(Now()) + "] Order Finalised for Customer (ID): " + customerIdU;
-			frmMain->redtLog->Lines->Add(logMsg); //
-
-			// --- ADD RECEIPT TO LOG ---
-			frmMain->redtLog->Lines->Add("------ Receipt (" + customerIdU + ") ------");
-			// Loop through items in the finalOrder object
-			for (const StockItem& item : finalOrder->getItems()) { //
-				UnicodeString logLine = "  - ";
-				logLine += item.getname().c_str(); //
-				logLine += " (";
-				// Cast price to double for formatting
-				logLine += FloatToStrF(static_cast<double>(item.getPrice()), ffCurrency, 8, 2); //
-				logLine += ")";
-				frmMain->redtLog->Lines->Add(logLine);
-			}
-			// Add Total PAID line using Order's total calculation
-			frmMain->redtLog->Lines->Add("  -------------------------");
-			frmMain->redtLog->Lines->Add("  Total Due: " + FloatToStrF(finalOrder->calculateTotal(), ffCurrency, 8, 2) + " [PAID]"); //
-			frmMain->redtLog->Lines->Add("  -------------------------");
-			// --- END RECEIPT LOG ---
-
-			// Reset UI, Refresh Inventory, Repopulate Combos
-			frmMain->UpdateOrderDisplay();       // Resets Sales Frame UI
-			frmMain->RefreshInventoryListView(); //
-			frmMain->PopulateSalesItemComboBox(); //
-			frmMain->PopulateCustomerComboBox(); //
-			// Builder is already empty, create new one
-			frmMain->objOrderBuilder->createNewOrder(); //
-
-		} else {
-			// Facade indicated failure
-			ShowMessage("Order processing failed. Please check inventory or payment details.");
-			frmMain->redtLog->Lines->Add("[" + DateTimeToStr(Now()) + "] Order processing failed for Customer ID " + customerIdU);
-			// Builder is already empty, create new one
-			frmMain->objOrderBuilder->createNewOrder();
-		}
-		// unique_ptr finalOrder is automatically deleted here
-	}
-	catch (const std::exception& ex) {
-		// Catch any unexpected C++ exceptions
-		ShowMessage("An error occurred during checkout: " + String(ex.what()));
-		frmMain->redtLog->Lines->Add("[" + DateTimeToStr(Now()) + "] EXCEPTION during checkout for Customer ID " + customerIdU + ": " + String(ex.what()));
-		// Ensure builder is reset after exception
-		frmMain->objOrderBuilder->createNewOrder();
-        // unique_ptr finalOrder is automatically deleted here (if created before exception)
-	}
+            frmMain->UpdateOrderDisplay();
+            frmMain->RefreshInventoryListView();
+            frmMain->PopulateSalesItemComboBox();
+            frmMain->PopulateCustomerComboBox();
+            frmMain->RefreshGreenhouseDisplay();
+            frmMain->objOrderBuilder->createNewOrder();
+        } else {
+            ShowMessage("Order processing failed. Please check inventory or payment details.");
+            frmMain->redtLog->Lines->Add("[" + DateTimeToStr(Now()) + "] Order processing failed for Customer ID " + customerIdU);
+            frmMain->objOrderBuilder->createNewOrder();
+        }
+    }
+    catch (const Exception& ex) {
+        ShowMessage("Error while processing payment: " + ex.Message);
+        frmMain->AppendLog(UnicodeString("Payment error: ") + ex.Message);
+        frmMain->objOrderBuilder->createNewOrder();
+    }
+    catch (const std::exception& ex) {
+        ShowMessage("Error while processing payment: " + String(ex.what()));
+        frmMain->AppendLog(UnicodeString("Payment error: ") + String(ex.what()));
+        frmMain->objOrderBuilder->createNewOrder();
+    }
+    catch (...) {
+        ShowMessage("Unknown error while processing payment.");
+        frmMain->AppendLog("Unknown payment error.");
+        frmMain->objOrderBuilder->createNewOrder();
+    }
 }
+
 //---------------------------------------------------------------------------
 
 void __fastcall TfrmSales::cmbCustomerSelectChange(TObject *Sender)
