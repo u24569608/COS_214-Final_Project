@@ -318,34 +318,37 @@ The Plant Nursery Simulator models a nursery business end‑to‑end:
 
 ## State - Plant Lifecycle
 
-- Intent and rationale
+### Intent and rationale
   - Encapsulate lifecycle stages and transitions for plants. Keeps per-state behaviour and thresholds modular and extendable.
-- Where implemented
+### Where implemented
   - `include/PlantState.h` (State interface)
   - Concrete states: `include/SeedState.h`, `include/GrowingState.h`, `include/MatureState.h`, `include/WitheringState.h`, `include/DeadState.h` (+ corresponding `src/*.cpp`)
   - Helpers/thresholds: `include/PlantStateUtils.h`, `include/PlantStateThresholds.h`
   - Context: `include/PlantInstance.h`, `src/PlantInstance.cpp` (delegates to state and triggers transitions)
-- Participants
+### Participants
   - State: `PlantState`
   - ConcreteState: `SeedState`, `GrowingState`, `MatureState`, `WitheringState`, `DeadState`
   - Context: `PlantInstance`
-- Key interactions
+### Key interactions
   - Each growth tick `PlantInstance` asks the current `PlantState` to update and possibly transition; `MatureState` communicates market readiness, but `PlantInstance` performs observer notifications.
-- Functional requirements
+### Functional requirements (with code references and tests)
   - FR3: Model lifecycle states and transitions
+    - Code: src/PlantInstance.cpp:142-153 (tick), 100-136 (state replacement)
+    - Tests: tests/plant_state_test.cpp:111,147,186,210,231
   - FR4: Identify market-ready plants for sale
+    - Code: include/PlantState.h:34-40; src/PlantInstance.cpp:163-165
+    - Tests: iterator prioritisation, tests/iterator_test.cpp:62,104
 
-- Why this pattern over alternatives
+### Why this pattern
   - Over large conditional chains: Encapsulating per-state logic (`onTick`, `onWater`, `onFertilize`) reduces branching and isolates thresholds/transitions for maintainability.
   - Over Strategy alone: Strategies handle how to perform care; State determines when and how states change and whether a plant is market-ready.
 
-- Implementation evidence
+### Implementation evidence
   - `PlantState` defines lifecycle hooks; concrete states implement behaviour and transitions. `PlantInstance::setState()` owns state lifetime and centralizes observer notifications when availability changes.
   - `isMarketReady()` is state-specific (true in `MatureState`) and drives sales availability checks.
 
-- FR details
-  - FR3 (States and transitions): On each tick, the current state updates vitals and may transition to a next state. This aligns with `PlantInstance::applyGrowthTick()` deferring to `PlantState::onTick()`.
-  - FR4 (Market readiness): `PlantInstance::isAvailableForSale()` consults `PlantState::isMarketReady()`, linking lifecycle directly to storefront visibility.
+### Why efficient
+  - Constant-time per plant per tick; branching isolated within state objects; transitions only on threshold crossings.
 
 ---
 
