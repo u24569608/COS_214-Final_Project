@@ -100,6 +100,19 @@ Note: File paths point to headers in `include/` and implementations in `src/` wi
   - FR11: Cascade care operations to all plants
   - FR26: Works with Iterator for growth ticks
 
+- Why this pattern over alternatives
+  - Over flat collections: The nursery requires grouping plants into beds and potentially nested beds. Composite allows treating beds and plants uniformly (`performCare()`, `createIterator()`), simplifying client code.
+  - Over inheritance-only hierarchies without composition: Without Composite, propagating actions (care, traversal) across variable-depth structures would require conditionals and special cases in multiple places.
+
+- Implementation evidence
+  - `GreenhouseComponent` declares uniform operations; `GreenhouseBed` owns `children` and delegates `performCare()` to them.
+  - `PlantInstance` is the leaf implementing actual care logic, compatible with Composite and Iterator contracts.
+
+- FR details
+  - FR10 (Organize hierarchy): Beds hold either other beds or plants via owned `unique_ptr<GreenhouseComponent>`, enabling dynamic, memory-safe structures.
+  - FR11 (Cascade care): `GreenhouseBed::performCare()` iterates children and calls `performCare()` recursively, ensuring consistent propagation.
+  - FR26 (Iterator over Composite): The Composite provides the structural backbone that the iterator walks each tick.
+
 ---
 
 ## Facade - Sales
