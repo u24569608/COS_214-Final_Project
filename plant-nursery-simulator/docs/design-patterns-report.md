@@ -195,6 +195,20 @@ Note: File paths point to headers in `include/` and implementations in `src/` wi
   - FR14: Staff and stock observers react to events
   - FR27: Stock item availability mirrors plant readiness
 
+- Why this pattern over alternatives
+  - Over polling: Observers receive timely updates on state changes (care required, availability toggled) without periodic scans over all plants.
+  - Over event buses: A lightweight Subject/Observer pair provides direct, typed notifications suitable for this domain; a generic bus would add complexity without benefit here.
+
+- Implementation evidence
+  - `PlantInstance` inherits `Subject` and calls `notify()` on growth ticks or when `setState()` triggers availability changes.
+  - `StockItem::update()` toggles availability and display status based on `ObserverEvent`.
+  - `Staff::update()` accumulates care reminders when receiving `CareRequired` events.
+
+- FR details
+  - FR13 (Subjects notify): `Subject::~Subject()` also sends `SubjectDestroyed` to enable safe detachment, avoiding dangling pointers during shutdown.
+  - FR14 (Observers react): `Staff` adds reminders and can later schedule commands; `StockItem` updates `isAvailable` and user-facing status strings for storefront consistency.
+  - FR27 (Sync sale readiness): When a plant transitions to a market-ready state, `StockItem` immediately reflects that in `getDisplayStatus()` for the UI.
+
 ---
 
 ## Adapter - Inventory File I/O
