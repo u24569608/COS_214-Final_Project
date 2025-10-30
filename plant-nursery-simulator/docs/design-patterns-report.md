@@ -391,33 +391,36 @@ The Plant Nursery Simulator models a nursery business end‑to‑end:
 
 ## Mediator - Floor Coordination
 
-- Intent and rationale
+### Intent and rationale
   - Centralize communication between colleagues (customers, staff) to avoid tight coupling and complex peer-to-peer links.
-- Where implemented
+### Where implemented
   - `include/FloorMediator.h` (Mediator interface)
   - `include/NurseryMediator.h`, `src/NurseryMediator.cpp` (ConcreteMediator)
   - `include/Colleague.h` (base), `include/Customer.h` (+ `src/Customer.cpp`), `include/Staff.h` (+ `src/Staff.cpp`) (ConcreteColleagues)
-- Participants
+### Participants
   - Mediator: `FloorMediator`
   - ConcreteMediator: `NurseryMediator`
   - Colleague: `Colleague`
   - ConcreteColleagues: `Customer`, `Staff`
-- Key interactions
+### Key interactions
   - Colleagues send messages to the mediator, which distributes to appropriate recipients, keeping colleagues decoupled.
-- Functional requirements
+### Functional requirements (with code references and tests)
   - FR22: Coordinate communication via mediator
+    - Code: src/NurseryMediator.cpp:31-59
+    - Tests: used implicitly via facade/customer interactions
   - FR23: Customers and staff act as colleagues
+    - Code: src/Staff.cpp:90-99; src/Customer.cpp:103-111
+    - Tests: cart sync via sale notify, tests/facade_test.cpp:164
 
-- Why this pattern over alternatives
+### Why this pattern
   - Over direct references between colleagues: Mediator avoids N² coupling and simplifies adding/removing colleagues without rewriting routing logic.
   - Over Observer for chat-like messaging: We require directed messages (with optional recipient); Mediator’s `distribute()` with sender/recipient IDs matches this routing concern.
 
-- Implementation evidence
+### Implementation evidence
   - `NurseryMediator` stores colleagues and routes messages via `distribute()`. `Staff` and `Customer` subclass `Colleague` and use `send()/receive()` to interact.
 
-- FR details
-  - FR22 (Coordinate): The mediator centralizes message routing and enables policies (e.g., broadcast or direct) without colleagues knowing each other.
-  - FR23 (Colleagues): Staff/customers integrate by conforming to the `Colleague` contract, enabling reuse with any `FloorMediator` implementation.
+### Why efficient
+  - O(m) for broadcast across m colleagues; O(1) targeted delivery after a short scan.
 
 ---
 
