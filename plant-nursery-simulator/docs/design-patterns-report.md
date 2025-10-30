@@ -330,6 +330,17 @@ Note: File paths point to headers in `include/` and implementations in `src/` wi
   - FR18: Encapsulate plant care actions as commands
   - FR19: Staff queue and invoke care commands
 
+- Why this pattern over alternatives
+  - Over direct method calls: Command objects let staff queue, schedule, and potentially undo/redo operations, decoupling request from execution time.
+  - Over function pointers/lambdas: Dedicated command classes capture semantics, enable polymorphic queues, and remain serializable/traceable if needed.
+
+- Implementation evidence
+  - `WaterPlant` and `FertilizePlant` extend `PlantCommand` and call receiver methods on `PlantInstance`. `Staff` maintains a queue and processes tasks later.
+
+- FR details
+  - FR18 (Encapsulate actions): Each care action is its own object with a single `handleRequest()` entry point.
+  - FR19 (Queue/invoke): `Staff::addCommandToQueue()` and `processNextTask()` demonstrate delayed execution over a polymorphic queue.
+
 ---
 
 ## Mediator - Floor Coordination
