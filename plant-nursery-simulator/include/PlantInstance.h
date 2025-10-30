@@ -179,6 +179,16 @@ public:
      * @param newName The new name to assign; ignored when empty.
      */
     void rename(const std::string& newName);
+    /**
+     * @brief Provides access to the active watering strategy reference.
+     * @return Borrowed pointer to the current watering strategy, or nullptr when unset.
+     */
+    WaterStrategy* getWaterStrategy() const;
+    /**
+     * @brief Provides access to the active fertilising strategy reference.
+     * @return Borrowed pointer to the current fertilising strategy, or nullptr when unset.
+     */
+    FertilizeStrategy* getFertilizeStrategy() const;
 
 private:
     /**

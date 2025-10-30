@@ -10,17 +10,9 @@
 #pragma resource "*.dfm"
 
 void TfrmGreenhouseInformation::enableDisableCareButtons() {
-	if (rgWaterStrategy->ItemIndex != -1 ) {
-		btnWater->Enabled = true;
-	} else {
-		btnWater->Enabled = false;
+	if (frmMain != nullptr) {
+		frmMain->UpdateCareActionState();
 	}
-
-	if (rgFertiliseStrategy->ItemIndex != -1) {
-		btnFertilise->Enabled = true;
-	} else {
-        btnFertilise->Enabled = false;
-    }
 }
 
 TfrmGreenhouseInformation *frmGreenhouseInformation;

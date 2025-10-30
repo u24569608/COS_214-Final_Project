@@ -9,6 +9,8 @@
 #include <System.SysUtils.hpp>
 #include "Add_Plant.h"
 #include "Add_Item.h"
+#include "../include/WaterPlant.h"
+#include "../include/FertilizePlant.h"
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 #pragma link "Greenhouse_Information_Frame"
@@ -42,6 +44,9 @@ class ConcretePlant : public Plant {
 __fastcall TfrmMain::TfrmMain(TComponent* Owner)
 	: TForm(Owner)
 {
+    currentPlantSelection = nullptr;
+    currentStaffSelection = nullptr;
+
     stratFreqWater = std::make_unique<FrequentWatering>();
     stratSparseWater = std::make_unique<SparseWatering>();
     stratSeasonalWater = std::make_unique<SeasonalWatering>();
@@ -86,6 +91,8 @@ __fastcall TfrmMain::TfrmMain(TComponent* Owner)
 	objInventory->setPlantRegistry(objPrototypeRegistry.get());
 	objInventory->setGreenhouseRoot(objGreenhouse.get());
 
+	objGreenhouseController = std::make_unique<GreenhouseController>(objGreenhouse.get());
+
 	objPaymentProcessor = std::make_unique<PaymentProcessor>();
 
 
@@ -112,8 +119,11 @@ __fastcall TfrmMain::TfrmMain(TComponent* Owner)
 
 	PopulateGreenhouseBedComboBox(objGreenhouse.get());
 
+	AttachGreenhouseFrameHandlers();
+
     WireStaffTaskEvents();
 	RefreshStaffTaskQueue();
+	UpdateCareActionState();
 }
 //---------------------------------------------------------------------------
 void __fastcall TfrmMain::edtMessageBodyChange(TObject *Sender)
@@ -146,6 +156,8 @@ void TfrmMain::PopulateColleagueComboBoxes()
 		cmbSender->Items->Add(idString);
 		cmbReceiver->Items->Add(idString);
 	}
+
+	PopulateStaffMemberComboBox();
 }
 //---------------------------------------------------------------------------
 void __fastcall TfrmMain::btnSendClick(TObject *Sender)
@@ -236,87 +248,79 @@ void TfrmMain::PopulateGreenhouseTree(TTreeNode* parentNode, GreenhouseComponent
 void __fastcall TfrmMain::tvGreenhouseChange(TObject *Sender, TTreeNode *Node)
 {
 	TTreeNode* selectedNode = tvGreenhouse->Selected;
-
-	if (selectedNode != nullptr && selectedNode->Data != nullptr)
-	{
-
+	PlantInstance* plant = nullptr;
+	if (selectedNode != nullptr && selectedNode->Data != nullptr) {
 		GreenhouseComponent* component = static_cast<GreenhouseComponent*>(selectedNode->Data);
-
-		PlantInstance* plant = dynamic_cast<PlantInstance*>(component);
-
-		if (plant != nullptr)
-		{
-
-			frmGreenhouseInformation1->lbledtPlantName->Text = plant->getName().c_str();
-
-
-			const PlantState* currentState = plant->getState();
-			if (currentState != nullptr) {
-				frmGreenhouseInformation1->lbledtPlantState->Text = currentState->getName().c_str();
-			} else {
-				frmGreenhouseInformation1->lbledtPlantState->Text = "Unknown State";
-			}
-
-
-			int health = plant->getHealth();
-			frmGreenhouseInformation1->pbGrowth->Position = health;
-
-
-			frmGreenhouseInformation1->rgWaterStrategy->Enabled = true;
-			frmGreenhouseInformation1->rgFertiliseStrategy->Enabled = true;
-
-			frmGreenhouseInformation1->enableDisableCareButtons();
-
-			return;
-		}
+		plant = dynamic_cast<PlantInstance*>(component);
 	}
-	frmGreenhouseInformation1->lbledtPlantName->Text = "—";
-	frmGreenhouseInformation1->lbledtPlantState->Text = "—";
-	frmGreenhouseInformation1->pbGrowth->Position = 0;
-	frmGreenhouseInformation1->pbWater->Position = 0;
-	frmGreenhouseInformation1->pbNutrients->Position = 0;
-	frmGreenhouseInformation1->rgWaterStrategy->Enabled = false;
-	frmGreenhouseInformation1->rgFertiliseStrategy->Enabled = false;
-	frmGreenhouseInformation1->btnWater->Enabled = false;
-	frmGreenhouseInformation1->btnFertilise->Enabled = false;
+
+	if (plant != nullptr) {
+		currentPlantSelection = plant;
+		LoadPlantDetails(plant);
+	} else {
+		currentPlantSelection = nullptr;
+		ClearPlantDetails();
+	}
+
+	UpdateCareActionState();
 }
+
 //---------------------------------------------------------------------------
 void __fastcall TfrmMain::btnLoadInventoryClick(TObject *Sender)
 {
-	if (dlgOpenLoadInventory->Execute())
-	{
-
-		UnicodeString uFileName = dlgOpenLoadInventory->FileName;
-		UnicodeString uExt = ExtractFileExt(uFileName);
-		std::string filePath = AnsiString(uFileName).c_str();
-
-
-		FileAdapter* adapter = nullptr;
-		if (uExt.LowerCase() == ".csv") {
-			adapter = new CSVAdapter();
-		} else if (uExt.LowerCase() == ".txt") {
-			adapter = new TXTAdapter();
-		}
-
-		if (adapter != nullptr) {
-			try {
-				objInventory->loadFromFile(adapter, filePath);
-
-				RefreshInventoryListView();
-
-                PopulateSalesItemComboBox();
-
-				redtLog->Lines->Add("[" + DateTimeToStr(Now()) + "] Successfully Loaded Inventory from '" + uFileName + "'");
-			}
-			catch (const std::exception &ex) {
-				redtLog->Lines->Add("[" + DateTimeToStr(Now()) + "] Error Loading File: " + String(ex.what()));
-			}
-			delete adapter;
-		} else {
-			redtLog->Lines->Add("[" + DateTimeToStr(Now()) + "] ERROR: Unsupported File Type Selected");
-		}
+	if (!dlgOpenLoadInventory->Execute()) {
+		return;
 	}
+
+	UnicodeString uFileName = dlgOpenLoadInventory->FileName;
+	UnicodeString uExt = ExtractFileExt(uFileName);
+	std::string filePath = AnsiString(uFileName).c_str();
+
+	FileAdapter* adapter = nullptr;
+	if (uExt.LowerCase() == ".csv") {
+		adapter = new CSVAdapter();
+	} else if (uExt.LowerCase() == ".txt") {
+		adapter = new TXTAdapter();
+	}
+
+	if (adapter == nullptr) {
+		redtLog->Lines->Add("[" + DateTimeToStr(Now()) + "] ERROR: Unsupported File Type Selected");
+		return;
+	}
+
+	try {
+		objInventory->loadFromFile(adapter, filePath);
+
+		tvGreenhouse->Items->BeginUpdate();
+		try {
+			tvGreenhouse->Items->Clear();
+			PopulateGreenhouseTree(nullptr, objGreenhouse.get());
+			tvGreenhouse->FullExpand();
+		}
+		__finally {
+			tvGreenhouse->Items->EndUpdate();
+		}
+
+		currentPlantSelection = nullptr;
+		ClearPlantDetails();
+
+		RefreshInventoryListView();
+		PopulateSalesItemComboBox();
+		RefreshStaffTaskQueue();
+		UpdateCareActionState();
+
+		if (objGreenhouseController) {
+			objGreenhouseController->setRootBed(objGreenhouse.get());
+		}
+
+		redtLog->Lines->Add("[" + DateTimeToStr(Now()) + "] Successfully Loaded Inventory from '" + uFileName + "'");
+	}
+	catch (const std::exception &ex) {
+		redtLog->Lines->Add("[" + DateTimeToStr(Now()) + "] Error Loading File: " + String(ex.what()));
+	}
+	delete adapter;
 }
+
 //---------------------------------------------------------------------------
 void TfrmMain::RefreshInventoryListView()
 {
@@ -699,4 +703,316 @@ void __fastcall TfrmMain::lvStaffTaskQueueSelectItem(TObject *Sender, TListItem 
 
 }
 //---------------------------------------------------------------------------
+
+void __fastcall TfrmMain::btnSimulateClick(TObject *Sender)
+{
+	if (!objGreenhouseController) {
+		redtLog->Lines->Add("[" + DateTimeToStr(Now()) + "] WARNING: Greenhouse controller unavailable");
+		return;
+	}
+
+	objGreenhouseController->runGrowthTick();
+	redtLog->Lines->Add("[" + DateTimeToStr(Now()) + "] Simulation: Applied growth tick to all plants");
+
+	if (currentPlantSelection != nullptr) {
+		LoadPlantDetails(currentPlantSelection);
+	}
+
+	RefreshInventoryListView();
+	PopulateSalesItemComboBox();
+	RefreshStaffTaskQueue();
+	UpdateCareActionState();
+}
+//---------------------------------------------------------------------------
+void __fastcall TfrmMain::cmbStaffMemberChange(TObject *Sender)
+{
+	if (!frmGreenhouseInformation1) {
+		return;
+	}
+
+	TComboBox* combo = frmGreenhouseInformation1->cmbStaffMember;
+	currentStaffSelection = ResolveStaffFromCombo(combo->ItemIndex);
+	if (currentStaffSelection == nullptr) {
+		int staffId = 0;
+		if (TryStrToInt(combo->Text, staffId)) {
+			currentStaffSelection = FindStaffById(staffId);
+		}
+	}
+
+	UpdateCareActionState();
+}
+//---------------------------------------------------------------------------
+void __fastcall TfrmMain::btnWaterClick(TObject *Sender)
+{
+	if (!currentPlantSelection || !currentStaffSelection) {
+		ShowMessage("Select a plant and staff member first.");
+		return;
+	}
+
+	PlantCommand* command = new WaterPlant(currentPlantSelection);
+	currentStaffSelection->addCommandToQueue(command);
+
+	UnicodeString logLine = "[" + DateTimeToStr(Now()) + "] Task queued: Water '" +
+		UnicodeString(currentPlantSelection->getName().c_str()) + "' via Staff " +
+		IntToStr(currentStaffSelection->getID());
+	redtLog->Lines->Add(logLine);
+
+	RefreshStaffTaskQueue();
+}
+//---------------------------------------------------------------------------
+void __fastcall TfrmMain::btnFertiliseClick(TObject *Sender)
+{
+	if (!currentPlantSelection || !currentStaffSelection) {
+		ShowMessage("Select a plant and staff member first.");
+		return;
+	}
+
+	PlantCommand* command = new FertilizePlant(currentPlantSelection);
+	currentStaffSelection->addCommandToQueue(command);
+
+	UnicodeString logLine = "[" + DateTimeToStr(Now()) + "] Task queued: Fertilise '" +
+		UnicodeString(currentPlantSelection->getName().c_str()) + "' via Staff " +
+		IntToStr(currentStaffSelection->getID());
+	redtLog->Lines->Add(logLine);
+
+	RefreshStaffTaskQueue();
+}
+//---------------------------------------------------------------------------
+void __fastcall TfrmMain::btnAssignObserveClick(TObject *Sender)
+{
+	if (!currentPlantSelection || !currentStaffSelection) {
+		ShowMessage("Select a plant and staff member first.");
+		return;
+	}
+
+	currentStaffSelection->observePlant(currentPlantSelection);
+
+	UnicodeString logLine = "[" + DateTimeToStr(Now()) + "] Staff " +
+		IntToStr(currentStaffSelection->getID()) + " now observing '" +
+		UnicodeString(currentPlantSelection->getName().c_str()) + "'";
+	redtLog->Lines->Add(logLine);
+
+	UpdateCareActionState();
+}
+//---------------------------------------------------------------------------
+void __fastcall TfrmMain::rgWaterStrategyClick(TObject *Sender)
+{
+	if (!currentPlantSelection) {
+		UpdateCareActionState();
+		return;
+	}
+
+	const int index = frmGreenhouseInformation1->rgWaterStrategy->ItemIndex;
+	WaterStrategy* strategy = WaterStrategyFromIndex(index);
+	if (!strategy) {
+		return;
+	}
+
+	if (currentPlantSelection->getWaterStrategy() == strategy) {
+		return;
+	}
+
+	currentPlantSelection->setWaterStrategy(strategy);
+	UnicodeString logLine = "[" + DateTimeToStr(Now()) + "] Updated watering strategy for '" +
+		UnicodeString(currentPlantSelection->getName().c_str()) + "'";
+	redtLog->Lines->Add(logLine);
+}
+//---------------------------------------------------------------------------
+void __fastcall TfrmMain::rgFertiliseStrategyClick(TObject *Sender)
+{
+	if (!currentPlantSelection) {
+		UpdateCareActionState();
+		return;
+	}
+
+	const int index = frmGreenhouseInformation1->rgFertiliseStrategy->ItemIndex;
+	FertilizeStrategy* strategy = FertilizeStrategyFromIndex(index);
+	if (!strategy) {
+		return;
+	}
+
+	if (currentPlantSelection->getFertilizeStrategy() == strategy) {
+		return;
+	}
+
+	currentPlantSelection->setFertilizeStrategy(strategy);
+	UnicodeString logLine = "[" + DateTimeToStr(Now()) + "] Updated fertilising strategy for '" +
+		UnicodeString(currentPlantSelection->getName().c_str()) + "'";
+	redtLog->Lines->Add(logLine);
+}
+//---------------------------------------------------------------------------
+void TfrmMain::PopulateStaffMemberComboBox()
+{
+	if (!frmGreenhouseInformation1) {
+		return;
+	}
+
+	TComboBox* combo = frmGreenhouseInformation1->cmbStaffMember;
+	combo->Items->BeginUpdate();
+	try {
+		combo->Items->Clear();
+		combo->Text = "Staff Member";
+		combo->ItemIndex = -1;
+
+		for (const auto& colleague : vtrColleagues) {
+			Staff* staff = dynamic_cast<Staff*>(colleague.get());
+			if (!staff) {
+				continue;
+			}
+			UnicodeString idText = IntToStr(staff->getID());
+			combo->Items->AddObject(idText, reinterpret_cast<TObject*>(staff));
+		}
+	}
+	__finally {
+		combo->Items->EndUpdate();
+	}
+
+	currentStaffSelection = nullptr;
+	UpdateCareActionState();
+}
+//---------------------------------------------------------------------------
+void TfrmMain::AttachGreenhouseFrameHandlers()
+{
+	if (!frmGreenhouseInformation1) {
+		return;
+	}
+
+	frmGreenhouseInformation1->btnWater->OnClick = btnWaterClick;
+	frmGreenhouseInformation1->btnFertilise->OnClick = btnFertiliseClick;
+	frmGreenhouseInformation1->cmbStaffMember->OnChange = cmbStaffMemberChange;
+	frmGreenhouseInformation1->rgWaterStrategy->OnClick = rgWaterStrategyClick;
+	frmGreenhouseInformation1->rgFertiliseStrategy->OnClick = rgFertiliseStrategyClick;
+	btnAssignObserve->OnClick = btnAssignObserveClick;
+	btnSimulate->OnClick = btnSimulateClick;
+}
+//---------------------------------------------------------------------------
+void TfrmMain::LoadPlantDetails(PlantInstance* plant)
+{
+	if (!plant || !frmGreenhouseInformation1) {
+		return;
+	}
+
+	frmGreenhouseInformation1->lbledtPlantName->Text = plant->getName().c_str();
+
+	const PlantState* currentState = plant->getState();
+	frmGreenhouseInformation1->lbledtPlantState->Text = currentState ? currentState->getName().c_str() : "Unknown State";
+	frmGreenhouseInformation1->lbledtSaleReadiness->Text = plant->isAvailableForSale() ? "Ready" : "Not Ready";
+	frmGreenhouseInformation1->pbGrowth->Position = plant->getHealth();
+	frmGreenhouseInformation1->pbWater->Position = plant->getWaterLevel();
+	frmGreenhouseInformation1->pbNutrients->Position = plant->getNutrientLevel();
+
+	frmGreenhouseInformation1->rgWaterStrategy->ItemIndex = WaterStrategyIndexFromPointer(plant->getWaterStrategy());
+	frmGreenhouseInformation1->rgFertiliseStrategy->ItemIndex = FertilizeStrategyIndexFromPointer(plant->getFertilizeStrategy());
+	frmGreenhouseInformation1->rgWaterStrategy->Enabled = true;
+	frmGreenhouseInformation1->rgFertiliseStrategy->Enabled = true;
+}
+//---------------------------------------------------------------------------
+void TfrmMain::ClearPlantDetails()
+{
+	if (!frmGreenhouseInformation1) {
+		return;
+	}
+
+	frmGreenhouseInformation1->lbledtPlantName->Text = "-";
+	frmGreenhouseInformation1->lbledtPlantState->Text = "-";
+	frmGreenhouseInformation1->lbledtSaleReadiness->Text = "-";
+	frmGreenhouseInformation1->pbGrowth->Position = 0;
+	frmGreenhouseInformation1->pbWater->Position = 0;
+	frmGreenhouseInformation1->pbNutrients->Position = 0;
+	frmGreenhouseInformation1->rgWaterStrategy->ItemIndex = -1;
+	frmGreenhouseInformation1->rgFertiliseStrategy->ItemIndex = -1;
+	frmGreenhouseInformation1->rgWaterStrategy->Enabled = false;
+	frmGreenhouseInformation1->rgFertiliseStrategy->Enabled = false;
+}
+//---------------------------------------------------------------------------
+void TfrmMain::UpdateCareActionState()
+{
+	if (!frmGreenhouseInformation1) {
+		return;
+	}
+
+	const bool hasPlant = currentPlantSelection != nullptr;
+	const bool hasStaff = currentStaffSelection != nullptr;
+
+	frmGreenhouseInformation1->btnWater->Enabled = hasPlant && hasStaff;
+	frmGreenhouseInformation1->btnFertilise->Enabled = hasPlant && hasStaff;
+	btnAssignObserve->Enabled = hasPlant && hasStaff;
+	frmGreenhouseInformation1->rgWaterStrategy->Enabled = hasPlant;
+	frmGreenhouseInformation1->rgFertiliseStrategy->Enabled = hasPlant;
+}
+//---------------------------------------------------------------------------
+Staff* TfrmMain::ResolveStaffFromCombo(int index) const
+{
+	if (!frmGreenhouseInformation1) {
+		return nullptr;
+	}
+
+	TComboBox* combo = frmGreenhouseInformation1->cmbStaffMember;
+	if (index < 0 || index >= combo->Items->Count) {
+		return nullptr;
+	}
+
+	return reinterpret_cast<Staff*>(combo->Items->Objects[index]);
+}
+//---------------------------------------------------------------------------
+Staff* TfrmMain::FindStaffById(int id) const
+{
+	for (const auto& colleague : vtrColleagues) {
+		Staff* staff = dynamic_cast<Staff*>(colleague.get());
+		if (staff && staff->getID() == id) {
+			return staff;
+		}
+	}
+	return nullptr;
+}
+//---------------------------------------------------------------------------
+WaterStrategy* TfrmMain::WaterStrategyFromIndex(int index) const
+{
+	switch (index) {
+		case 0: return stratFreqWater.get();
+		case 1: return stratSparseWater.get();
+		case 2: return stratSeasonalWater.get();
+		default: return nullptr;
+	}
+}
+//---------------------------------------------------------------------------
+FertilizeStrategy* TfrmMain::FertilizeStrategyFromIndex(int index) const
+{
+	switch (index) {
+		case 0: return stratLiquidFert.get();
+		case 1: return stratOrganicFert.get();
+		case 2: return stratSlowFert.get();
+		default: return nullptr;
+	}
+}
+//---------------------------------------------------------------------------
+int TfrmMain::WaterStrategyIndexFromPointer(WaterStrategy* strategy) const
+{
+	if (dynamic_cast<FrequentWatering*>(strategy) != nullptr) {
+		return 0;
+	}
+	if (dynamic_cast<SparseWatering*>(strategy) != nullptr) {
+		return 1;
+	}
+	if (dynamic_cast<SeasonalWatering*>(strategy) != nullptr) {
+		return 2;
+	}
+	return -1;
+}
+//---------------------------------------------------------------------------
+int TfrmMain::FertilizeStrategyIndexFromPointer(FertilizeStrategy* strategy) const
+{
+	if (dynamic_cast<LiquidFertilizer*>(strategy) != nullptr) {
+		return 0;
+	}
+	if (dynamic_cast<OrganicFertilizer*>(strategy) != nullptr) {
+		return 1;
+	}
+	if (dynamic_cast<SlowReleaseFertilizer*>(strategy) != nullptr) {
+		return 2;
+	}
+	return -1;
+}
+//---------------------------------------------------------------------------
+
 

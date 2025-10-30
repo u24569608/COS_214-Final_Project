@@ -227,6 +227,14 @@ void PlantInstance::rename(const std::string& newName) {
     name = newName;
 }
 
+WaterStrategy* PlantInstance::getWaterStrategy() const {
+    return wStrategy;
+}
+
+FertilizeStrategy* PlantInstance::getFertilizeStrategy() const {
+    return fStrategy;
+}
+
 void PlantInstance::applyWaterStrategy() {
     if (wStrategy) {
         wStrategy->water(*this);

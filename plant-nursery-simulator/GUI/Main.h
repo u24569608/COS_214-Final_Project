@@ -67,6 +67,7 @@
 #include "../include/LiquidFertilizer.h"
 #include "../include/OrganicFertilizer.h"
 #include "../include/SlowReleaseFertilizer.h"
+#include "../include/GreenhouseController.h"
 //---------------------------------------------------------------------------
 class TfrmMain : public TForm
 {
@@ -136,6 +137,7 @@ __published:	// IDE-managed Components
 	TComboBox *cmbGreenhouseSelection;
 	TLabel *Label1;
 	TLabel *Label2;
+	TButton *btnAssignObserve;
 	void __fastcall edtMessageBodyChange(TObject *Sender);
 	void __fastcall FormCreate(TObject *Sender);
 	void __fastcall btnSendClick(TObject *Sender);
@@ -155,6 +157,13 @@ __published:	// IDE-managed Components
 	void __fastcall lbledtPlantPriceChange(TObject *Sender);
 	void __fastcall btnProcessNextTaskClick(TObject *Sender);
 	void __fastcall lvStaffTaskQueueSelectItem(TObject *Sender, TListItem *Item, bool Selected);
+	void __fastcall btnSimulateClick(TObject *Sender);
+	void __fastcall cmbStaffMemberChange(TObject *Sender);
+	void __fastcall btnWaterClick(TObject *Sender);
+	void __fastcall btnFertiliseClick(TObject *Sender);
+	void __fastcall btnAssignObserveClick(TObject *Sender);
+	void __fastcall rgWaterStrategyClick(TObject *Sender);
+	void __fastcall rgFertiliseStrategyClick(TObject *Sender);
 
 
 private:	// User declarations
@@ -181,8 +190,23 @@ private:	// User declarations
 	std::unique_ptr<FertilizeStrategy> stratLiquidFert;
 	std::unique_ptr<FertilizeStrategy> stratOrganicFert;
 	std::unique_ptr<FertilizeStrategy> stratSlowFert;
+	std::unique_ptr<GreenhouseController> objGreenhouseController;
+
+	PlantInstance* currentPlantSelection;
+	Staff* currentStaffSelection;
 
 	void PopulatePrototypeComboBox();
+	void PopulateStaffMemberComboBox();
+	void AttachGreenhouseFrameHandlers();
+	void LoadPlantDetails(PlantInstance* plant);
+	void ClearPlantDetails();
+	void UpdateCareActionState();
+	Staff* ResolveStaffFromCombo(int index) const;
+	Staff* FindStaffById(int id) const;
+	WaterStrategy* WaterStrategyFromIndex(int index) const;
+	FertilizeStrategy* FertilizeStrategyFromIndex(int index) const;
+	int WaterStrategyIndexFromPointer(WaterStrategy* strategy) const;
+	int FertilizeStrategyIndexFromPointer(FertilizeStrategy* strategy) const;
 
     // New
     void RefreshStaffTaskQueue();

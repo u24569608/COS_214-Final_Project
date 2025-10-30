@@ -11,6 +11,7 @@
 #include "../include/PlantPrototypeRegistry.h"
 #include "../include/PlantInstance.h"
 #include "../include/PlantState.h"
+#include "../include/Plant.h"
 #include "../include/SeedState.h"
 #include "../include/GrowingState.h"
 #include "../include/MatureState.h"
@@ -48,6 +49,33 @@ double parsePrice(const std::string& raw, size_t lineNumber, const std::string& 
                   << lineNumber << " of " << filePath << ". Defaulting to 0.\n";
         return 0.0;
     }
+}
+
+class ImportedPlantPrototype : public Plant {
+public:
+	explicit ImportedPlantPrototype(const std::string& plantName) {
+		setName(plantName);
+		setType("Imported");
+	}
+
+	ImportedPlantPrototype(const ImportedPlantPrototype& other) : Plant() {
+		setName(other.getName());
+		setType(other.getType());
+		setDefaultWaterStrat(other.getDefaultWaterStrat());
+		setDefaultFertStrat(other.getDefaultFertStrat());
+	}
+
+	Plant* clone() const override {
+		return new ImportedPlantPrototype(*this);
+	}
+};
+
+void ensurePrototypeExists(PlantPrototypeRegistry* registry, const std::string& plantName) {
+	if (!registry || plantName.empty() || registry->hasPrototype(plantName)) {
+		return;
+	}
+
+	registry->addPrototype(plantName, std::make_unique<ImportedPlantPrototype>(plantName));
 }
 
 } // namespace
@@ -97,11 +125,12 @@ void CSVAdapter::loadInventory(std::string filePath, Inventory* inventory) {
             const double price = parsePrice(row[2], i + 1, filePath);
             const std::string& stateLabel = row[3];
 
-            bool treatAsPlant = true;
             PlantPrototypeRegistry* registry = inventory->getPlantRegistry();
-            if (registry != nullptr && !registry->hasPrototype(name)) {
-                treatAsPlant = false;
+            if (registry != nullptr) {
+                ensurePrototypeExists(registry, name);
             }
+
+            const bool treatAsPlant = registry != nullptr && registry->hasPrototype(name);
             if (treatAsPlant) {
                 inventory->registerPlantType(name);
             }
