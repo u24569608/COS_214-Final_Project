@@ -619,7 +619,7 @@ object frmMain: TfrmMain
               StyleElements = [seClient, seBorder]
             end
             object Label2: TLabel
-              Left = 441
+              Left = 431
               Top = 43
               Width = 141
               Height = 21
@@ -633,11 +633,12 @@ object frmMain: TfrmMain
               StyleElements = [seClient, seBorder]
             end
             object btnClonePlant: TButton
-              Left = 227
-              Top = 180
+              Left = 696
+              Top = 116
               Width = 120
               Height = 28
               Caption = 'Plant'
+              Enabled = False
               ImageIndex = 15
               ImageName = 'Plant'
               Images = vrtlmglstMain
@@ -651,6 +652,7 @@ object frmMain: TfrmMain
               Height = 29
               TabOrder = 1
               Text = 'Plant'
+              OnChange = cmbPrototypesChange
             end
             object btnAddPlantToRegistry: TButton
               Left = 25
@@ -665,23 +667,27 @@ object frmMain: TfrmMain
               OnClick = btnAddPlantToRegistryClick
             end
             object lbledtPlantPrice: TLabeledEdit
-              Left = 227
-              Top = 134
+              Left = 636
+              Top = 71
               Width = 180
               Height = 29
               EditLabel.Width = 60
               EditLabel.Height = 21
               EditLabel.Caption = 'Set Price'
+              Enabled = False
               TabOrder = 3
               Text = ''
+              OnChange = lbledtPlantPriceChange
             end
             object cmbGreenhouseSelection: TComboBox
-              Left = 441
+              Left = 431
               Top = 71
               Width = 180
               Height = 29
+              Enabled = False
               TabOrder = 4
               Text = 'Greenhouse'
+              OnChange = cmbGreenhouseSelectionChange
             end
           end
         end

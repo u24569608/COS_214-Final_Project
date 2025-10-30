@@ -95,18 +95,18 @@ __fastcall TfrmMain::TfrmMain(TComponent* Owner)
 	// Create a bed (using raw pointer for add() method)
 	GreenhouseBed* roseBedPtr = new GreenhouseBed("Rose Bed");
 
-	// Create plant instances BY CLONING from the registry
+	/*// Create plant instances BY CLONING from the registry
 	Plant* roseClone1 = objPrototypeRegistry->createPlant("Rose", "");
 	if (roseClone1) {
 		roseBedPtr->add(new PlantInstance(roseClone1, "Rose 1"));
 		delete roseClone1;
 	}
 
-    Plant* roseClone2 = objPrototypeRegistry->createPlant("Rose", "");
+	Plant* roseClone2 = objPrototypeRegistry->createPlant("Rose", "");
     if (roseClone2) {
         roseBedPtr->add(new PlantInstance(roseClone2, "Rose 2"));
 		delete roseClone2;
-    }
+    }     */
 
 	// Add the bed (with plants) to the main greenhouse
 	objGreenhouse->add(roseBedPtr);
@@ -640,37 +640,22 @@ void TfrmMain::PopulatePrototypeComboBox()
 {
     // Go to the "System Admin" tab's combobox
     cmbPrototypes->Clear(); //
-
-    // ASSUMPTION: PlantPrototypeRegistry has getPrototypeNames()
-    // If not, we need to get the map and iterate keys.
-    // Let's assume getPrototypeNames() exists:
-    // std::vector<std::string> names = objPrototypeRegistry->getPrototypeNames();
-    // for (const std::string& name : names)
-    // {
-    //     cmbPrototypes->Items->Add(name.c_str());
-    // }
-
-    // --- More robust way without assuming getPrototypeNames ---
-    // This is safer if only addPrototype/createPlant exist
-    // We'll just re-add the ones we know about.
-    // NOTE: This will not show prototypes loaded from file, etc.
-    // This part needs to be updated if registry logic is complex.
-    // For now, let's just add the ones we created in the constructor:
+    cmbPrototypes->Text = "Plant";
     cmbPrototypes->Items->Add("Rose");
-    cmbPrototypes->Items->Add("Fern");
-    cmbPrototypes->Items->Add("Spruce");
-    // (New prototypes will be added by the "Add" button click)
+	cmbPrototypes->Items->Add("Fern");
+	cmbPrototypes->Items->Add("Spruce");
 
 
-    if (cmbPrototypes->Items->Count > 0) {
+
+	/* if (cmbPrototypes->Items->Count > 0) {
         cmbPrototypes->ItemIndex = 0;
     } else {
         cmbPrototypes->Text = "No Prototypes Registered";
-    }
+    }       */
 }
 void __fastcall TfrmMain::btnClonePlantClick(TObject *Sender)
 {
-// 1. VALIDATE PROTOTYPE SELECTION
+	// 1. VALIDATE PROTOTYPE SELECTION
 	std::string prototypeName = AnsiString(cmbPrototypes->Text).c_str();
 	if (cmbPrototypes->ItemIndex == -1 || prototypeName.empty() || cmbPrototypes->Text == "No Prototypes Registered") {
 		ShowMessage("Please select a plant prototype to clone.");
@@ -678,20 +663,19 @@ void __fastcall TfrmMain::btnClonePlantClick(TObject *Sender)
 		return;
 	}
 
-	// 2. *** VALIDATE GREENHOUSE BED SELECTION (THE FIX) ***
+	// 2. VALIDATE GREENHOUSE BED SELECTION
 	if (cmbGreenhouseSelection->ItemIndex == -1 || cmbGreenhouseSelection->Text == "Select a Bed...") {
 		ShowMessage("Please select a greenhouse bed from the dropdown.");
 		cmbGreenhouseSelection->SetFocus();
 		return;
 	}
 
-	// Get the GreenhouseBed* pointer from the ComboBox's Objects property
+	// Get the GreenhouseBed* pointer from the ComboBox
 	GreenhouseBed* bed = reinterpret_cast<GreenhouseBed*>(cmbGreenhouseSelection->Items->Objects[cmbGreenhouseSelection->ItemIndex]);
 	if (bed == nullptr) {
 		ShowMessage("An error occurred. The selected bed is invalid.");
 		return;
 	}
-	// --- (End of validation fix) ---
 
 	// 3. VALIDATE PRICE
 	double itemPrice = 0.0;
@@ -715,6 +699,8 @@ void __fastcall TfrmMain::btnClonePlantClick(TObject *Sender)
 		// 4. CLONE THE PROTOTYPE (Prototype Pattern - FR2)
 		Plant* prototypeClone = objPrototypeRegistry->createPlant(prototypeName, ""); //
 		if (!prototypeClone) {
+			// *** THIS IS THE FIX ***
+			// Start the expression with a UnicodeString object
 			ShowMessage(UnicodeString("Error: Could not clone prototype '") + prototypeName.c_str() + "'.");
 			return;
 		}
@@ -745,6 +731,8 @@ void __fastcall TfrmMain::btnClonePlantClick(TObject *Sender)
 		PopulateSalesItemComboBox();  // Refresh sales dropdown
 
 		// 9. Log and clear price
+		// *** THIS IS THE SECOND FIX (for safety) ***
+		// Start with a UnicodeString to ensure '+' works correctly.
 		redtLog->Lines->Add(UnicodeString("[") + DateTimeToStr(Now()) + "] New plant '" + newStockItemName.c_str() + "' created and added to inventory.");
 		lbledtPlantPrice->Text = "";
 	}
@@ -781,3 +769,21 @@ void TfrmMain::PopulateGreenhouseBedComboBox(GreenhouseComponent* component, con
 	}
 	// If it's a PlantInstance, we do nothing.
 }
+void __fastcall TfrmMain::cmbPrototypesChange(TObject *Sender)
+{
+    cmbGreenhouseSelection->Enabled = true;
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TfrmMain::cmbGreenhouseSelectionChange(TObject *Sender)
+{
+    lbledtPlantPrice->Enabled = true;
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TfrmMain::lbledtPlantPriceChange(TObject *Sender)
+{
+    btnClonePlant->Enabled = true;
+}
+//---------------------------------------------------------------------------
+

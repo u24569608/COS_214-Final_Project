@@ -150,6 +150,9 @@ __published:	// IDE-managed Components
 	void __fastcall btnAddPlantToRegistryClick(TObject *Sender);
 	void __fastcall btnAddItemClick(TObject *Sender);
 	void __fastcall btnClonePlantClick(TObject *Sender);
+	void __fastcall cmbPrototypesChange(TObject *Sender);
+	void __fastcall cmbGreenhouseSelectionChange(TObject *Sender);
+	void __fastcall lbledtPlantPriceChange(TObject *Sender);
 
 private:	// User declarations
 	// --- Mediator Pattern ---
