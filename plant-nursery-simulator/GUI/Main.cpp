@@ -143,7 +143,10 @@ __fastcall TfrmMain::TfrmMain(TComponent* Owner)
 	// Populate the item selection combobox on the Sales Frame
 	PopulateSalesItemComboBox();
 
-    PopulateGreenhouseBedComboBox(objGreenhouse.get());
+	PopulateGreenhouseBedComboBox(objGreenhouse.get());
+
+    WireStaffTaskEvents();
+	RefreshStaffTaskQueue();
 }
 //---------------------------------------------------------------------------
 
@@ -740,6 +743,86 @@ void __fastcall TfrmMain::cmbGreenhouseSelectionChange(TObject *Sender)
 void __fastcall TfrmMain::lbledtPlantPriceChange(TObject *Sender)
 {
     btnClonePlant->Enabled = true;
+}
+//---------------------------------------------------------------------------
+// NEW
+void TfrmMain::WireStaffTaskEvents()
+{
+    lvStaffTaskQueue->ViewStyle = vsReport;
+    lvStaffTaskQueue->ReadOnly = true;
+    lvStaffTaskQueue->RowSelect = true;
+    lvStaffTaskQueue->HideSelection = false;
+
+    if (lvStaffTaskQueue->Columns->Count == 0) {
+        TListColumn* c1 = lvStaffTaskQueue->Columns->Add(); c1->Caption = "Staff ID";       c1->Width = 100;
+        TListColumn* c2 = lvStaffTaskQueue->Columns->Add(); c2->Caption = "Pending Tasks";  c2->Width = 120;
+		TListColumn* c3 = lvStaffTaskQueue->Columns->Add(); c3->Caption = "Reminders";      c3->Width = 100;
+	}
+
+    btnProcessNextTask->OnClick = btnProcessNextTaskClick;
+}
+
+void TfrmMain::RefreshStaffTaskQueue()
+{
+    lvStaffTaskQueue->Items->BeginUpdate();
+    try {
+		lvStaffTaskQueue->Items->Clear();
+
+        for (const auto& col : vtrColleagues) {
+            auto* staff = dynamic_cast<Staff*>(col.get());
+            if (!staff) continue;
+
+            TListItem* item = lvStaffTaskQueue->Items->Add();
+			item->Caption = IntToStr(staff->getID());
+			item->SubItems->Add(IntToStr(staff->getTaskQueueSize()));
+			item->SubItems->Add(IntToStr(staff->getCareReminderCount()));
+
+
+            item->Data = staff;
+        }
+    }
+    __finally {
+        lvStaffTaskQueue->Items->EndUpdate();
+    }
+}
+void __fastcall TfrmMain::btnProcessNextTaskClick(TObject *Sender)
+{
+    if (!lvStaffTaskQueue->Selected) {
+        ShowMessage("Select a staff row first.");
+        return;
+    }
+
+    auto* selected = lvStaffTaskQueue->Selected;
+    auto* staff = reinterpret_cast<Staff*>(selected->Data);
+    if (!staff) {
+        ShowMessage("Invalid staff selection.");
+        return;
+    }
+
+	if (staff->getTaskQueueSize() <= 0) {
+        ShowMessage("No tasks in this staff member's queue.");
+        return;
+    }
+
+
+	staff->processNextTask();
+
+	redtLog->Lines->Add("[" + DateTimeToStr(Now()) + "] Staff " + selected->Caption +
+						" processed one task.");
+
+    RefreshStaffTaskQueue();
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TfrmMain::lvStaffTaskQueueSelectItem(TObject *Sender, TListItem *Item,
+          bool Selected)
+{
+	if (lvStaffTaskQueue->ItemIndex != -1) {
+		btnProcessNextTask->Enabled = true;
+	} else {
+        btnProcessNextTask->Enabled = false;
+    }
+
 }
 //---------------------------------------------------------------------------
 

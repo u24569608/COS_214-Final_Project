@@ -153,6 +153,9 @@ __published:	// IDE-managed Components
 	void __fastcall cmbPrototypesChange(TObject *Sender);
 	void __fastcall cmbGreenhouseSelectionChange(TObject *Sender);
 	void __fastcall lbledtPlantPriceChange(TObject *Sender);
+	void __fastcall btnProcessNextTaskClick(TObject *Sender);
+	void __fastcall lvStaffTaskQueueSelectItem(TObject *Sender, TListItem *Item, bool Selected);
+
 
 private:	// User declarations
 	// --- Mediator Pattern ---
@@ -179,8 +182,11 @@ private:	// User declarations
 	std::unique_ptr<FertilizeStrategy> stratOrganicFert;
 	std::unique_ptr<FertilizeStrategy> stratSlowFert;
 
-    void PopulatePrototypeComboBox();
+	void PopulatePrototypeComboBox();
 
+    // New
+    void RefreshStaffTaskQueue();
+	void WireStaffTaskEvents();
 
 public:		// User declarations
 	__fastcall TfrmMain(TComponent* Owner);

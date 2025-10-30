@@ -914,8 +914,21 @@ object frmMain: TfrmMain
             Height = 178
             Align = alBottom
             Anchors = [akLeft, akTop, akRight, akBottom]
-            Columns = <>
+            Columns = <
+              item
+                Caption = 'Staff ID'
+                MinWidth = 200
+              end
+              item
+                Caption = 'Pending Tasks'
+                MinWidth = 200
+              end
+              item
+                Caption = 'Reminders'
+                MinWidth = 200
+              end>
             TabOrder = 0
+            OnSelectItem = lvStaffTaskQueueSelectItem
             ExplicitHeight = 159
           end
           object btnProcessNextTask: TBitBtn
@@ -925,10 +938,12 @@ object frmMain: TfrmMain
             Height = 28
             Anchors = [akTop, akRight]
             Caption = 'Process Next Task'
+            Enabled = False
             ImageIndex = 19
             ImageName = 'Next'
             Images = vrtlmglstMain
             TabOrder = 1
+            OnClick = btnProcessNextTaskClick
           end
         end
       end
