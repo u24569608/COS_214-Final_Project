@@ -9,11 +9,18 @@ class PlantInstance;
  */
 class FertilizeStrategy {
 public:
+    /**
+     * @brief Ensures derived strategies clean up correctly.
+     */
     virtual ~FertilizeStrategy();
     /**
      * @brief Abstract method to execute the fertilizing strategy.
      */
     virtual void fertilize(PlantInstance& plant) const = 0;
+    /**
+     * @brief Creates a deep copy of the concrete strategy.
+     * @return Newly allocated strategy instance.
+     */
     virtual FertilizeStrategy* clone() const = 0;
 };
 

@@ -12,6 +12,9 @@ class Inventory;
  */
 class FileAdapter {
 public:
+    /**
+     * @brief Guarantees derived adapters release resources correctly.
+     */
     virtual ~FileAdapter();
     /**
      * @brief Loads plant data from a file into inventory.
@@ -20,10 +23,10 @@ public:
      */
     virtual void loadInventory(std::string filePath, Inventory* inventory) = 0;
 
-       /**
-     * @brief saves plant data from a inventory into file.
-     * @param filePath The path to the data file.
-     * @param inventory A pointer to the inventory to populate.
+    /**
+     * @brief Saves plant data from the inventory into storage.
+     * @param filePath Destination data file path.
+     * @param inventory Pointer to the inventory supplying data.
      */
     virtual void saveInventory(std::string filePath, Inventory* inventory) = 0;
 };

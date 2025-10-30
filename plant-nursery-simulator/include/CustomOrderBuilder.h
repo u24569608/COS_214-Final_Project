@@ -10,8 +10,15 @@
  */
 class CustomOrderBuilder : public OrderBuilder {
 public:
+    /**
+     * @brief Instantiates a builder that accumulates bespoke order line items.
+     */
     CustomOrderBuilder();
-    
+
+    /**
+     * @brief Appends a stock item to the order currently being constructed.
+     * @param item Pointer to the stock item being requested.
+     */
     void addItem(StockItem* item);
 };
 

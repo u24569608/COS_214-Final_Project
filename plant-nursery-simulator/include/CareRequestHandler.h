@@ -15,8 +15,17 @@ public:
     CareRequestHandler();
     virtual ~CareRequestHandler();
 
+    /**
+     * @brief Links the next handler in the chain to allow request delegation.
+     * @param h Pointer to the handler that should process requests this handler skips.
+     */
     void setNext(CareRequestHandler* h);
 
+    /**
+     * @brief Passes the request through the chain, letting capable handlers react.
+     * @param plant The plant instance requiring care.
+     * @param requestType Identifier describing the request to fulfil.
+     */
     virtual void handleRequest(PlantInstance* plant, std::string requestType);
     
     /**

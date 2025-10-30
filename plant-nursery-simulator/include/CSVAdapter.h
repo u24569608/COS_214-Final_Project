@@ -15,10 +15,24 @@ class CSVReaderWriter;
  */
 class CSVAdapter : public FileAdapter {
 public:
+    /**
+     * @brief Creates a CSV-backed file adapter with its own reader/writer utility.
+     */
     CSVAdapter();
     ~CSVAdapter() override = default;
 
+    /**
+     * @brief Populates the inventory state from a comma-separated file.
+     * @param filePath Path to the CSV file to open.
+     * @param inventory Target inventory instance to hydrate.
+     */
     void loadInventory(std::string filePath, Inventory* inventory) override;
+
+    /**
+     * @brief Serialises the inventory contents to a CSV file.
+     * @param filePath Destination file path.
+     * @param inventory Inventory instance whose state should be exported.
+     */
     void saveInventory(std::string filePath, Inventory* inventory) override;
 
 private:
