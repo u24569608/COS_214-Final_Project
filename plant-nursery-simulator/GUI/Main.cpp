@@ -1384,6 +1384,9 @@ void TfrmMain::DetachObserverFromAllPlants()
 	std::vector<PlantInstance*> plants(loggedPlants.begin(), loggedPlants.end());
 	for (PlantInstance* plant : plants) {
 		if (plant != nullptr) {
+			if (objInventory && !objInventory->isManagingPlant(plant)) {
+				continue;
+			}
 			plant->detach(plantLogObserver.get());
 		}
 	}
@@ -1438,6 +1441,9 @@ void TfrmMain::AttachLoggerToAllPlants()
 
 	for (GreenhouseComponent* component = iterator->first(); component != nullptr; component = iterator->next()) {
 		if (auto* instance = dynamic_cast<PlantInstance*>(component)) {
+			if (objInventory && !objInventory->isManagingPlant(instance)) {
+				continue;
+			}
 			AttachObserverToPlant(instance);
 			UnicodeString label = BuildPlantLabel(instance);
 			if (!label.IsEmpty()) {
@@ -1825,3 +1831,4 @@ int TfrmMain::FertilizeStrategyIndexFromPointer(FertilizeStrategy* strategy) con
 	return -1;
 }
 //---------------------------------------------------------------------------
+
