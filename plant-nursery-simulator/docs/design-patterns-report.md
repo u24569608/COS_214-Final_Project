@@ -1,7 +1,5 @@
 # Design Patterns Report
 
-Team: COS214 - The Tormentos
-
 This report documents every design pattern identified and used in the Plant Nursery Simulator. For each pattern we explain the intent and rationale (why we chose it), identify the concrete implementation in this codebase (where it is), list the participants, outline key interactions, and map the pattern to the functional requirements (FRs) in `plant-nursery-simulator/docs/Functional_and_non-functional_requirements.md`.
 
 See also: `plant-nursery-simulator/docs/GUI Requirements.md` for UI-focused items that the Facade and Iterator patterns help enable.
@@ -24,8 +22,9 @@ The Plant Nursery Simulator models a nursery business end‑to‑end:
 
 ## Iterator - Inventory
 
-### Intent and rationale
+![Iterator - Inventory](diagrams/ClassDiagram/DPClassDiagrams/IteratorInventory.png)
 
+### Intent and rationale
  - Provide a uniform way to traverse inventory items without exposing the underlying container. Supports browsing and sales workflows cleanly and testably while enforcing domain order.
 ### Where implemented
   - `include/InventoryCollection.h` (Aggregate interface)
@@ -63,6 +62,8 @@ The Plant Nursery Simulator models a nursery business end‑to‑end:
 ---
 
 ## Iterator - Greenhouse
+
+![Iterator - Greenhouse](diagrams/ClassDiagram/DPClassDiagrams/IteratorGreenhouse.png)
 
 ### Intent and rationale
   - Traverse all plants within a hierarchical greenhouse (Composite) without coupling traversal logic to the structure. Enables controller-driven growth ticks and batch care.
@@ -102,6 +103,8 @@ The Plant Nursery Simulator models a nursery business end‑to‑end:
 
 ## Composite - Greenhouse Structure
 
+![Composite - Greenhouse Structure](diagrams/ClassDiagram/DPClassDiagrams/CompositeGreenhouse.png)
+
 ### Intent and rationale
   - Represent part–whole hierarchies (beds composed of beds and plants) and enable uniform treatment of leaves and composites. Simplifies applying operations (care, tick, display) to entire structures.
 ### Where implemented
@@ -140,6 +143,8 @@ The Plant Nursery Simulator models a nursery business end‑to‑end:
 
 ## Facade - Sales
 
+![Facade - Sales](diagrams/ClassDiagram/DPClassDiagrams/FacadeSales.png)
+
 ### Intent and rationale
   - Provide a single entry point for sales operations, decoupling UI/client code from inventory, payments, and order-building complexity.
 ### Where implemented
@@ -161,7 +166,7 @@ The Plant Nursery Simulator models a nursery business end‑to‑end:
 
 ### Why this pattern
   - Over Service Locator or direct subsystem calls: Facade narrows and stabilizes the API the GUI/tests use, while dependencies (`Inventory`, `PaymentProcessor`, builders) remain swappable and independently testable.
-  - Over turning `SalesFacade` into a God object: Facade keeps orchestration only; business rules live in subsystems, preventing bloat and maintaining separation of concerns.
+  - Over turning `SalesFacade` into a "master" object: Facade keeps orchestration only; business rules live in subsystems, preventing bloat and maintaining separation of concerns.
 
 ### Implementation evidence
   - `SalesFacade` accepts subsystem pointers and coordinates operations like `purchaseItem`, `addItemToCart`, `buildAndFinalizeOrder`, `checkStock`, and `addItemToInventory`.
@@ -173,6 +178,8 @@ The Plant Nursery Simulator models a nursery business end‑to‑end:
 ---
 
 ## Builder - Orders
+
+![Builder - Orders](diagrams/ClassDiagram/DPClassDiagrams/BuilderOrder.png)
 
 ### Intent and rationale
   - Construct complex `Order` objects step-by-step and support different compositions/presets via a director. Keeps `Order` immutable in shape while flexible in content.
@@ -210,6 +217,8 @@ The Plant Nursery Simulator models a nursery business end‑to‑end:
 
 ## Observer - Plants, Staff, and Stock Items
 
+![Observer - Plants, Staff, and Stock Items](diagrams/ClassDiagram/DPClassDiagrams/ObserverPlant.png)
+
 ### Intent and rationale
   - Decouple plant lifecycle events from dependent behaviours such as staff reminders and store display availability. Supports many observers without tight coupling.
 ### Where implemented
@@ -218,7 +227,8 @@ The Plant Nursery Simulator models a nursery business end‑to‑end:
   - Observers: `include/Staff.h`, `src/Staff.cpp`; `include/StockItem.h`, `src/StockItem.cpp`
   - Subject: `include/PlantInstance.h`, `src/PlantInstance.cpp` (publishes events on tick/state change)
 ### Participants
-  - Subject: `PlantInstance`
+  - Subject: `Subject`
+  - ConcreteSubject: `PlantInstance`
   - Observer: `Observer`
   - ConcreteObserver: `Staff`, `StockItem`
 ### Key interactions
@@ -233,6 +243,9 @@ The Plant Nursery Simulator models a nursery business end‑to‑end:
   - FR27: Stock item availability mirrors plant readiness
     - Code: src/PlantInstance.cpp:163-165; src/StockItem.cpp:149-155
     - Tests: prioritised iterator order implies readiness, tests/iterator_test.cpp:62,104
+
+### Model used: Push Model
+  - `PlantInstance::setState()` and `PlantInstance::applyGrowthTick()` build an `ObserverEvent` that already contains the message copy and optional availability flag before calling `Subject::notify()` (`src/PlantInstance.cpp:121-153,267-276`; `src/Subject.cpp:38-45`). Observers such as `StockItem::update()` and `Staff::update()` consume that payload directly, so they do not need to call back into the subject for additional context (`src/StockItem.cpp:110-136`; `src/Staff.cpp:48-88`). This keeps coupling low while ensuring each notification delivers exactly the state the UI and reminder queues require.
 
 ### Why this pattern
   - Over polling: Observers receive timely updates on state changes (care required, availability toggled) without periodic scans over all plants.
@@ -249,6 +262,8 @@ The Plant Nursery Simulator models a nursery business end‑to‑end:
 ---
 
 ## Adapter - Inventory File I/O
+
+![Adapter - Inventory File I/O](diagrams/ClassDiagram/DPClassDiagrams/AdapterIO.png)
 
 ### Intent and rationale
   - Isolate inventory logic from specific storage formats. Enable pluggable readers/writers (CSV, TXT) without changing inventory code.
@@ -291,6 +306,8 @@ The Plant Nursery Simulator models a nursery business end‑to‑end:
 
 ## Prototype (Data‑Driven) - Plants and Registry
 
+![Prototype - Plants and Registry](diagrams/ClassDiagram/DPClassDiagrams/PrototypePlant.png)
+
 ### Intent and rationale
   - Support data-driven creation of plant objects by cloning registered prototypes. Allows new plant types without changing creator code.
 ### Where implemented
@@ -324,6 +341,8 @@ The Plant Nursery Simulator models a nursery business end‑to‑end:
 ---
 
 ## State - Plant Lifecycle
+
+![State - Plant Lifecycle](diagrams/ClassDiagram/DPClassDiagrams/StatePlant.png)
 
 ### Intent and rationale
   - Encapsulate lifecycle stages and transitions for plants. Keeps per-state behaviour and thresholds modular and extendable.
@@ -360,6 +379,8 @@ The Plant Nursery Simulator models a nursery business end‑to‑end:
 ---
 
 ## Command - Plant Care Tasks
+
+![Command - Plant Care Tasks](diagrams/ClassDiagram/DPClassDiagrams/CommandPlantCare.png)
 
 ### Intent and rationale
   - Encapsulate care actions (water, fertilize) as command objects queued by staff. Enables scheduling, undo/redo extensions, and testing.
@@ -398,6 +419,8 @@ The Plant Nursery Simulator models a nursery business end‑to‑end:
 
 ## Mediator - Floor Coordination
 
+![Mediator - Floor Coordination](diagrams/ClassDiagram/DPClassDiagrams/MediatorFloor.png)
+
 ### Intent and rationale
   - Centralize communication between colleagues (customers, staff) to avoid tight coupling and complex peer-to-peer links.
 ### Where implemented
@@ -433,6 +456,8 @@ The Plant Nursery Simulator models a nursery business end‑to‑end:
 
 ## Chain of Responsibility - Care Routing
 
+![Chain of Responsibility - Care Routing](diagrams/ClassDiagram/DPClassDiagrams/CORHandlers.png)
+
 ### Intent and rationale
   - Route care requests through a chain of handlers so each handler either processes or delegates. Makes it easy to add new care types.
 ### Where implemented
@@ -467,6 +492,8 @@ The Plant Nursery Simulator models a nursery business end‑to‑end:
 ---
 
 ## Strategy (+ Prototype) - Watering and Fertilizing
+
+![Strategy - Watering and Fertilizing](diagrams/ClassDiagram/DPClassDiagrams/StrategyPrototypePlant.png)
 
 ### Intent and rationale
   - Vary watering and fertilizing algorithms independently of `PlantInstance` and swap them at runtime. We additionally prototype strategies to clone preconfigured policies when needed.
@@ -518,7 +545,7 @@ The Plant Nursery Simulator models a nursery business end‑to‑end:
 
 ---
 
-## Pattern-to-Requirement Traceability Summary
+## Pattern-to-Requirement Summary
 
 - Prototype (Plants): FR1, FR2
 - State (Lifecycle): FR3, FR4
