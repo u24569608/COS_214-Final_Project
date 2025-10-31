@@ -281,6 +281,35 @@ void TfrmMain::PopulateGreenhouseTree(TTreeNode* parentNode, GreenhouseComponent
 	}
 }
 //---------------------------------------------------------------------------
+void TfrmMain::ResetGreenhouseStructure()
+{
+	if (cmbGreenhouseSelection) {
+		cmbGreenhouseSelection->Items->BeginUpdate();
+		try {
+			cmbGreenhouseSelection->Items->Clear();
+		}
+		__finally {
+			cmbGreenhouseSelection->Items->EndUpdate();
+		}
+		cmbGreenhouseSelection->Text = "Greenhouse";
+		cmbGreenhouseSelection->ItemIndex = -1;
+
+		if (objGreenhouse) {
+			PopulateGreenhouseBedComboBox(objGreenhouse.get());
+		}
+	}
+
+	if (tvGreenhouse) {
+		tvGreenhouse->Items->BeginUpdate();
+		try {
+			tvGreenhouse->Items->Clear();
+		}
+		__finally {
+			tvGreenhouse->Items->EndUpdate();
+		}
+	}
+}
+//---------------------------------------------------------------------------
 void __fastcall TfrmMain::tvGreenhouseChange(TObject *Sender, TTreeNode *Node)
 {
 	try {
@@ -350,16 +379,52 @@ void __fastcall TfrmMain::btnLoadInventoryClick(TObject *Sender)
 		}
 
 		DetachObserverFromAllPlants();
-
-		tvGreenhouse->Items->BeginUpdate();
-		try {
-			tvGreenhouse->Items->Clear();
+		// Ensure staff detach from existing plants before greenhouse objects are replaced.
+		AppendLog("Resetting staff assignments for incoming inventory load.");
+		ResetStaffLoggers();
+		for (const auto& colleague : vtrColleagues) {
+			if (auto* staff = dynamic_cast<Staff*>(colleague.get())) {
+				staff->resetAssignments();
+			}
 		}
-		__finally {
-			tvGreenhouse->Items->EndUpdate();
+		RefreshStaffTaskQueue();
+
+		auto newGreenhouse = std::make_unique<GreenhouseBed>("Main Greenhouse");
+		newGreenhouse->add(new GreenhouseBed("Empty Bed"));
+
+		auto newInventory = std::make_unique<Inventory>();
+		newInventory->setPlantRegistry(objPrototypeRegistry.get());
+		newInventory->setGreenhouseRoot(newGreenhouse.get());
+
+		newInventory->loadFromFile(adapter.get(), filePath);
+
+		auto newSalesFacade = std::make_unique<SalesFacade>(
+			newInventory.get(),
+			objPaymentProcessor.get(),
+			objOrderBuilder.get(),
+			newGreenhouse.get(),
+			objPrototypeRegistry.get());
+		for (const auto& colleague : vtrColleagues) {
+			if (auto* customer = dynamic_cast<Customer*>(colleague.get())) {
+				newSalesFacade->registerCustomer(customer);
+			}
 		}
 
-		objInventory->loadFromFile(adapter.get(), filePath);
+		objInventory = std::move(newInventory);
+		objGreenhouse = std::move(newGreenhouse);
+		objSalesFacade = std::move(newSalesFacade);
+
+		if (objInventory) {
+			objInventory->setPlantRegistry(objPrototypeRegistry.get());
+			objInventory->setGreenhouseRoot(objGreenhouse.get());
+		}
+		if (objSalesFacade) {
+			objSalesFacade->setPlantRegistry(objPrototypeRegistry.get());
+			objSalesFacade->setGreenhouseRoot(objGreenhouse.get());
+		}
+
+		ResetGreenhouseStructure();
+		ownedPrototypeClones.clear();
 
 		objOrderBuilder->createNewOrder();
 		UpdateOrderDisplay();
@@ -369,11 +434,6 @@ void __fastcall TfrmMain::btnLoadInventoryClick(TObject *Sender)
 		snapshotPlant = nullptr;
 		currentPlantSnapshot.reset();
 
-		for (const auto& colleague : vtrColleagues) {
-			if (auto* staff = dynamic_cast<Staff*>(colleague.get())) {
-				staff->resetAssignments();
-			}
-		}
 		RegisterStaffLoggers();
 		PopulateStaffMemberComboBox();
 
@@ -390,25 +450,51 @@ void __fastcall TfrmMain::btnLoadInventoryClick(TObject *Sender)
 			objGreenhouseController->setRootBed(objGreenhouse.get());
 		}
 
-		AppendLog(UnicodeString("Successfully loaded inventory from '") + uFileName + UnicodeString("'"));
-	}
-	catch (const Exception& ex) {
-		AttachLoggerToAllPlants();
-		AppendLog(UnicodeString("Error loading file: ") + ex.Message);
-	}
-	catch (const std::exception& ex) {
-		AttachLoggerToAllPlants();
-		AppendLog(UnicodeString("Error loading file: ") + String(ex.what()));
-	}
-	catch (...) {
-		AttachLoggerToAllPlants();
-		AppendLog("Unknown error while loading inventory.");
-	}
+	AppendLog(UnicodeString("Successfully loaded inventory from '") + uFileName + UnicodeString("'"));
+}
+catch (const Exception& ex) {
+	RefreshGreenhouseDisplay();
+	RegisterStaffLoggers();
+	PopulateStaffMemberComboBox();
+	RefreshInventoryListView();
+	PopulateSalesItemComboBox();
+	PopulateCustomerComboBox();
+	RefreshStaffTaskQueue();
+	UpdateCareActionState();
+	AppendLog(UnicodeString("Error loading file: ") + ex.Message);
+}
+catch (const std::exception& ex) {
+	RefreshGreenhouseDisplay();
+	RegisterStaffLoggers();
+	PopulateStaffMemberComboBox();
+	RefreshInventoryListView();
+	PopulateSalesItemComboBox();
+	PopulateCustomerComboBox();
+	RefreshStaffTaskQueue();
+	UpdateCareActionState();
+	AppendLog(UnicodeString("Error loading file: ") + String(ex.what()));
+}
+catch (...) {
+	RefreshGreenhouseDisplay();
+	RegisterStaffLoggers();
+	PopulateStaffMemberComboBox();
+	RefreshInventoryListView();
+	PopulateSalesItemComboBox();
+	PopulateCustomerComboBox();
+	RefreshStaffTaskQueue();
+	UpdateCareActionState();
+	AppendLog("Unknown error while loading inventory.");
+}
 }
 
 //---------------------------------------------------------------------------
 void TfrmMain::RefreshInventoryListView()
 {
+	if (!objInventory) {
+		AppendLog("ERROR: Inventory unavailable while refreshing inventory list view.");
+		return;
+	}
+
 	lvInventory->Items->Clear();
 
 	InventoryIterator* itRaw = objInventory->createIterator();
@@ -572,10 +658,15 @@ StockItem* TfrmMain::ResolveSalesItemByIndex(int comboIndex, const UnicodeString
 	return item;
 }
 //---------------------------------------------------------------------------
-void TfrmMain::RemoveSalesComboEntry(int comboIndex)
+void TfrmMain::RemoveSalesComboEntryById(const std::string& itemId)
 {
-	if (comboIndex >= 0 && comboIndex < static_cast<int>(salesComboIds.size())) {
-		salesComboIds.erase(salesComboIds.begin() + comboIndex);
+	if (itemId.empty()) {
+		return;
+	}
+
+	auto it = std::find(salesComboIds.begin(), salesComboIds.end(), itemId);
+	if (it != salesComboIds.end()) {
+		salesComboIds.erase(it);
 	}
 }
 //---------------------------------------------------------------------------
@@ -810,9 +901,14 @@ void TfrmMain::PopulateGreenhouseBedComboBox(GreenhouseComponent* component, con
 	if (bed != nullptr)
 	{
 		std::string bedName = prefix + bed->getName();
-		int index = cmbGreenhouseSelection->Items->Add(bedName.c_str());
-
-		cmbGreenhouseSelection->Items->Objects[index] = (TObject*)bed;
+		int index = -1;
+		if (cmbGreenhouseSelection) {
+			index = cmbGreenhouseSelection->Items->IndexOf(bedName.c_str());
+			if (index == -1) {
+				index = cmbGreenhouseSelection->Items->Add(bedName.c_str());
+			}
+			cmbGreenhouseSelection->Items->Objects[index] = reinterpret_cast<TObject*>(bed);
+		}
 
 		std::unique_ptr<GreenhouseIterator> it = bed->createIterator();
 		if (it) {
