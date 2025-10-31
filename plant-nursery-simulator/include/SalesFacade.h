@@ -63,6 +63,7 @@ public:
      */
     void registerPlantType(const std::string& name);
 
+
     /**
      * @brief Simplifies buying a single item at the counter.
      * @return bool True if the sale was successful.

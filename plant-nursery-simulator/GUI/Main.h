@@ -25,6 +25,7 @@
 #include <functional>
 #include <memory>
 #include <optional>
+#include <string>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
@@ -429,6 +430,10 @@ public:		// User declarations
 	 * @brief Rebuilds the greenhouse tree view to match current model state.
 	 */
 	void RefreshGreenhouseDisplay();
+	/**
+	 * @brief Resets greenhouse-related UI controls to reflect the current model.
+	 */
+	void ResetGreenhouseStructure();
     /**
      * @brief Repopulates the sales item combo with available stock.
      */
@@ -470,9 +475,9 @@ public:		// User declarations
 	StockItem* ResolveSalesItemByIndex(int comboIndex, const UnicodeString& displayText) const;
 	/**
 	 * @brief Synchronises internal combo tracking after an entry is removed.
-	 * @param comboIndex The index that was erased from the combo box UI.
+	 * @param itemId Identifier of the item that was erased from the combo box UI.
 	 */
-	void RemoveSalesComboEntry(int comboIndex);
+	void RemoveSalesComboEntryById(const std::string& itemId);
 	/**
 	 * @brief Clears the sales combo prior to an inventory reload to avoid stale references.
 	 */

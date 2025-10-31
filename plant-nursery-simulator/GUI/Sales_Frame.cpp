@@ -131,7 +131,7 @@ void __fastcall TfrmSales::btnAddToOrderClick(TObject *Sender)
 		// Remove the item from the selection list and mark it reserved to avoid duplicates.
 		if (itemIndex < cmbItemSelection->Items->Count) {
 			cmbItemSelection->Items->Delete(itemIndex);
-			frmMain->RemoveSalesComboEntry(itemIndex);
+			frmMain->RemoveSalesComboEntryById(itemToAdd->getId());
 		}
 		cmbItemSelection->ItemIndex = -1;
 		cmbItemSelection->Text = "Select an Item";

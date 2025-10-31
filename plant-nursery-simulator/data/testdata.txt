@@ -1,2 +1,6 @@
+Plant,Rose,10,Mature
 Plant,Tulip,6,Mature
+Plant,Tulip2,19,Mature
+Plant,Peter1,19,Mature
 Item,Spade,12
+Item,Pot,7
