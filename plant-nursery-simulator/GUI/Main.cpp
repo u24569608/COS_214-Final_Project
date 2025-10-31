@@ -1343,6 +1343,9 @@ btnSimulate->OnClick = btnSimulateClick;
 //---------------------------------------------------------------------------
 void TfrmMain::AppendLog(const UnicodeString& message)
 {
+	if (!redtLog || redtLog->ComponentState.Contains(csDestroying)) {
+		return;
+	}
 	redtLog->Lines->Add("[" + DateTimeToStr(Now()) + "] " + message);
 }
 //---------------------------------------------------------------------------
