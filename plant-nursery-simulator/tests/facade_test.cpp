@@ -146,18 +146,19 @@ void testBuildAndFinalizeOrder() {
 
     StockItem item1("Soil", 10.0, nullptr);
     StockItem item2("Pot", 5.0, nullptr);
-    std::vector<StockItem> items = {item1, item2};
+    Order order;
+    order.addItem(item1);
+    order.addItem(item2);
 
-    Order* order = facade->buildAndFinalizeOrder(nullptr, items);
+    bool success = facade->buildAndFinalizeOrder(nullptr, order);
 
-    ASSERT_TRUE(order != nullptr, "Order should be created and returned");
-    ASSERT_EQ_STR(order->getOrderStatus(), "Paid", "Order status should be 'Paid'");
-    ASSERT_EQ_INT(static_cast<int>(order->calculateTotal()), 15, "Order total should be 15");
+    ASSERT_TRUE(success, "Order should be processed successfully");
+    ASSERT_EQ_STR(order.getOrderStatus(), "Paid", "Order status should be 'Paid'");
+    ASSERT_EQ_INT(static_cast<int>(order.calculateTotal()), 15, "Order total should be 15");
     ASSERT_EQ_INT(facade->checkStock("Soil"), 0, "Soil should be removed from stock");
     ASSERT_EQ_INT(facade->checkStock("Pot"), 0, "Pot should be removed from stock");
     ASSERT_EQ_INT(greenhouse->getSize(), greenhouseBefore, "Supplies should not affect greenhouse plants");
 
-    delete order;
     clearInventory();
 }
 
@@ -169,22 +170,22 @@ void testProcessReturn() {
     ASSERT_EQ_INT(facade->checkStock("Orchid"), 1, "Orchid should be in stock");
 
     StockItem item1("Orchid", 25.0, nullptr);
-    std::vector<StockItem> items = {item1};
-    Order* order = facade->buildAndFinalizeOrder(nullptr, items);
+    Order order;
+    order.addItem(item1);
+    bool saleSuccess = facade->buildAndFinalizeOrder(nullptr, order);
 
-    ASSERT_TRUE(order != nullptr, "Order should have been created");
-    ASSERT_EQ_STR(order->getOrderStatus(), "Paid", "Order should be 'Paid'");
+    ASSERT_TRUE(saleSuccess, "Order should have been created");
+    ASSERT_EQ_STR(order.getOrderStatus(), "Paid", "Order should be 'Paid'");
     ASSERT_EQ_INT(facade->checkStock("Orchid"), 0, "Orchid should be sold out");
     const int greenhouseAfterSale = greenhouse->getSize();
 
-    bool success = facade->processReturn(order);
+    bool success = facade->processReturn(&order);
 
     ASSERT_TRUE(success, "Return should be successful");
-    ASSERT_EQ_STR(order->getOrderStatus(), "Refunded", "Order status should be 'Refunded'");
+    ASSERT_EQ_STR(order.getOrderStatus(), "Refunded", "Order status should be 'Refunded'");
     ASSERT_EQ_INT(facade->checkStock("Orchid"), 1, "Orchid should be restocked");
     ASSERT_EQ_INT(greenhouse->getSize(), greenhouseAfterSale + 1, "Greenhouse should receive the returned plant");
 
-    delete order;
     clearInventory();
 }
 

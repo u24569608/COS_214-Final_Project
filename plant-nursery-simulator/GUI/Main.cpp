@@ -52,6 +52,8 @@ class ConcretePlant : public Plant {
 		ConcretePlant(const ConcretePlant& other) : Plant() {
 			setName(other.getName());
 			setType(other.getType());
+			setDefaultWaterStrat(other.getDefaultWaterStrat());
+			setDefaultFertStrat(other.getDefaultFertStrat());
 		}
 
 
@@ -1382,6 +1384,7 @@ void TfrmMain::HandlePlantObserverEvent(const ObserverEvent& event)
 	RefreshStaffTaskQueue();
 	if (event.type == ObserverEventType::AvailabilityChanged) {
 		RefreshInventoryListView();
+		PopulateSalesItemComboBox();
 	}
 }
 //---------------------------------------------------------------------------

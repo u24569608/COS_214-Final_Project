@@ -201,9 +201,7 @@ void __fastcall TfrmSales::btnProcessPaymentClick(TObject *Sender)
             return;
         }
 
-        bool success = frmMain->objSalesFacade->buildAndFinalizeOrder(
-            customerPtr,
-            finalOrder->getItems());
+        bool success = frmMain->objSalesFacade->buildAndFinalizeOrder(customerPtr, *finalOrder);
 
         if (success) {
             UnicodeString logMsg = "[" + DateTimeToStr(Now()) + "] Order Finalised for Customer (ID): " + customerIdU;

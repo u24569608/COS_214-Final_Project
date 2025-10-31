@@ -259,65 +259,68 @@ bool SalesFacade::addItemToCart(Customer* customer, const std::string& itemName)
 /**
  * @brief Simplifies building a complex order.
  */
-Order* SalesFacade::buildAndFinalizeOrder(Customer* customer, std::vector<StockItem> items) {
-    // 1. Build the order
-    orderBuilder->createNewOrder();
-    for (StockItem& item : items) {
-        // We pass the address of the item in our local vector copy
-        orderBuilder->addItem(&item);
+bool SalesFacade::buildAndFinalizeOrder(Customer* customer, Order& order) {
+    if (!inventory || !paymentProcessor) {
+        return false;
     }
 
-    Order* order = orderBuilder->getOrder();
-    if (order == nullptr) {
-        return nullptr; // Builder failed
+    const std::vector<StockItem>& items = order.getItems();
+    if (items.empty()) {
+        std::cout << "[SalesFacade] Custom order aborted: no items to process." << std::endl;
+        return false;
     }
 
-    // 2. Process Payment
-    double total = order->calculateTotal();
-     // Using a mock string since 'customer' is unused
-    bool paid = paymentProcessor->processPayment("MockCustomerDetails", total);
+    const double total = order.calculateTotal();
+    if (!paymentProcessor->processPayment("MockCustomerDetails", total)) {
+        std::cout << "[SalesFacade] Custom order failed: Payment declined." << std::endl;
+        return false;
+    }
 
-    // 3. Finalize and update inventory
-    if (paid) {
-        order->setOrderStatus("Paid");
-        // Remove all items from inventory
-        for (StockItem& item : items) {
-            const std::string itemName = item.getname();
-            StockItem* itemInStock = inventory->findItem(itemName);
-            std::string itemId = itemInStock != nullptr ? itemInStock->getId() : "";
+    order.setOrderStatus("Paid");
 
-            if (customer != nullptr) {
-                if (!itemId.empty()) {
-                    customer->removeFromCartById(itemId);
-                } else {
-                    customer->removeFromCart(itemName);
-                }
-            }
+    for (const StockItem& item : items) {
+        std::string itemId = item.getId();
+        std::string itemName = item.getname();
 
-            bool removed = false;
-            if (!itemId.empty()) {
-                removed = inventory->removeItemById(itemId);
-            } else {
-                const int countBefore = inventory->getStockCount(itemName);
-                inventory->removeItem(itemName);
-                removed = countBefore > inventory->getStockCount(itemName);
-            }
-
-            if (removed) {
-                notifyItemSold(itemId, itemName);
-            } else {
-                std::cerr << "[SalesFacade] Warning: Unable to retire '" << itemName
-                          << "' while finalising order.\n";
+        StockItem* inventoryItem = nullptr;
+        if (!itemId.empty()) {
+            inventoryItem = inventory->findItemById(itemId);
+        }
+        if (!inventoryItem && !itemName.empty()) {
+            inventoryItem = inventory->findItem(itemName);
+            if (inventoryItem != nullptr) {
+                itemId = inventoryItem->getId();
+                itemName = inventoryItem->getname();
             }
         }
-        std::cout << "[SalesFacade] Custom order finalized and paid." << std::endl;
-        return order;
-    } else {
-        // Payment failed, we must delete the order
-        std::cout << "[SalesFacade] Custom order failed: Payment declined." << std::endl;
-        delete order;
-        return nullptr;
+
+        if (customer != nullptr) {
+            if (!itemId.empty()) {
+                customer->removeFromCartById(itemId);
+            } else if (!itemName.empty()) {
+                customer->removeFromCart(itemName);
+            }
+        }
+
+        bool removed = false;
+        if (!itemId.empty()) {
+            removed = inventory->removeItemById(itemId);
+        } else if (!itemName.empty()) {
+            const int countBefore = inventory->getStockCount(itemName);
+            inventory->removeItem(itemName);
+            removed = countBefore > inventory->getStockCount(itemName);
+        }
+
+        if (removed) {
+            notifyItemSold(itemId, itemName);
+        } else {
+            std::cerr << "[SalesFacade] Warning: Unable to retire '" << itemName
+                      << "' while finalising order.\n";
+        }
     }
+
+    std::cout << "[SalesFacade] Custom order finalized and paid." << std::endl;
+    return true;
 }
 
 
