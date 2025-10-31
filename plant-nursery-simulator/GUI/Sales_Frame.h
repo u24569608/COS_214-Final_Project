@@ -29,9 +29,25 @@ __published:	// IDE-managed Components
 	TBitBtn *btnRefund;
 	TComboBox *cmbCustomerSelect;
 	TLabel *lblCustomerSelectionHeading;
+	/**
+	 * @brief Adds the currently selected stock item to the pending order.
+	 * @param Sender Component raising the event.
+	 */
 	void __fastcall btnAddToOrderClick(TObject *Sender);
+	/**
+	 * @brief Manages button state whenever the item selection changes.
+	 * @param Sender Component raising the event.
+	 */
 	void __fastcall cmbItemSelectionChange(TObject *Sender);
+	/**
+	 * @brief Finalises the order and submits payment for the selected customer.
+	 * @param Sender Component raising the event.
+	 */
 	void __fastcall btnProcessPaymentClick(TObject *Sender);
+	/**
+	 * @brief Enables payment once a valid customer selection is made.
+	 * @param Sender Component raising the event.
+	 */
 	void __fastcall cmbCustomerSelectChange(TObject *Sender);
 private:	// User declarations
 	std::unordered_set<std::string> reservedItemIds; ///< Tracks stock IDs already staged in the order.
@@ -47,6 +63,10 @@ private:	// User declarations
 	 */
 	bool isItemReserved(const std::string& itemId) const;
 public:		// User declarations
+	/**
+	 * @brief Sets up the sales frame and initial control state.
+	 * @param Owner Component that owns this frame.
+	 */
 	__fastcall TfrmSales(TComponent* Owner);
     double currentOrderTotal;
 	/**

@@ -31,12 +31,27 @@ __published:	// IDE-managed Components
 	TProgressBar *pbNutrients;
 	TLabel *lblNutrientLevelHeading;
 	TLabeledEdit *lbledtSaleReadiness;
+	/**
+	 * @brief Handles watering strategy selection updates and refreshes UI state.
+	 * @param Sender Component raising the event.
+	 */
 	void __fastcall rgWaterStrategyClick(TObject *Sender);
+	/**
+	 * @brief Handles fertilising strategy selection updates and refreshes UI state.
+	 * @param Sender Component raising the event.
+	 */
 	void __fastcall rgFertiliseStrategyClick(TObject *Sender);
 private:	// User declarations
 
 public:		// User declarations
+	/**
+	 * @brief Initialises the greenhouse information frame controls.
+	 * @param Owner Component that owns this frame.
+	 */
 	__fastcall TfrmGreenhouseInformation(TComponent* Owner);
+	/**
+	 * @brief Toggles care buttons based on the current context and selection.
+	 */
 	void enableDisableCareButtons();
 };
 //---------------------------------------------------------------------------

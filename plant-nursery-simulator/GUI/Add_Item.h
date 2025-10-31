@@ -19,12 +19,32 @@ __published:	// IDE-managed Components
 	TButton *btnAdd;
 	TLabeledEdit *lbledtItemName;
 	TLabeledEdit *lbledtItemPrice;
+	/**
+	 * @brief Closes the dialog without persisting changes.
+	 * @param Sender Component raising the event.
+	 */
 	void __fastcall btnCancelClick(TObject *Sender);
+	/**
+	 * @brief Validates input fields and adds the new stock item to the inventory.
+	 * @param Sender Component raising the event.
+	 */
 	void __fastcall btnAddClick(TObject *Sender);
+	/**
+	 * @brief Enables pricing input once a tentative name is provided.
+	 * @param Sender Component raising the event.
+	 */
 	void __fastcall lbledtItemNameChange(TObject *Sender);
+	/**
+	 * @brief Activates the confirmation button when a valid price is supplied.
+	 * @param Sender Component raising the event.
+	 */
 	void __fastcall lbledtItemPriceChange(TObject *Sender);
 private:	// User declarations
 public:		// User declarations
+	/**
+	 * @brief Constructs the add-item form and wires default state.
+	 * @param Owner Component that owns this form.
+	 */
 	__fastcall TfrmAddItem(TComponent* Owner);
 };
 //---------------------------------------------------------------------------

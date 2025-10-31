@@ -146,18 +146,71 @@ __published:	// IDE-managed Components
 	TLabel *Label1;
 	TLabel *Label2;
 	TButton *btnAssignObserve;
+	/**
+	 * @brief Keeps the send button state in sync with message body edits.
+	 * @param Sender Component raising the event.
+	 */
 	void __fastcall edtMessageBodyChange(TObject *Sender);
+	/**
+	 * @brief Performs initial data loading and UI wiring during form construction.
+	 * @param Sender Component raising the event.
+	 */
 	void __fastcall FormCreate(TObject *Sender);
+	/**
+	 * @brief Dispatches a mediator message using the selected sender and receiver.
+	 * @param Sender Component raising the event.
+	 */
 	void __fastcall btnSendClick(TObject *Sender);
+	/**
+	 * @brief Clears message history panes when the clear button is pressed.
+	 * @param Sender Component raising the event.
+	 */
 	void __fastcall btnClearMessagesClick(TObject *Sender);
+	/**
+	 * @brief Reverses the currently selected staff task queue ordering.
+	 * @param Sender Component raising the event.
+	 */
 	void __fastcall btnReverseClick(TObject *Sender);
+	/**
+	 * @brief Responds to greenhouse tree navigation changes.
+	 * @param Sender Component raising the event.
+	 * @param Node Newly selected node.
+	 */
 	void __fastcall tvGreenhouseChange(TObject *Sender, TTreeNode *Node);
+	/**
+	 * @brief Loads inventory data from disk and refreshes the UI.
+	 * @param Sender Component raising the event.
+	 */
 	void __fastcall btnLoadInventoryClick(TObject *Sender);
+	/**
+	 * @brief Moves the selected inventory item upward in the list.
+	 * @param Sender Component raising the event.
+	 */
 	void __fastcall btnInventoryUpClick(TObject *Sender);
+	/**
+	 * @brief Moves the selected inventory item downward in the list.
+	 * @param Sender Component raising the event.
+	 */
 	void __fastcall btnInventoryDownClick(TObject *Sender);
+	/**
+	 * @brief Persists the current inventory state to the chosen file.
+	 * @param Sender Component raising the event.
+	 */
 	void __fastcall btnSaveInventoryClick(TObject *Sender);
+	/**
+	 * @brief Refreshes runtime data and UI bindings when the form gains focus.
+	 * @param Sender Component raising the event.
+	 */
 	void __fastcall FormActivate(TObject *Sender);
+	/**
+	 * @brief Opens the add-plant dialog and registers a new prototype on success.
+	 * @param Sender Component raising the event.
+	 */
 	void __fastcall btnAddPlantToRegistryClick(TObject *Sender);
+	/**
+	 * @brief Launches the add-item dialog and integrates the created stock item.
+	 * @param Sender Component raising the event.
+	 */
 	void __fastcall btnAddItemClick(TObject *Sender);
 	/**
 	 * @brief Handles the Clone Plant button click, initiating plant creation from a prototype.
