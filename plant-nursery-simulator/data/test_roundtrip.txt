@@ -1,0 +1,2 @@
+Plant,Succulent,18,Mature
+Item,Pot,7

@@ -63,12 +63,8 @@ void __fastcall TfrmSales::btnAddToOrderClick(TObject *Sender)
 		}
 
 		UnicodeString selectedItemNameU = cmbItemSelection->Items->Strings[itemIndex];
-		std::string selectedItemName = AnsiString(selectedItemNameU).c_str();
 
-		TObject* rawObject = cmbItemSelection->Items->Objects[itemIndex];
-		StockItem* itemToAdd = rawObject != nullptr
-			? reinterpret_cast<StockItem*>(rawObject)
-			: frmMain->objInventory->findItem(selectedItemName);
+		StockItem* itemToAdd = frmMain->ResolveSalesItemByIndex(itemIndex, selectedItemNameU);
 
 		// Validate item found and available
 		if (!itemToAdd) {
@@ -135,6 +131,7 @@ void __fastcall TfrmSales::btnAddToOrderClick(TObject *Sender)
 		// Remove the item from the selection list and mark it reserved to avoid duplicates.
 		if (itemIndex < cmbItemSelection->Items->Count) {
 			cmbItemSelection->Items->Delete(itemIndex);
+			frmMain->RemoveSalesComboEntry(itemIndex);
 		}
 		cmbItemSelection->ItemIndex = -1;
 		cmbItemSelection->Text = "Select an Item";

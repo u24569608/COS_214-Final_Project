@@ -342,6 +342,13 @@ void __fastcall TfrmMain::btnLoadInventoryClick(TObject *Sender)
 	}
 
 	try {
+		ResetSalesCombo();
+		if (currentPlantSelection != nullptr) {
+			ForgetPlant(currentPlantSelection);
+			currentPlantSelection = nullptr;
+			ClearPlantDetails();
+		}
+
 		DetachObserverFromAllPlants();
 
 		objInventory->loadFromFile(adapter.get(), filePath);
@@ -360,6 +367,7 @@ void __fastcall TfrmMain::btnLoadInventoryClick(TObject *Sender)
 			}
 		}
 		RegisterStaffLoggers();
+		PopulateStaffMemberComboBox();
 
 		RefreshGreenhouseDisplay();
 
@@ -497,6 +505,8 @@ void TfrmMain::PopulateSalesItemComboBox()
 	}
 
 	TComboBox* combo = frmSales1->cmbItemSelection;
+	salesComboIds.clear();
+
 	combo->Items->BeginUpdate();
 	try {
 		combo->Clear();
@@ -513,7 +523,8 @@ void TfrmMain::PopulateSalesItemComboBox()
 				if (frmSales1->isItemReserved(item)) {
 					continue;
 				}
-				combo->Items->AddObject(item->getname().c_str(), reinterpret_cast<TObject*>(item));
+				combo->Items->Add(item->getname().c_str());
+				salesComboIds.push_back(item->getId());
 			}
 		}
 	}
@@ -533,6 +544,63 @@ void TfrmMain::PopulateSalesItemComboBox()
 	frmSales1->btnAddToOrder->Enabled = false;
 }
 //---------------------------------------------------------------------------
+StockItem* TfrmMain::ResolveSalesItemByIndex(int comboIndex, const UnicodeString& displayText) const
+{
+	if (!objInventory) {
+		return nullptr;
+	}
+
+	StockItem* item = nullptr;
+	if (comboIndex >= 0 && comboIndex < static_cast<int>(salesComboIds.size())) {
+		const std::string& id = salesComboIds[comboIndex];
+		if (!id.empty()) {
+			item = objInventory->findItemById(id);
+		}
+	}
+
+	if (!item && !displayText.IsEmpty()) {
+		item = objInventory->findItem(AnsiString(displayText).c_str());
+	}
+	return item;
+}
+//---------------------------------------------------------------------------
+void TfrmMain::RemoveSalesComboEntry(int comboIndex)
+{
+	if (comboIndex >= 0 && comboIndex < static_cast<int>(salesComboIds.size())) {
+		salesComboIds.erase(salesComboIds.begin() + comboIndex);
+	}
+}
+//---------------------------------------------------------------------------
+void TfrmMain::ResetSalesCombo()
+{
+	if (!frmSales1) {
+		return;
+	}
+
+	salesComboIds.clear();
+	frmSales1->releaseReservations();
+	frmSales1->currentOrderTotal = 0.0;
+
+	TComboBox* combo = frmSales1->cmbItemSelection;
+	combo->Items->BeginUpdate();
+	try {
+		combo->Items->Clear();
+	}
+	__finally {
+		combo->Items->EndUpdate();
+	}
+	combo->ItemIndex = -1;
+	combo->Text = "Select an Item";
+	frmSales1->btnAddToOrder->Enabled = false;
+	frmSales1->cmbCustomerSelect->Enabled = false;
+	frmSales1->cmbCustomerSelect->ItemIndex = -1;
+	frmSales1->cmbCustomerSelect->Text = "Select Customer ID";
+	frmSales1->redtOrderDetails->Clear();
+	frmSales1->redtOrderDetails->Lines->Add("(Empty Order)");
+	frmSales1->redtOrderDetails->Enabled = false;
+	frmSales1->btnProcessPayment->Enabled = false;
+}
+//---------------------------------------------------------------------------
 void TfrmMain::UpdateOrderDisplay()
 {
 	if (frmSales1) {
@@ -543,6 +611,7 @@ void TfrmMain::UpdateOrderDisplay()
 
 	frmSales1->redtOrderDetails->Enabled = false;
 	frmSales1->btnProcessPayment->Enabled = false;
+	frmSales1->cmbCustomerSelect->Enabled = false;
 
     frmSales1->currentOrderTotal = 0.0;
 }
@@ -1133,6 +1202,7 @@ void TfrmMain::PopulateStaffMemberComboBox()
 		combo->Items->Clear();
 		combo->Text = "Staff Member";
 		combo->ItemIndex = -1;
+		staffComboEntries.clear();
 
 		for (const auto& colleague : vtrColleagues) {
 			Staff* staff = dynamic_cast<Staff*>(colleague.get());
@@ -1140,7 +1210,8 @@ void TfrmMain::PopulateStaffMemberComboBox()
 				continue;
 			}
 			UnicodeString idText = IntToStr(staff->getID());
-			combo->Items->AddObject(idText, reinterpret_cast<TObject*>(staff));
+			combo->Items->Add(idText);
+			staffComboEntries.push_back(staff);
 		}
 	}
 	__finally {
@@ -1584,12 +1655,11 @@ Staff* TfrmMain::ResolveStaffFromCombo(int index) const
 		return nullptr;
 	}
 
-	TComboBox* combo = frmGreenhouseInformation1->cmbStaffMember;
-	if (index < 0 || index >= combo->Items->Count) {
+	if (index < 0 || index >= static_cast<int>(staffComboEntries.size())) {
 		return nullptr;
 	}
 
-	return reinterpret_cast<Staff*>(combo->Items->Objects[index]);
+	return staffComboEntries[index];
 }
 //---------------------------------------------------------------------------
 Staff* TfrmMain::FindStaffById(int id) const

@@ -461,6 +461,22 @@ public:		// User declarations
 	 * @param event Observer payload describing the state change.
 	 */
 	void HandlePlantObserverEvent(const ObserverEvent& event);
+	/**
+	 * @brief Resolves the inventory stock item represented by a sales combo entry.
+	 * @param comboIndex Index within the combo box.
+	 * @param displayText Fallback display text to use when the index is out of range.
+	 * @return Pointer to the corresponding stock item, or nullptr if not found.
+	 */
+	StockItem* ResolveSalesItemByIndex(int comboIndex, const UnicodeString& displayText) const;
+	/**
+	 * @brief Synchronises internal combo tracking after an entry is removed.
+	 * @param comboIndex The index that was erased from the combo box UI.
+	 */
+	void RemoveSalesComboEntry(int comboIndex);
+	/**
+	 * @brief Clears the sales combo prior to an inventory reload to avoid stale references.
+	 */
+	void ResetSalesCombo();
 
     // A list to hold all colleagues (Staff and Customers)
 	std::vector<std::unique_ptr<Colleague>> vtrColleagues;
@@ -477,6 +493,8 @@ public:		// User declarations
 	std::unique_ptr<Observer> plantLogObserver;
 	std::unordered_map<PlantInstance*, UnicodeString> knownPlantLabels; ///< Cached labels for tracked plants.
 	std::unordered_set<PlantInstance*> loggedPlants;
+	std::vector<std::string> salesComboIds; ///< Mirrors sales combo entries with inventory item identifiers.
+	std::vector<Staff*> staffComboEntries; ///< Mirrors staff combo entries with colleague pointers.
 	std::vector<std::unique_ptr<Plant>> ownedPrototypeClones;
 };
 //---------------------------------------------------------------------------
