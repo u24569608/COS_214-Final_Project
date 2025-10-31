@@ -351,6 +351,14 @@ void __fastcall TfrmMain::btnLoadInventoryClick(TObject *Sender)
 
 		DetachObserverFromAllPlants();
 
+		tvGreenhouse->Items->BeginUpdate();
+		try {
+			tvGreenhouse->Items->Clear();
+		}
+		__finally {
+			tvGreenhouse->Items->EndUpdate();
+		}
+
 		objInventory->loadFromFile(adapter.get(), filePath);
 
 		objOrderBuilder->createNewOrder();
