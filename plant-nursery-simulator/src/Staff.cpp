@@ -214,6 +214,12 @@ bool Staff::removeCommandsForPlant(PlantInstance* plant) {
     return removed;
 }
 
+void Staff::resetAssignments() {
+    stopObservingAll();
+    taskQueue.clear();
+    careReminders.clear();
+}
+
 void Staff::setLogSink(std::function<void(const std::string&)> sink) {
     logSink = std::move(sink);
 }

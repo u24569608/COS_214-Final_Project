@@ -23,9 +23,7 @@
 #include <iostream>
 #include <memory>
 
-TXTAdapter::TXTAdapter()
-    : txtReader(std::make_unique<TXTReaderWriter>()) {
-}
+TXTAdapter::TXTAdapter() = default;
 
 namespace {
 std::unique_ptr<PlantState> makeStateFromLabel(const std::string& label) {
@@ -108,7 +106,7 @@ void TXTAdapter::loadInventory(std::string filePath, Inventory* inventory) {
         return;
     }
 
-    std::vector<std::string> lines = txtReader->readDataFromTxt(filePath);
+    std::vector<std::string> lines = txtReader.readDataFromTxt(filePath);
 
     for (size_t i = 0; i < lines.size(); ++i) {
         std::stringstream ss(lines[i]);
@@ -163,6 +161,12 @@ void TXTAdapter::loadInventory(std::string filePath, Inventory* inventory) {
             }
             PlantInstance* plant = treatAsPlant ? inventory->createPlantInstance(name) : nullptr;
             if (plant != nullptr) {
+                if (plant->getWaterStrategy() == nullptr) {
+                    plant->setWaterStrategy(&defaultWaterStrategy());
+                }
+                if (plant->getFertilizeStrategy() == nullptr) {
+                    plant->setFertilizeStrategy(&defaultFertilizerStrategy());
+                }
                 if (std::unique_ptr<PlantState> desiredState = makeStateFromLabel(stateLabel)) {
                     plant->setState(std::move(desiredState));
                 }
@@ -193,7 +197,7 @@ void TXTAdapter::saveInventory(std::string filePath, Inventory* inventory) {
         itemsToSave.push_back(item);
     }
 
-    if (txtReader->writeDataToTxt(filePath, itemsToSave)) {
+    if (txtReader.writeDataToTxt(filePath, itemsToSave)) {
         std::cout << "[TXTAdapter] Saved inventory to " << filePath << std::endl;
     } else {
         std::cerr << "[TXTAdapter] Error: Failed to save inventory to " << filePath << std::endl;

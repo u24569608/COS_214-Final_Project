@@ -116,6 +116,10 @@ public:
      * @return True when at least one command was purged.
      */
     bool removeCommandsForPlant(PlantInstance* plant);
+    /**
+     * @brief Clears pending tasks and active observations, resetting the staff member.
+     */
+    void resetAssignments();
 
     /**
      * @brief Installs a UI logging sink used for status updates.

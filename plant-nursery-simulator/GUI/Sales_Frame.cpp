@@ -5,6 +5,7 @@
 
 #include "Sales_Frame.h"
 #include "Main.h"
+#include "../include/StockItem.h"
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 #pragma resource "*.dfm"
@@ -16,34 +17,73 @@ __fastcall TfrmSales::TfrmSales(TComponent* Owner)
 {
 }
 //---------------------------------------------------------------------------
+void TfrmSales::reserveItem(const std::string& itemId)
+{
+	if (itemId.empty()) {
+		return;
+	}
+	reservedItemIds.insert(itemId);
+}
+//---------------------------------------------------------------------------
+bool TfrmSales::isItemReserved(const std::string& itemId) const
+{
+	if (itemId.empty()) {
+		return false;
+	}
+	return reservedItemIds.find(itemId) != reservedItemIds.end();
+}
+//---------------------------------------------------------------------------
+bool TfrmSales::isItemReserved(const StockItem* item) const
+{
+	if (!item) {
+		return false;
+	}
+	return isItemReserved(item->getId());
+}
+//---------------------------------------------------------------------------
+void TfrmSales::releaseReservations()
+{
+	reservedItemIds.clear();
+}
+//---------------------------------------------------------------------------
+void TfrmSales::clearOrderState()
+{
+	releaseReservations();
+	currentOrderTotal = 0.0;
+	btnAddToOrder->Enabled = false;
+}
+//---------------------------------------------------------------------------
 void __fastcall TfrmSales::btnAddToOrderClick(TObject *Sender)
 {
-	// 1. Get selected item name from ComboBox
-	UnicodeString selectedItemNameU = cmbItemSelection->Text;
-	std::string selectedItemName = AnsiString(selectedItemNameU).c_str();
-
-	// Validate selection (check for empty or placeholder text)
-	if (selectedItemName.empty() || selectedItemNameU == "Select an Item") {
-		ShowMessage("Please select an item to add.");
-		return;
-	}
-
-	// 2. Find the StockItem in the main form's inventory
-	// Access main form's inventory via the global frmMain pointer
-	StockItem* itemToAdd = frmMain->objInventory->findItem(selectedItemName); //
-
-	// Validate item found and available
-	if (!itemToAdd) {
-		ShowMessage("Error: Could not find '" + selectedItemNameU + "' in inventory.");
-		return;
-	}
-	if (!itemToAdd->getIsAvailible()) { //
-		ShowMessage("Sorry, '" + selectedItemNameU + "' is currently out of stock.");
-		return;
-	}
-
-	// 3. Use the main form's OrderBuilder to add the item
 	try {
+		const int itemIndex = cmbItemSelection->ItemIndex;
+		if (itemIndex < 0 || itemIndex >= cmbItemSelection->Items->Count) {
+			ShowMessage("Please select an item to add.");
+			return;
+		}
+
+		UnicodeString selectedItemNameU = cmbItemSelection->Items->Strings[itemIndex];
+		std::string selectedItemName = AnsiString(selectedItemNameU).c_str();
+
+		TObject* rawObject = cmbItemSelection->Items->Objects[itemIndex];
+		StockItem* itemToAdd = rawObject != nullptr
+			? reinterpret_cast<StockItem*>(rawObject)
+			: frmMain->objInventory->findItem(selectedItemName);
+
+		// Validate item found and available
+		if (!itemToAdd) {
+			ShowMessage("Error: Could not find '" + selectedItemNameU + "' in inventory.");
+			return;
+		}
+		if (!itemToAdd->getIsAvailible()) {
+			ShowMessage("Sorry, '" + selectedItemNameU + "' is currently out of stock.");
+			return;
+		}
+		if (isItemReserved(itemToAdd)) {
+			ShowMessage("This item is already in the order.");
+			return;
+		}
+
 		// Call backend builder's addItem
 		frmMain->objOrderBuilder->addItem(itemToAdd);
 
@@ -90,19 +130,36 @@ void __fastcall TfrmSales::btnAddToOrderClick(TObject *Sender)
 		cmbCustomerSelect->Enabled = true;
 
 		// Trigger the check for enabling the payment button based on customer selection AND order items
-		cmbCustomerSelectChange(Sender); //
+		cmbCustomerSelectChange(Sender);
+
+		// Remove the item from the selection list and mark it reserved to avoid duplicates.
+		if (itemIndex < cmbItemSelection->Items->Count) {
+			cmbItemSelection->Items->Delete(itemIndex);
+		}
+		cmbItemSelection->ItemIndex = -1;
+		cmbItemSelection->Text = "Select an Item";
+		btnAddToOrder->Enabled = false;
+		reserveItem(itemToAdd->getId());
+	}
+	catch (const Exception& ex) {
+		ShowMessage("Error adding item to order: " + ex.Message);
+		frmMain->AppendLog(UnicodeString("Order item add error: ") + ex.Message);
 	}
 	catch (const std::exception& ex) {
-		 // Display any errors from the backend addItem call
-		 ShowMessage("Error adding item to order: " + String(ex.what()));
+		ShowMessage("Error adding item to order: " + String(ex.what()));
+		frmMain->AppendLog(UnicodeString("Order item add error: ") + String(ex.what()));
+	}
+	catch (...) {
+		ShowMessage("Unknown error adding item to order.");
+		frmMain->AppendLog("Unknown error while adding item to order.");
 	}
 }
 //---------------------------------------------------------------------------
 void __fastcall TfrmSales::cmbItemSelectionChange(TObject *Sender)
 {
-	if (cmbItemSelection->Text != "Select an Item") {
-        btnAddToOrder->Enabled = true;
-	}
+	const bool validSelection = (cmbItemSelection->ItemIndex >= 0) &&
+		(cmbItemSelection->ItemIndex < cmbItemSelection->Items->Count);
+	btnAddToOrder->Enabled = validSelection;
 }
 //---------------------------------------------------------------------------
 
@@ -174,23 +231,31 @@ void __fastcall TfrmSales::btnProcessPaymentClick(TObject *Sender)
         } else {
             ShowMessage("Order processing failed. Please check inventory or payment details.");
             frmMain->redtLog->Lines->Add("[" + DateTimeToStr(Now()) + "] Order processing failed for Customer ID " + customerIdU);
+            frmMain->UpdateOrderDisplay();
             frmMain->objOrderBuilder->createNewOrder();
+            frmMain->PopulateSalesItemComboBox();
         }
     }
     catch (const Exception& ex) {
         ShowMessage("Error while processing payment: " + ex.Message);
         frmMain->AppendLog(UnicodeString("Payment error: ") + ex.Message);
+        frmMain->UpdateOrderDisplay();
         frmMain->objOrderBuilder->createNewOrder();
+        frmMain->PopulateSalesItemComboBox();
     }
     catch (const std::exception& ex) {
         ShowMessage("Error while processing payment: " + String(ex.what()));
         frmMain->AppendLog(UnicodeString("Payment error: ") + String(ex.what()));
+        frmMain->UpdateOrderDisplay();
         frmMain->objOrderBuilder->createNewOrder();
+        frmMain->PopulateSalesItemComboBox();
     }
     catch (...) {
         ShowMessage("Unknown error while processing payment.");
         frmMain->AppendLog("Unknown payment error.");
+        frmMain->UpdateOrderDisplay();
         frmMain->objOrderBuilder->createNewOrder();
+        frmMain->PopulateSalesItemComboBox();
     }
 }
 
@@ -204,4 +269,3 @@ void __fastcall TfrmSales::cmbCustomerSelectChange(TObject *Sender)
     btnProcessPayment->Enabled = (cmbCustomerSelect->ItemIndex > -1) && orderHasItems;
 }
 //---------------------------------------------------------------------------
-

@@ -356,12 +356,6 @@ private:	// User declarations
 	 */
 	UnicodeString BuildPlantLabel(PlantInstance* plant) const;
 	/**
-	 * @brief Indicates whether the UI observer is still attached to a plant.
-	 * @param plant Plant pointer to evaluate.
-	 * @return True if the plant is currently tracked; otherwise false.
-	 */
-	bool IsPlantTracked(PlantInstance* plant) const;
-	/**
 	 * @brief Drops all cached state for a plant that is no longer valid.
 	 * @param plant Plant pointer to forget.
 	 */

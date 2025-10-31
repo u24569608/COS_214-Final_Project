@@ -98,9 +98,16 @@ __fastcall TfrmMain::TfrmMain(TComponent* Owner)
 
 	objPrototypeRegistry = std::make_unique<PlantPrototypeRegistry>();
 
-	objPrototypeRegistry->addPrototype("Rose", std::make_unique<ConcretePlant>("Rose", "Flower"));
-	objPrototypeRegistry->addPrototype("Fern", std::make_unique<ConcretePlant>("Fern", "Foliage"));
-	objPrototypeRegistry->addPrototype("Spruce", std::make_unique<ConcretePlant>("Spruce", "Conifer"));
+	auto addDefaultPrototype = [this](const std::string& name, const std::string& type) {
+		auto prototype = std::make_unique<ConcretePlant>(name, type);
+		prototype->setDefaultWaterStrat(stratFreqWater.get());
+		prototype->setDefaultFertStrat(stratLiquidFert.get());
+		objPrototypeRegistry->addPrototype(name, std::move(prototype));
+	};
+
+	addDefaultPrototype("Rose", "Flower");
+	addDefaultPrototype("Fern", "Foliage");
+	addDefaultPrototype("Spruce", "Conifer");
 
 	PopulatePrototypeComboBox();
 
@@ -333,13 +340,31 @@ void __fastcall TfrmMain::btnLoadInventoryClick(TObject *Sender)
 	}
 
 	try {
+		DetachObserverFromAllPlants();
+
 		objInventory->loadFromFile(adapter.get(), filePath);
+
+		objOrderBuilder->createNewOrder();
+		UpdateOrderDisplay();
+
+		currentPlantSelection = nullptr;
+		currentStaffSelection = nullptr;
+		snapshotPlant = nullptr;
+		currentPlantSnapshot.reset();
+
+		for (const auto& colleague : vtrColleagues) {
+			if (auto* staff = dynamic_cast<Staff*>(colleague.get())) {
+				staff->resetAssignments();
+			}
+		}
+		RegisterStaffLoggers();
 
 		RefreshGreenhouseDisplay();
 
 		RefreshInventoryListView();
 		PopulateSalesItemComboBox();
 		PopulatePrototypeComboBox();
+		PopulateCustomerComboBox();
 		RefreshStaffTaskQueue();
 		UpdateCareActionState();
 
@@ -350,12 +375,15 @@ void __fastcall TfrmMain::btnLoadInventoryClick(TObject *Sender)
 		AppendLog(UnicodeString("Successfully loaded inventory from '") + uFileName + UnicodeString("'"));
 	}
 	catch (const Exception& ex) {
+		AttachLoggerToAllPlants();
 		AppendLog(UnicodeString("Error loading file: ") + ex.Message);
 	}
 	catch (const std::exception& ex) {
+		AttachLoggerToAllPlants();
 		AppendLog(UnicodeString("Error loading file: ") + String(ex.what()));
 	}
 	catch (...) {
+		AttachLoggerToAllPlants();
 		AppendLog("Unknown error while loading inventory.");
 	}
 }
@@ -427,7 +455,9 @@ void __fastcall TfrmMain::btnSaveInventoryClick(TObject *Sender)
 		if (filterIndex <= 0 || filterIndex > dlgSaveSaveInventory->FileTypes->Count) {
 			filterIndex = 1;
 		}
-		UnicodeString mask = dlgSaveSaveInventory->FileTypes->Items[filterIndex - 1]->FileMask.LowerCase();
+		Vcl::Dialogs::TFileTypeItem* fileType = dlgSaveSaveInventory->FileTypes->Items[filterIndex - 1];
+		UnicodeString mask = fileType ? fileType->FileMask : UnicodeString();
+		mask = mask.LowerCase();
 		if (mask.Pos(".csv") > 0) {
 			adapter = std::make_unique<CSVAdapter>();
 			enforcedExt = ".csv";
@@ -460,27 +490,52 @@ void __fastcall TfrmMain::btnSaveInventoryClick(TObject *Sender)
 //---------------------------------------------------------------------------
 void TfrmMain::PopulateSalesItemComboBox()
 {
-	frmSales1->cmbItemSelection->Clear();
-
-	InventoryIterator* itRaw = objInventory->createIterator();
-	if (!itRaw) return;
-    std::unique_ptr<InventoryIterator> it(itRaw);
-
-    for (StockItem* item = it->first(); it->hasNext(); item = it->next())
-	{
-		item = it->currentItem();
-		if (item && item->getIsAvailible())
-        {
-			frmSales1->cmbItemSelection->Items->Add(item->getname().c_str());
-		}
+	if (!frmSales1) {
+		return;
 	}
 
-    frmSales1->cmbItemSelection->ItemIndex = -1;
-	frmSales1->cmbItemSelection->Text = "Select an Item";
+	TComboBox* combo = frmSales1->cmbItemSelection;
+	combo->Items->BeginUpdate();
+	try {
+		combo->Clear();
+
+		std::unique_ptr<InventoryIterator> it(objInventory ? objInventory->createIterator() : nullptr);
+		if (!it) {
+			AppendLog("ERROR: Could not get Inventory Iterator");
+		} else {
+			for (StockItem* item = it->first(); it->hasNext(); item = it->next()) {
+				item = it->currentItem();
+				if (!item || !item->getIsAvailible()) {
+					continue;
+				}
+				if (frmSales1->isItemReserved(item)) {
+					continue;
+				}
+				combo->Items->AddObject(item->getname().c_str(), reinterpret_cast<TObject*>(item));
+			}
+		}
+	}
+	catch (const Exception& ex) {
+		AppendLog(UnicodeString("Error populating sales combo: ") + ex.Message);
+	}
+	catch (const std::exception& ex) {
+		AppendLog(UnicodeString("Error populating sales combo: ") + String(ex.what()));
+	}
+	catch (...) {
+		AppendLog("Unknown error while populating sales combo.");
+	}
+	combo->Items->EndUpdate();
+
+	combo->ItemIndex = -1;
+	combo->Text = "Select an Item";
+	frmSales1->btnAddToOrder->Enabled = false;
 }
 //---------------------------------------------------------------------------
 void TfrmMain::UpdateOrderDisplay()
 {
+	if (frmSales1) {
+		frmSales1->clearOrderState();
+	}
 	frmSales1->redtOrderDetails->Clear();
 	frmSales1->redtOrderDetails->Lines->Add("(Empty Order)");
 
@@ -789,7 +844,7 @@ try {
 	RefreshStaffTaskQueue();
 	SelectStaffRowById(staffId);
 	if (affectedPlant != nullptr && affectedPlant == currentPlantSelection) {
-		if (IsPlantTracked(affectedPlant)) {
+		if (objInventory && objInventory->isManagingPlant(affectedPlant)) {
 			UpdateSelectedPlantDisplay(false);
 		} else {
 			currentPlantSelection = nullptr;
@@ -870,12 +925,14 @@ void __fastcall TfrmMain::btnSimulateClick(TObject *Sender)
 		objGreenhouseController->runGrowthTick();
 		AppendLog("Simulation: Applied growth tick to all plants");
 
-		if (IsPlantTracked(currentPlantSelection)) {
-			UpdateSelectedPlantDisplay(false);
-		} else if (currentPlantSelection != nullptr) {
-			ForgetPlant(currentPlantSelection);
-			currentPlantSelection = nullptr;
-			ClearPlantDetails();
+		if (currentPlantSelection != nullptr) {
+			if (objInventory && objInventory->isManagingPlant(currentPlantSelection)) {
+				UpdateSelectedPlantDisplay(false);
+			} else {
+				ForgetPlant(currentPlantSelection);
+				currentPlantSelection = nullptr;
+				ClearPlantDetails();
+			}
 		}
 
 		RefreshInventoryListView();
@@ -1318,7 +1375,7 @@ void TfrmMain::HandlePlantObserverEvent(const ObserverEvent& event)
 		}
 	}
 
-	if (plant == currentPlantSelection && IsPlantTracked(plant)) {
+	if (plant == currentPlantSelection && objInventory && objInventory->isManagingPlant(plant)) {
 		UpdateSelectedPlantDisplay(false);
 	}
 
@@ -1449,11 +1506,6 @@ UnicodeString TfrmMain::BuildPlantLabel(PlantInstance* plant) const
 	return label;
 }
 //---------------------------------------------------------------------------
-bool TfrmMain::IsPlantTracked(PlantInstance* plant) const
-{
-	return plant != nullptr && loggedPlants.find(plant) != loggedPlants.end();
-}
-//---------------------------------------------------------------------------
 void TfrmMain::ForgetPlant(PlantInstance* plant)
 {
 	if (!plant) {
@@ -1475,21 +1527,22 @@ PlantInstance* TfrmMain::GetTrackedPlantOrNull(const UnicodeString& contextHint)
 		return nullptr;
 	}
 
-	if (IsPlantTracked(currentPlantSelection)) {
-		return currentPlantSelection;
+	if (!objInventory || !objInventory->isManagingPlant(currentPlantSelection)) {
+		UnicodeString message = UnicodeString("WARNING: Selected plant is no longer available");
+		if (!contextHint.IsEmpty()) {
+			message += UnicodeString(" (") + contextHint + UnicodeString(")");
+		}
+		AppendLog(message);
+
+		ForgetPlant(currentPlantSelection);
+		currentPlantSelection = nullptr;
+		ClearPlantDetails();
+		UpdateCareActionState();
+		return nullptr;
 	}
 
-	UnicodeString message = UnicodeString("WARNING: Selected plant is no longer available");
-	if (!contextHint.IsEmpty()) {
-		message += UnicodeString(" (") + contextHint + UnicodeString(")");
-	}
-	AppendLog(message);
-
-	ForgetPlant(currentPlantSelection);
-	currentPlantSelection = nullptr;
-	ClearPlantDetails();
-	UpdateCareActionState();
-	return nullptr;
+	AttachObserverToPlant(currentPlantSelection);
+	return currentPlantSelection;
 }
 //---------------------------------------------------------------------------
 void TfrmMain::UpdateSelectedPlantDisplay(bool logChanges)
@@ -1506,7 +1559,7 @@ void TfrmMain::UpdateCareActionState()
 		return;
 	}
 
-	if (currentPlantSelection != nullptr && !IsPlantTracked(currentPlantSelection)) {
+	if (currentPlantSelection != nullptr && (!objInventory || !objInventory->isManagingPlant(currentPlantSelection))) {
 		ForgetPlant(currentPlantSelection);
 		currentPlantSelection = nullptr;
 		ClearPlantDetails();

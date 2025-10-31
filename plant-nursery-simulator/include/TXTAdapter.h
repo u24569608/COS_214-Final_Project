@@ -4,7 +4,6 @@
 #include "FileAdapter.h"
 #include "TXTReaderWriter.h"
 #include <string>
-#include <memory>
 
 // Forward declaration
 class Inventory;
@@ -36,7 +35,7 @@ public:
     void saveInventory(std::string filePath, Inventory* inventory) override;
 
 private:
-    std::unique_ptr<TXTReaderWriter> txtReader; ///< The wrapped 'Adaptee'.
+    TXTReaderWriter txtReader; ///< TXT helper used to read/write stock data.
 };
 
 #endif // TXT_ADAPTER_H
