@@ -25,6 +25,7 @@
 #include <functional>
 #include <memory>
 #include <optional>
+#include <unordered_map>
 #include <unordered_set>
 #include <vector>
 
@@ -343,44 +344,34 @@ private:	// User declarations
 	 */
 	int FertilizeStrategyIndexFromPointer(FertilizeStrategy* strategy) const;
 	/**
-	 * @brief Adds a timestamped entry to the application log panel.
-	 * @param message Text to append.
+	 * @brief Caches a pre-formatted label for a tracked plant.
+	 * @param plant Plant instance serving as the key.
+	 * @param label Human-readable label describing the plant.
 	 */
+	void CachePlantLabel(PlantInstance* plant, const UnicodeString& label);
 	/**
-	 * @brief Connects UI logging callbacks to each staff member.
+	 * @brief Builds a display label for a live plant instance.
+	 * @param plant Plant instance to describe.
+	 * @return Combined type/name label; empty when plant is nullptr.
 	 */
+	UnicodeString BuildPlantLabel(PlantInstance* plant) const;
 	/**
-	 * @brief Ensures the UI logging observer is attached to the specified plant.
-	 * @param plant Plant that should emit observer notifications to the UI.
+	 * @brief Indicates whether the UI observer is still attached to a plant.
+	 * @param plant Plant pointer to evaluate.
+	 * @return True if the plant is currently tracked; otherwise false.
 	 */
+	bool IsPlantTracked(PlantInstance* plant) const;
 	/**
-	 * @brief Recursively attaches the UI logging observer to all plants in the greenhouse.
+	 * @brief Drops all cached state for a plant that is no longer valid.
+	 * @param plant Plant pointer to forget.
 	 */
+	void ForgetPlant(PlantInstance* plant);
 	/**
-	 * @brief Captures the current plant metrics for later comparisons.
-	 * @param plant Plant to sample.
-	 * @return Snapshot containing the latest metrics.
+	 * @brief Provides safe access to the current plant selection.
+	 * @param contextHint Label describing the action requiring the plant.
+	 * @return Non-null pointer when the plant is still tracked; otherwise nullptr.
 	 */
-	/**
-	 * @brief Emits detailed log entries describing differences between two snapshots.
-	 * @param before Baseline snapshot.
-	 * @param after Updated snapshot.
-	 * @param plantLabel Label identifying the plant instance in logs.
-	 */
-	/**
-	 * @brief Disconnects all staff log callbacks.
-	 */
-	/**
-	 * @brief Removes the UI observer from every tracked plant instance.
-	 */
-	/**
-	 * @brief Helper to re-select a staff row after refreshing the list view.
-	 */
-	/**
-	 * @brief Rebuilds greenhouse tree UI after inventory changes.
-	 */
-
-    // New
+	PlantInstance* GetTrackedPlantOrNull(const UnicodeString& contextHint);
 	/**
 	 * @brief Rebuilds the staff task queue list view from model data.
 	 */
@@ -396,15 +387,53 @@ public:		// User declarations
 	 * @brief Cleans up UI observers and log sinks before destruction.
 	 */
 	__fastcall ~TfrmMain();
+	/**
+	 * @brief Appends a timestamped entry to the application log pane.
+	 * @param message Unicode string to write.
+	 */
 	void AppendLog(const UnicodeString& message);
+	/**
+	 * @brief Hooks logging callbacks for every staff colleague.
+	 */
 	void RegisterStaffLoggers();
+	/**
+	 * @brief Ensures the shared UI observer is attached to a specific plant.
+	 * @param plant Target plant that should emit GUI updates.
+	 */
 	void AttachObserverToPlant(PlantInstance* plant);
+	/**
+	 * @brief Attaches the UI observer to all plants currently hosted in the greenhouse.
+	 */
 	void AttachLoggerToAllPlants();
+	/**
+	 * @brief Builds a snapshot of key plant stats for delta tracking.
+	 * @param plant Plant to sample.
+	 * @return Snapshot of display-relevant metrics.
+	 */
 	PlantDisplaySnapshot BuildSnapshot(PlantInstance* plant) const;
+	/**
+	 * @brief Logs differences between two stored plant snapshots.
+	 * @param before Baseline snapshot.
+	 * @param after Updated snapshot.
+	 * @param plantLabel Label identifying the plant in log output.
+	 */
 	void LogSnapshotDelta(const PlantDisplaySnapshot& before, const PlantDisplaySnapshot& after, const UnicodeString& plantLabel);
+	/**
+	 * @brief Removes previously installed staff logging callbacks.
+	 */
 	void ResetStaffLoggers();
+	/**
+	 * @brief Detaches the UI observer from every tracked plant instance.
+	 */
 	void DetachObserverFromAllPlants();
+	/**
+	 * @brief Reselects a staff member in the queue view by identifier.
+	 * @param staffId Identifier to locate.
+	 */
 	void SelectStaffRowById(int staffId);
+	/**
+	 * @brief Rebuilds the greenhouse tree view to match current model state.
+	 */
 	void RefreshGreenhouseDisplay();
     /**
      * @brief Repopulates the sales item combo with available stock.
@@ -452,6 +481,7 @@ public:		// User declarations
 	std::optional<PlantDisplaySnapshot> currentPlantSnapshot;
 	PlantInstance* snapshotPlant;
 	std::unique_ptr<Observer> plantLogObserver;
+	std::unordered_map<PlantInstance*, UnicodeString> knownPlantLabels; ///< Cached labels for tracked plants.
 	std::unordered_set<PlantInstance*> loggedPlants;
 	std::vector<std::unique_ptr<Plant>> ownedPrototypeClones;
 };

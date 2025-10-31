@@ -51,8 +51,12 @@ Staff::~Staff() {
 
 void Staff::update(const ObserverEvent& event) {
     if (event.type == ObserverEventType::SubjectDestroyed) {
-        if (event.source != nullptr) {
-            observedPlants.erase(static_cast<PlantInstance*>(event.source));
+        PlantInstance* retired = event.source != nullptr
+                                     ? static_cast<PlantInstance*>(event.source)
+                                     : nullptr;
+        if (retired != nullptr) {
+            observedPlants.erase(retired);
+            removeCommandsForPlant(retired);
         }
         if (!event.message.empty()) {
             careReminders.push_back({StaffReminderType::Message, event.message});
@@ -186,6 +190,28 @@ std::vector<std::string> Staff::describePendingTasks() const {
         descriptions.push_back(std::move(line));
     }
     return descriptions;
+}
+
+bool Staff::removeCommandsForPlant(PlantInstance* plant) {
+    if (plant == nullptr || taskQueue.empty()) {
+        return false;
+    }
+
+    bool removed = false;
+    for (auto it = taskQueue.begin(); it != taskQueue.end();) {
+        PlantInstance* target = (*it) ? (*it)->getTarget() : nullptr;
+        if (target == plant) {
+            it = taskQueue.erase(it);
+            removed = true;
+        } else {
+            ++it;
+        }
+    }
+
+    if (removed) {
+        log(name + " removed pending tasks for a retired plant.");
+    }
+    return removed;
 }
 
 void Staff::setLogSink(std::function<void(const std::string&)> sink) {

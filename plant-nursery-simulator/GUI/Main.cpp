@@ -731,25 +731,36 @@ void TfrmMain::WireStaffTaskEvents()
 //---------------------------------------------------------------------------
 void TfrmMain::RefreshStaffTaskQueue()
 {
-    lvStaffTaskQueue->Items->BeginUpdate();
-    try {
-		lvStaffTaskQueue->Items->Clear();
+	try {
+		lvStaffTaskQueue->Items->BeginUpdate();
+		try {
+			lvStaffTaskQueue->Items->Clear();
 
-        for (const auto& col : vtrColleagues) {
-            auto* staff = dynamic_cast<Staff*>(col.get());
-		if (!staff) continue;
+			for (const auto& col : vtrColleagues) {
+				auto* staff = dynamic_cast<Staff*>(col.get());
+				if (!staff) {
+					continue;
+				}
 
-		TListItem* item = lvStaffTaskQueue->Items->Add();
-		item->Caption = IntToStr(staff->getID());
-		item->SubItems->Add(IntToStr(staff->getTaskQueueSize()));
-
-
-		item->Data = staff;
+				TListItem* item = lvStaffTaskQueue->Items->Add();
+				item->Caption = IntToStr(staff->getID());
+				item->SubItems->Add(IntToStr(staff->getTaskQueueSize()));
+				item->Data = staff;
+			}
+		}
+		__finally {
+			lvStaffTaskQueue->Items->EndUpdate();
+		}
 	}
-    }
-    __finally {
-        lvStaffTaskQueue->Items->EndUpdate();
-    }
+	catch (const Exception& ex) {
+		AppendLog(UnicodeString("Error refreshing staff task queue: ") + ex.Message);
+	}
+	catch (const std::exception& ex) {
+		AppendLog(UnicodeString("Error refreshing staff task queue: ") + String(ex.what()));
+	}
+	catch (...) {
+		AppendLog("Unknown error while refreshing staff task queue.");
+	}
 }
 //---------------------------------------------------------------------------
 void __fastcall TfrmMain::btnProcessNextTaskClick(TObject *Sender)
@@ -778,7 +789,13 @@ try {
 	RefreshStaffTaskQueue();
 	SelectStaffRowById(staffId);
 	if (affectedPlant != nullptr && affectedPlant == currentPlantSelection) {
-		UpdateSelectedPlantDisplay(false);
+		if (IsPlantTracked(affectedPlant)) {
+			UpdateSelectedPlantDisplay(false);
+		} else {
+			currentPlantSelection = nullptr;
+			ClearPlantDetails();
+			UpdateCareActionState();
+		}
 	}
 }
 catch (const Exception& ex) {
@@ -844,22 +861,37 @@ void __fastcall TfrmMain::lvStaffTaskQueueDblClick(TObject *Sender)
 
 void __fastcall TfrmMain::btnSimulateClick(TObject *Sender)
 {
-	if (!objGreenhouseController) {
-		AppendLog("WARNING: Greenhouse controller unavailable");
-		return;
+	try {
+		if (!objGreenhouseController) {
+			AppendLog("WARNING: Greenhouse controller unavailable");
+			return;
+		}
+
+		objGreenhouseController->runGrowthTick();
+		AppendLog("Simulation: Applied growth tick to all plants");
+
+		if (IsPlantTracked(currentPlantSelection)) {
+			UpdateSelectedPlantDisplay(false);
+		} else if (currentPlantSelection != nullptr) {
+			ForgetPlant(currentPlantSelection);
+			currentPlantSelection = nullptr;
+			ClearPlantDetails();
+		}
+
+		RefreshInventoryListView();
+		PopulateSalesItemComboBox();
+		RefreshStaffTaskQueue();
+		UpdateCareActionState();
 	}
-
-	objGreenhouseController->runGrowthTick();
-	AppendLog("Simulation: Applied growth tick to all plants");
-
-	if (currentPlantSelection != nullptr) {
-		UpdateSelectedPlantDisplay(false);
+	catch (const Exception& ex) {
+		AppendLog(UnicodeString("Simulation error: ") + ex.Message);
 	}
-
-	RefreshInventoryListView();
-	PopulateSalesItemComboBox();
-	RefreshStaffTaskQueue();
-	UpdateCareActionState();
+	catch (const std::exception& ex) {
+		AppendLog(UnicodeString("Simulation error: ") + String(ex.what()));
+	}
+	catch (...) {
+		AppendLog("Unknown error while running simulation.");
+	}
 }
 //---------------------------------------------------------------------------
 void __fastcall TfrmMain::cmbStaffMemberChange(TObject *Sender)
@@ -883,12 +915,13 @@ void __fastcall TfrmMain::cmbStaffMemberChange(TObject *Sender)
 void __fastcall TfrmMain::btnWaterClick(TObject *Sender)
 {
 	try {
-		if (!currentPlantSelection || !currentStaffSelection) {
+		PlantInstance* plant = GetTrackedPlantOrNull("queuing water task");
+		if (!plant || !currentStaffSelection) {
 			ShowMessage("Select a plant and staff member first.");
 			return;
 		}
 
-		currentStaffSelection->addCommandToQueue(std::make_unique<WaterPlant>(currentPlantSelection));
+		currentStaffSelection->addCommandToQueue(std::make_unique<WaterPlant>(plant));
 		RefreshStaffTaskQueue();
 	}
 	catch (const Exception& ex) {
@@ -905,12 +938,13 @@ void __fastcall TfrmMain::btnWaterClick(TObject *Sender)
 void __fastcall TfrmMain::btnFertiliseClick(TObject *Sender)
 {
 	try {
-		if (!currentPlantSelection || !currentStaffSelection) {
+		PlantInstance* plant = GetTrackedPlantOrNull("queuing fertilise task");
+		if (!plant || !currentStaffSelection) {
 			ShowMessage("Select a plant and staff member first.");
 			return;
 		}
 
-		currentStaffSelection->addCommandToQueue(std::make_unique<FertilizePlant>(currentPlantSelection));
+		currentStaffSelection->addCommandToQueue(std::make_unique<FertilizePlant>(plant));
 		RefreshStaffTaskQueue();
 	}
 	catch (const Exception& ex) {
@@ -926,58 +960,106 @@ void __fastcall TfrmMain::btnFertiliseClick(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TfrmMain::btnAssignObserveClick(TObject *Sender)
 {
-	if (!currentPlantSelection || !currentStaffSelection) {
-		ShowMessage("Select a plant and staff member first.");
-		return;
+	try {
+		PlantInstance* plant = GetTrackedPlantOrNull("assigning observer");
+		if (!plant || !currentStaffSelection) {
+			ShowMessage("Select a plant and staff member first.");
+			return;
+		}
+
+		currentStaffSelection->observePlant(plant);
+		UnicodeString label = BuildPlantLabel(plant);
+		if (label.IsEmpty()) {
+			label = UnicodeString(plant->getName().c_str());
+		}
+		AppendLog(UnicodeString("Staff ") + IntToStr(currentStaffSelection->getID()) + UnicodeString(" now observing '") +
+			label + UnicodeString("'"));
+
+		UpdateCareActionState();
 	}
-
-	currentStaffSelection->observePlant(currentPlantSelection);
-	AppendLog(UnicodeString("Staff ") + IntToStr(currentStaffSelection->getID()) + UnicodeString(" now observing '") +
-		UnicodeString(currentPlantSelection->getName().c_str()) + UnicodeString("'"));
-
-	UpdateCareActionState();
+	catch (const Exception& ex) {
+		AppendLog(UnicodeString("Error assigning observer: ") + ex.Message);
+	}
+	catch (const std::exception& ex) {
+		AppendLog(UnicodeString("Error assigning observer: ") + String(ex.what()));
+	}
+	catch (...) {
+		AppendLog("Unknown error while assigning observer.");
+	}
 }
 //---------------------------------------------------------------------------
 void __fastcall TfrmMain::rgWaterStrategyClick(TObject *Sender)
 {
-	if (!currentPlantSelection) {
-		UpdateCareActionState();
-		return;
-	}
+	try {
+		PlantInstance* plant = GetTrackedPlantOrNull("changing watering strategy");
+		if (!plant) {
+			UpdateCareActionState();
+			return;
+		}
 
-	const int index = frmGreenhouseInformation1->rgWaterStrategy->ItemIndex;
-	WaterStrategy* strategy = WaterStrategyFromIndex(index);
-	if (!strategy) {
-		return;
-	}
+		const int index = frmGreenhouseInformation1->rgWaterStrategy->ItemIndex;
+		WaterStrategy* strategy = WaterStrategyFromIndex(index);
+		if (!strategy) {
+			return;
+		}
 
-	if (currentPlantSelection->getWaterStrategy() == strategy) {
-		return;
-	}
+		if (plant->getWaterStrategy() == strategy) {
+			return;
+		}
 
-	currentPlantSelection->setWaterStrategy(strategy);
-	AppendLog(UnicodeString("Updated watering strategy for '") + UnicodeString(currentPlantSelection->getName().c_str()) + UnicodeString("'"));
+		plant->setWaterStrategy(strategy);
+		UnicodeString label = BuildPlantLabel(plant);
+		if (label.IsEmpty()) {
+			label = UnicodeString(plant->getName().c_str());
+		}
+		AppendLog(UnicodeString("Updated watering strategy for '") + label + UnicodeString("'"));
+	}
+	catch (const Exception& ex) {
+		AppendLog(UnicodeString("Error updating watering strategy: ") + ex.Message);
+	}
+	catch (const std::exception& ex) {
+		AppendLog(UnicodeString("Error updating watering strategy: ") + String(ex.what()));
+	}
+	catch (...) {
+		AppendLog("Unknown error while updating watering strategy.");
+	}
 }
 //---------------------------------------------------------------------------
 void __fastcall TfrmMain::rgFertiliseStrategyClick(TObject *Sender)
 {
-	if (!currentPlantSelection) {
-		UpdateCareActionState();
-		return;
-	}
+	try {
+		PlantInstance* plant = GetTrackedPlantOrNull("changing fertilising strategy");
+		if (!plant) {
+			UpdateCareActionState();
+			return;
+		}
 
-	const int index = frmGreenhouseInformation1->rgFertiliseStrategy->ItemIndex;
-	FertilizeStrategy* strategy = FertilizeStrategyFromIndex(index);
-	if (!strategy) {
-		return;
-	}
+		const int index = frmGreenhouseInformation1->rgFertiliseStrategy->ItemIndex;
+		FertilizeStrategy* strategy = FertilizeStrategyFromIndex(index);
+		if (!strategy) {
+			return;
+		}
 
-	if (currentPlantSelection->getFertilizeStrategy() == strategy) {
-		return;
-	}
+		if (plant->getFertilizeStrategy() == strategy) {
+			return;
+		}
 
-	currentPlantSelection->setFertilizeStrategy(strategy);
-	AppendLog(UnicodeString("Updated fertilising strategy for '") + UnicodeString(currentPlantSelection->getName().c_str()) + UnicodeString("'"));
+		plant->setFertilizeStrategy(strategy);
+		UnicodeString label = BuildPlantLabel(plant);
+		if (label.IsEmpty()) {
+			label = UnicodeString(plant->getName().c_str());
+		}
+		AppendLog(UnicodeString("Updated fertilising strategy for '") + label + UnicodeString("'"));
+	}
+	catch (const Exception& ex) {
+		AppendLog(UnicodeString("Error updating fertilising strategy: ") + ex.Message);
+	}
+	catch (const std::exception& ex) {
+		AppendLog(UnicodeString("Error updating fertilising strategy: ") + String(ex.what()));
+	}
+	catch (...) {
+		AppendLog("Unknown error while updating fertilising strategy.");
+	}
 }
 //---------------------------------------------------------------------------
 void TfrmMain::PopulateStaffMemberComboBox()
@@ -1072,6 +1154,7 @@ void TfrmMain::DetachObserverFromAllPlants()
 		}
 	}
 	loggedPlants.clear();
+	knownPlantLabels.clear();
 }
 //---------------------------------------------------------------------------
 void TfrmMain::SelectStaffRowById(int staffId)
@@ -1122,6 +1205,10 @@ void TfrmMain::AttachLoggerToAllPlants()
 	for (GreenhouseComponent* component = iterator->first(); component != nullptr; component = iterator->next()) {
 		if (auto* instance = dynamic_cast<PlantInstance*>(component)) {
 			AttachObserverToPlant(instance);
+			UnicodeString label = BuildPlantLabel(instance);
+			if (!label.IsEmpty()) {
+				CachePlantLabel(instance, label);
+			}
 		}
 	}
 }
@@ -1170,16 +1257,52 @@ void TfrmMain::HandlePlantObserverEvent(const ObserverEvent& event)
 {
 	PlantInstance* plant = event.source ? dynamic_cast<PlantInstance*>(event.source) : nullptr;
 	if (!plant) {
+		AppendLog("WARNING: Received plant event without context.");
 		return;
 	}
 
 	if (event.type == ObserverEventType::SubjectDestroyed) {
-		loggedPlants.erase(plant);
-	} else {
-		AttachObserverToPlant(plant);
+		UnicodeString plantLabel;
+		const auto it = knownPlantLabels.find(plant);
+		if (it != knownPlantLabels.end()) {
+			plantLabel = it->second;
+		}
+
+		ForgetPlant(plant);
+
+		for (const auto& colleague : vtrColleagues) {
+			if (auto* staff = dynamic_cast<Staff*>(colleague.get())) {
+				staff->removeCommandsForPlant(plant);
+			}
+		}
+		RefreshStaffTaskQueue();
+
+		if (currentPlantSelection == plant) {
+			currentPlantSelection = nullptr;
+			ClearPlantDetails();
+			UpdateCareActionState();
+		}
+
+		if (plantLabel.IsEmpty()) {
+			if (!event.message.empty()) {
+				plantLabel = UnicodeString(event.message.c_str());
+			} else {
+				plantLabel = "Plant";
+			}
+		}
+
+		AppendLog(plantLabel + UnicodeString(": removed from greenhouse."));
+		RefreshInventoryListView();
+		PopulateSalesItemComboBox();
+		return;
 	}
 
-	UnicodeString plantLabel = UnicodeString(plant->getPlantTypeName().c_str()) + " (" + plant->getName().c_str() + ")";
+	AttachObserverToPlant(plant);
+	UnicodeString plantLabel = BuildPlantLabel(plant);
+	if (!plantLabel.IsEmpty()) {
+		CachePlantLabel(plant, plantLabel);
+	}
+
 	UnicodeString message;
 	if (!event.message.empty()) {
 		message = UnicodeString(event.message.c_str());
@@ -1188,10 +1311,14 @@ void TfrmMain::HandlePlantObserverEvent(const ObserverEvent& event)
 	}
 
 	if (!message.IsEmpty()) {
-		AppendLog(plantLabel + ": " + message);
+		if (!plantLabel.IsEmpty()) {
+			AppendLog(plantLabel + ": " + message);
+		} else {
+			AppendLog(message);
+		}
 	}
 
-	if (plant == currentPlantSelection) {
+	if (plant == currentPlantSelection && IsPlantTracked(plant)) {
 		UpdateSelectedPlantDisplay(false);
 	}
 
@@ -1242,10 +1369,13 @@ void TfrmMain::LoadPlantDetails(PlantInstance* plant, bool logChanges)
 	}
 
 	AttachObserverToPlant(plant);
+	UnicodeString plantLabel = BuildPlantLabel(plant);
+	if (!plantLabel.IsEmpty()) {
+		CachePlantLabel(plant, plantLabel);
+	}
 
 	const bool samePlant = snapshotPlant == plant && currentPlantSnapshot.has_value();
 	PlantDisplaySnapshot latest = BuildSnapshot(plant);
-	UnicodeString plantLabel = UnicodeString(latest.typeName.c_str()) + " (" + plant->getName().c_str() + ")";
 
 	if (logChanges && samePlant) {
 		LogSnapshotDelta(*currentPlantSnapshot, latest, plantLabel);
@@ -1287,10 +1417,86 @@ void TfrmMain::ClearPlantDetails()
 	snapshotPlant = nullptr;
 }
 //---------------------------------------------------------------------------
+void TfrmMain::CachePlantLabel(PlantInstance* plant, const UnicodeString& label)
+{
+	if (!plant || label.IsEmpty()) {
+		return;
+	}
+	knownPlantLabels[plant] = label;
+}
+//---------------------------------------------------------------------------
+UnicodeString TfrmMain::BuildPlantLabel(PlantInstance* plant) const
+{
+	if (!plant) {
+		return UnicodeString();
+	}
+
+	UnicodeString typeName = UnicodeString(plant->getPlantTypeName().c_str());
+	UnicodeString instanceName = UnicodeString(plant->getName().c_str());
+
+	if (typeName.IsEmpty()) {
+		typeName = instanceName;
+	}
+
+	if (typeName.IsEmpty()) {
+		return UnicodeString();
+	}
+
+	UnicodeString label = typeName;
+	if (!instanceName.IsEmpty()) {
+		label += UnicodeString(" (") + instanceName + UnicodeString(")");
+	}
+	return label;
+}
+//---------------------------------------------------------------------------
+bool TfrmMain::IsPlantTracked(PlantInstance* plant) const
+{
+	return plant != nullptr && loggedPlants.find(plant) != loggedPlants.end();
+}
+//---------------------------------------------------------------------------
+void TfrmMain::ForgetPlant(PlantInstance* plant)
+{
+	if (!plant) {
+		return;
+	}
+
+	loggedPlants.erase(plant);
+	knownPlantLabels.erase(plant);
+
+	if (snapshotPlant == plant) {
+		snapshotPlant = nullptr;
+		currentPlantSnapshot.reset();
+	}
+}
+//---------------------------------------------------------------------------
+PlantInstance* TfrmMain::GetTrackedPlantOrNull(const UnicodeString& contextHint)
+{
+	if (currentPlantSelection == nullptr) {
+		return nullptr;
+	}
+
+	if (IsPlantTracked(currentPlantSelection)) {
+		return currentPlantSelection;
+	}
+
+	UnicodeString message = UnicodeString("WARNING: Selected plant is no longer available");
+	if (!contextHint.IsEmpty()) {
+		message += UnicodeString(" (") + contextHint + UnicodeString(")");
+	}
+	AppendLog(message);
+
+	ForgetPlant(currentPlantSelection);
+	currentPlantSelection = nullptr;
+	ClearPlantDetails();
+	UpdateCareActionState();
+	return nullptr;
+}
+//---------------------------------------------------------------------------
 void TfrmMain::UpdateSelectedPlantDisplay(bool logChanges)
 {
-	if (currentPlantSelection != nullptr) {
-		LoadPlantDetails(currentPlantSelection, logChanges);
+	PlantInstance* plant = GetTrackedPlantOrNull("updating plant details");
+	if (plant != nullptr) {
+		LoadPlantDetails(plant, logChanges);
 	}
 }
 //---------------------------------------------------------------------------
@@ -1298,6 +1504,12 @@ void TfrmMain::UpdateCareActionState()
 {
 	if (!frmGreenhouseInformation1) {
 		return;
+	}
+
+	if (currentPlantSelection != nullptr && !IsPlantTracked(currentPlantSelection)) {
+		ForgetPlant(currentPlantSelection);
+		currentPlantSelection = nullptr;
+		ClearPlantDetails();
 	}
 
 	const bool hasPlant = currentPlantSelection != nullptr;

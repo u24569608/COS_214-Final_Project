@@ -110,6 +110,12 @@ public:
      * @return Ordered list of human-readable task strings.
      */
     std::vector<std::string> describePendingTasks() const;
+    /**
+     * @brief Removes any queued commands that target the supplied plant.
+     * @param plant Plant instance that has been retired.
+     * @return True when at least one command was purged.
+     */
+    bool removeCommandsForPlant(PlantInstance* plant);
 
     /**
      * @brief Installs a UI logging sink used for status updates.
