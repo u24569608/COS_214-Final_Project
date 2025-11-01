@@ -37,6 +37,17 @@ A sophisticated `C++` simulation of a plant nursery management system, developed
 
 `Coming Soon`
 
+## Documentation
+
+Generate the API reference with [Doxygen](https://www.doxygen.nl/):
+
+```bash
+cd plant-nursery-simulator
+doxygen Doxyfile
+```
+
+Graphs require [Graphviz](https://graphviz.org/download/) on your PATH. The HTML output opens from `plant-nursery-simulator/docs/doxygen/html/index.html`.
+
 
 <h2>Technologies</h2>
 <p align="center">

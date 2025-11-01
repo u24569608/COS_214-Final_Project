@@ -1,0 +1,33 @@
+digraph "FertilizeStrategy.cpp"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  Node1 [label="FertilizeStrategy.cpp",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black",tooltip="Implements the FertilizeStrategy behaviour defined in the corresponding header."];
+  Node1 -> Node2 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node2 [label="../include/FertilizeStrategy.h",height=0.2,width=0.4,color="black",URL="$FertilizeStrategy_8h.html",tooltip="Abstract 'Strategy' interface for fertilizing."];
+  Node1 -> Node3 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node3 [label="../include/PlantInstance.h",height=0.2,width=0.4,color="black",URL="$PlantInstance_8h.html",tooltip="Represents a single, physical plant in the nursery."];
+  Node3 -> Node4 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node4 [label="GreenhouseComponent.h",height=0.2,width=0.4,color="black",URL="$GreenhouseComponent_8h.html",tooltip="The abstract 'Component' interface for the Composite pattern."];
+  Node4 -> Node5 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node5 [label="memory",height=0.2,width=0.4,color="grey75",tooltip=" "];
+  Node4 -> Node6 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node6 [label="string",height=0.2,width=0.4,color="grey75",tooltip=" "];
+  Node3 -> Node7 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node7 [label="PlantState.h",height=0.2,width=0.4,color="black",URL="$PlantState_8h.html",tooltip="Abstract base class describing the lifecycle state of a plant."];
+  Node7 -> Node6 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node3 -> Node8 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node8 [label="Subject.h",height=0.2,width=0.4,color="black",URL="$Subject_8h.html",tooltip="Declares the Subject base that manages observer subscriptions."];
+  Node8 -> Node9 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node9 [label="list",height=0.2,width=0.4,color="grey75",tooltip=" "];
+  Node8 -> Node10 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node10 [label="Observer.h",height=0.2,width=0.4,color="black",URL="$Observer_8h.html",tooltip="Declares the Observer contract and shared event payload."];
+  Node10 -> Node11 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node11 [label="optional",height=0.2,width=0.4,color="grey75",tooltip=" "];
+  Node10 -> Node6 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node3 -> Node5 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node3 -> Node6 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+}

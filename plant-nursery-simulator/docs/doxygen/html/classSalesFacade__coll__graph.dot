@@ -1,0 +1,9 @@
+digraph "SalesFacade"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  Node1 [label="{SalesFacade\n||+ SalesFacade()\l+ addItemToCart()\l+ addItemToInventory()\l+ buildAndFinalizeOrder()\l+ checkStock()\l+ processReturn()\l+ purchaseItem()\l+ registerCustomer()\l+ registerPlantType()\l+ setGreenhouseRoot()\l+ setPlantRegistry()\l+ unregisterCustomer()\l}",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black",tooltip=" "];
+}

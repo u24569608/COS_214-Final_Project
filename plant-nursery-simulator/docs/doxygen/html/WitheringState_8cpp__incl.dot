@@ -1,0 +1,54 @@
+digraph "WitheringState.cpp"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  Node1 [label="WitheringState.cpp",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black",tooltip="Implements the WitheringState behaviour defined in the corresponding header."];
+  Node1 -> Node2 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node2 [label="../include/WitheringState.h",height=0.2,width=0.4,color="black",URL="$WitheringState_8h.html",tooltip="Concrete state representing a withering plant (needs care)."];
+  Node2 -> Node3 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node3 [label="PlantState.h",height=0.2,width=0.4,color="black",URL="$PlantState_8h.html",tooltip="Abstract base class describing the lifecycle state of a plant."];
+  Node3 -> Node4 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node4 [label="string",height=0.2,width=0.4,color="grey75",tooltip=" "];
+  Node2 -> Node4 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node1 -> Node5 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node5 [label="../include/DeadState.h",height=0.2,width=0.4,color="black",URL="$DeadState_8h.html",tooltip="Concrete state representing a dead plant."];
+  Node5 -> Node3 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node5 -> Node4 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node1 -> Node6 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node6 [label="../include/GrowingState.h",height=0.2,width=0.4,color="black",URL="$GrowingState_8h.html",tooltip="Concrete state representing a growing plant."];
+  Node6 -> Node3 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node6 -> Node4 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node1 -> Node7 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node7 [label="../include/MatureState.h",height=0.2,width=0.4,color="black",URL="$MatureState_8h.html",tooltip="Concrete state representing a mature plant (ready for sale)."];
+  Node7 -> Node3 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node7 -> Node4 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node1 -> Node8 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node8 [label="../include/PlantInstance.h",height=0.2,width=0.4,color="black",URL="$PlantInstance_8h.html",tooltip="Represents a single, physical plant in the nursery."];
+  Node8 -> Node9 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node9 [label="GreenhouseComponent.h",height=0.2,width=0.4,color="black",URL="$GreenhouseComponent_8h.html",tooltip="The abstract 'Component' interface for the Composite pattern."];
+  Node9 -> Node10 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node10 [label="memory",height=0.2,width=0.4,color="grey75",tooltip=" "];
+  Node9 -> Node4 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node8 -> Node3 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node8 -> Node11 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node11 [label="Subject.h",height=0.2,width=0.4,color="black",URL="$Subject_8h.html",tooltip="Declares the Subject base that manages observer subscriptions."];
+  Node11 -> Node12 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node12 [label="list",height=0.2,width=0.4,color="grey75",tooltip=" "];
+  Node11 -> Node13 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node13 [label="Observer.h",height=0.2,width=0.4,color="black",URL="$Observer_8h.html",tooltip="Declares the Observer contract and shared event payload."];
+  Node13 -> Node14 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node14 [label="optional",height=0.2,width=0.4,color="grey75",tooltip=" "];
+  Node13 -> Node4 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node8 -> Node10 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node8 -> Node4 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node1 -> Node15 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node15 [label="../include/PlantStateThresholds.h",height=0.2,width=0.4,color="black",URL="$PlantStateThresholds_8h.html",tooltip="Centralised constants describing lifecycle transition boundaries."];
+  Node1 -> Node16 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node16 [label="../include/PlantStateUtils.h",height=0.2,width=0.4,color="black",URL="$PlantStateUtils_8h.html",tooltip="Common helper functions shared by lifecycle state implementations."];
+  Node16 -> Node15 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node16 -> Node8 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node1 -> Node10 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+}
