@@ -1,3 +1,8 @@
+# Plant Nursery Simulator Documentation Compilation
+
+## Source: design-patterns-report.md
+
+
 # Design Patterns Report
 
 This report documents every design pattern identified and used in the Plant Nursery Simulator. For each pattern we explain the intent and rationale (why we chose it), identify the concrete implementation in this codebase (where it is), list the participants, outline key interactions, and map the pattern to the functional requirements (FRs) in `plant-nursery-simulator/docs/Functional_and_non-functional_requirements.md`.
@@ -626,3 +631,641 @@ The Plant Nursery Simulator models a nursery business end‑to‑end:
 - Extensibility: New care policies, file formats, plant states, and greenhouse structures can be added with minimal changes, leveraging Strategy, Adapter, State, and Composite.
 - Testability: Iterators, commands, and mediators make behaviour easy to drive from tests without deep setup.
 - Performance: Iterating over Composite structures is linear in the number of plants, satisfying FR/NFR scalability goals.
+
+
+
+
+---
+
+## Source: Functional_and_non-functional_requirements.md
+
+
+# Plant Nursery Simulator — Functional and Non-Functional Requirements (Project Version)
+
+*_COS214 Team — The Tormentos_*  
+_Updated: 2025 Project Version_
+
+## Scope and source
+
+This document captures the Project-version requirements described in the COS214 Final Project Specification (2025). The requirements are derived from and traceable to the implemented C++ code under `plant-nursery-simulator/include` and `plant-nursery-simulator/src`. Where applicable, each Functional Requirement (FR) references the design pattern(s) used. This satisfies the specification guidance to identify functional requirements per design pattern and to utilise at least ten design patterns.
+
+## Functional requirements
+
+The following FRs are organised by subsystem / pattern. IDs (FR1, FR2, ...) are unique across the system.
+
+### Plants, prototypes and lifecycle
+
+1. **FR1.** The system shall support registering clonable plant prototypes by name. [Pattern: Prototype]  
+   Implementation: `PlantPrototypeRegistry::addPrototype` (`include/PlantPrototypeRegistry.h`).
+
+2. **FR2.** The system shall create new plant objects by cloning a registered prototype, with optional type override. [Pattern: Prototype]  
+   Implementation: `PlantPrototypeRegistry::createPlant` (`include/PlantPrototypeRegistry.h`); `Plant::clone()` (`include/Plant.h`).
+
+3. **FR3.** The system shall model plant lifecycle states and transitions driven by vitals (health, water, nutrients) during growth ticks. [Pattern: State]  
+   Implementation: `PlantState` and concrete states `SeedState`, `GrowingState`, `MatureState`, `WitheringState`, `DeadState` (`include/*.h`); thresholds and helpers in `PlantStateThresholds.h`, `PlantStateUtils.h`; `PlantInstance::applyGrowthTick()`.
+
+4. **FR4.** The system shall mark a plant as available for sale when it is in a market-ready lifecycle state. [Pattern: State]  
+   Implementation: `MatureState::isMarketReady()`, `PlantInstance::isAvailableForSale()`.
+
+### Care strategies (watering / fertilising)
+
+5. **FR5.** The system shall define interchangeable watering strategies and execute them per plant. [Pattern: Strategy]  
+   Implementation: `WaterStrategy` and concretes `FrequentWatering`, `SeasonalWatering`, `SparseWatering`; `WaterStrategy::water()`.
+
+6. **FR6.** The system shall define interchangeable fertilising strategies and execute them per plant. [Pattern: Strategy]  
+   Implementation: `FertilizeStrategy` and concretes `LiquidFertilizer`, `SlowReleaseFertilizer`, `OrganicFertilizer`; `FertilizeStrategy::fertilize()`.
+
+7. **FR7.** The system shall allow changing the watering and fertilising strategies at runtime per plant instance. [Pattern: Strategy]  
+   Implementation: `PlantInstance::setWaterStrategy()`, `PlantInstance::setFertilizeStrategy()`.
+
+### Greenhouse structure and traversal
+
+8. **FR8.** The system shall provide a file I/O abstraction for inventory. [Pattern: Adapter Target]  
+   Implementation: `FileAdapter` (`include/FileAdapter.h`).
+
+9. **FR9.** The system shall load and save inventory using pluggable adapters for supported formats (CSV, TXT). [Pattern: Adapter]  
+   Implementation: `CSVAdapter`, `TXTAdapter` wrapping `CSVReaderWriter`, `TXTReaderWriter`; used by `Inventory::loadFromFile()`, `Inventory::saveToFile()`.
+
+10. **FR10.** The system shall organise plants in a composite greenhouse hierarchy of beds and leaves (plants). [Pattern: Composite]  
+	Implementation: `GreenhouseComponent` (component), `GreenhouseBed` (composite), `PlantInstance` (leaf).
+
+11. **FR11.** The system shall cascade care operations through the greenhouse hierarchy, reaching all plants. [Pattern: Composite]  
+	Implementation: `GreenhouseBed::performCare()` delegates to children; `PlantInstance::performCare()`.
+
+12. **FR12.** The system shall provide an iterator to traverse all plants inside a greenhouse bed hierarchy. [Pattern: Iterator]  
+	Implementation: `GreenhouseIterator` interface and `ConcreteGreenhouseIterator` (DFS over `GreenhouseBed`).
+
+### Observation and notifications
+
+13. **FR13.** Plants shall act as subjects that notify observers of significant events, including care required, availability changes, and shutdown. [Pattern: Observer]  
+	Implementation: `Subject` base; `PlantInstance` derives from `Subject`; events in `ObserverEvent`, types in `ObserverEventType`; notifications in `PlantInstance::applyGrowthTick()` and state changes.
+
+14. **FR14.** Staff and stock items shall observe plants and update their own state or reminders upon notifications. [Pattern: Observer]  
+	Implementation: `Staff::update()` (care reminders), `StockItem::update()` (availability/display status); subject lifetime handled in `Subject::~Subject()`.
+
+### Inventory and aggregation
+
+15. **FR15.** The system shall expose an aggregate interface for inventory collections to create iterators. [Pattern: Iterator Aggregate]  
+	Implementation: `InventoryCollection` with `createIterator()`.
+
+16. **FR16.** The system shall iterate over inventory items to support browsing and sales workflows. [Pattern: Iterator]  
+	Implementation: `InventoryIterator`, `ConcreteInventoryIterator`; used by `Customer::browseInventory()` and tests.
+
+17. **FR17.** The system shall maintain and query inventory, including adding, removing, counting by type, and lookup by name. [No specific pattern]  
+	Implementation: `Inventory::additem()`, `Inventory::removeItem()`, `Inventory::getStockCount()`, `Inventory::findItem()`; `StockItem` accessors.
+
+### Staff, commands and care workflow
+
+18. **FR18.** The system shall encapsulate plant care actions as commands. [Pattern: Command]  
+	Implementation: `PlantCommand` (command), `WaterPlant`, `FertilizePlant` (concrete commands); receiver methods in `PlantInstance::performWater()`, `PlantInstance::performFertilize()`.
+
+19. **FR19.** Staff shall queue and invoke plant care commands for later execution. [Pattern: Command Invoker]  
+	Implementation: `Staff::addCommandToQueue()`, `Staff::processNextTask()`, `Staff::getTaskQueueSize()`.
+
+20. **FR20.** The system shall route care requests (e.g., watering, fertilising) through a chain of responsibility. [Pattern: Chain of Responsibility]  
+	Implementation: `CareRequestHandler` (handler), `WateringHandler`, `FertilizingHandler` (concrete handlers); `CareRequestHandler::setNext()`, `canHandle()`, `handleRequest()`.
+
+21. **FR21.** Each care handler shall either process the request it supports or delegate to the next handler. [Pattern: Chain of Responsibility]  
+	Implementation: Concrete handler overrides of `canHandle()` and `handleRequest()` in `WateringHandler`, `FertilizingHandler`; client wiring via `Staff::setCareHandler()`, `Staff::makeCareRequest()`.
+
+### Mediation and customer interaction
+
+22. **FR22.** The system shall coordinate communication between colleagues (customers, staff) via a mediator. [Pattern: Mediator]  
+	Implementation: `FloorMediator` interface and `NurseryMediator` concrete; `FloorMediator::distribute()`.
+
+23. **FR23.** Customers and staff shall act as colleagues, sending and receiving messages through the mediator. [Pattern: Mediator]  
+	Implementation: `Colleague` base; `Customer` and `Staff` implement `send()/receive()/getID()`.
+
+### Sales, orders and façade
+
+24. **FR24.** The system shall build orders from items using a builder and an optional director for presets. [Pattern: Builder]  
+	Implementation: `Order` (product), `OrderBuilder` (builder), `CustomOrderBuilder` (concrete builder), `OrderDirector` (director); `Order::addItem()`, `Order::calculateTotal()`, `OrderDirector::build*()`.
+
+25. **FR25.** The system shall provide a unified façade for sales operations including purchase, stock checks, custom orders, returns, and inventory updates. [Pattern: Facade]  
+	Implementation: `SalesFacade` using `Inventory`, `PaymentProcessor`, and `OrderBuilder`; methods `purchaseItem()`, `buildAndFinalizeOrder()`, `processReturn()`, `checkStock()`, `addItemToInventory()`.
+
+26. **FR26.** The system shall execute periodic greenhouse growth ticks and follow-up care across all plants in the current bed hierarchy. [Controller + Iterator over Composite]  
+	Implementation: `GreenhouseController::runGrowthTick()` creating a fresh `GreenhouseIterator` from the current `GreenhouseBed` root.
+
+27. **FR27.** The system shall keep stock item availability in sync with the observed plant’s sale readiness for customer display. [Pattern: Observer]  
+	Implementation: `StockItem::update()`, `StockItem::getDisplayStatus()`, `StockItem::setIsAvailible()` observing `PlantInstance`.
+
+## Non-functional requirements
+
+Each NFR is stated with its addressed quality attribute in brackets.
+
+1. **NFR1.** The system shall scale linearly with the number of plants during traversal and growth ticks. Traversal is performed by iterators over the Composite, resulting in O($n$) passes for $n$ plants. [Scalability, Performance]  
+   Evidence: `ConcreteGreenhouseIterator` performs a depth-first collection; `GreenhouseController::runGrowthTick()` iterates plants once per tick.
+
+2. **NFR2.** A greenhouse growth tick over typical deployments (up to thousands of plants) shall avoid quadratic behaviour and complete using bounded, per-plant constant-time updates. [Performance]  
+   Evidence: `PlantInstance::applyGrowthTick()` performs fixed work then defers to the current `PlantState`.
+
+3. **NFR3.** Observers shall not access destroyed subjects; subject shutdown must be communicated before observer detachment. [Reliability]  
+   Evidence: `Subject::~Subject()` emits a `SubjectDestroyed` event and clears subscriptions; observers (e.g., `StockItem`) detach appropriately.
+
+4. **NFR4.** The system shall be extensible: new strategies (watering/fertilising), states, handlers, iterators, adapters, and commands can be added without modifying existing client code. [Maintainability, Extensibility]  
+   Evidence: Use of interfaces/abstract bases (e.g., `WaterStrategy`, `FertilizeStrategy`, `PlantState`, `CareRequestHandler`, `FileAdapter`, `InventoryIterator`, `PlantCommand`).
+
+5. **NFR5.** Sales interactions shall be simplified through a single façade, reducing coupling between UI/clients and subsystems. [Usability, Maintainability]  
+   Evidence: `SalesFacade` wraps `Inventory`, `PaymentProcessor`, and `OrderBuilder`.
+
+6. **NFR6.** Persistence shall be adaptable to multiple file formats without changes to inventory logic. [Portability, Maintainability]  
+   Evidence: `Inventory::loadFromFile()` and `saveToFile()` depend on the `FileAdapter` target; format specifics reside in `CSVAdapter`/`TXTAdapter`.
+
+7. **NFR7.** Core components shall be documented and organised for automated documentation generation. [Maintainability, Documentation]  
+   Evidence: Doxygen-style headers across `include/*.h` and `src/*.cpp`; complies with project requirement to use Doxygen (Spec p. 7).
+
+8. **NFR8.** The design shall support unit testing via interfaces and clear separation of concerns. [Testability, Maintainability]  
+   Evidence: Abstractions with minimal side effects (e.g., iterators, strategies, mediator, command handlers) and existing test files under `tests/` (e.g., `iterator_test.cpp`, `observer_test.cpp`, `facade_test.cpp`).
+
+## Traceability to specification
+
+These requirements align to the Final Project Specification.
+
+---
+
+_Document generated from project sources in `plant-nursery-simulator`._
+
+
+
+
+---
+
+## Source: GUI Requirements.md
+
+
+# GUI Requirements
+
+This document outlines the features the nursery simulator must expose through a
+user interface and proposes interaction patterns for each capability. The goal
+is to ensure every subsystem (sales, inventory, greenhouse, staff, adapters,
+prototype registry, and lifecycle management) is accessible to end users.
+
+## 1. Home Dashboard
+- **Functionality**:
+  - Present a high-level summary of inventory levels, recent sales, care alerts,
+    and greenhouse health.
+  - Surface outstanding staff reminders (observer messages) and pending care
+    requests from the chain-of-responsibility pipeline.
+  - Highlight plants transitioning into critical states (Withering/Dead).
+- **Suggested UI**:
+  - Cards or widgets for "Available Stock", "Plants Requiring Care",
+    "Recent Orders", and "Imports/Exports".
+  - Notification panel fed by `SubjectDestroyed`, `CareRequired`, and
+    `AvailabilityChanged` observer events.
+  - Click-through links to detailed modules (inventory list, staff tasks, etc.).
+
+## 2. Greenhouse Visualisation
+- **Functionality**:
+  - Browse the composite greenhouse hierarchy (`GreenhouseBed`, nested beds,
+    `PlantInstance` leaves).
+  - Inspect plant stats (state, health, water, nutrients, readiness for sale).
+  - Trigger manual care actions (water/fertilise via command pattern).
+  - Assign staff to beds and register observers.
+- **Suggested UI**:
+  - Tree or floor-plan view representing beds; selecting a node opens a detail
+    panel.
+  - Detail pane shows lifecycle state, thresholds, strategies in use, and
+    observer subscribers; includes controls to water or fertilise (invokes
+    strategies) and to detach/attach staff.
+  - Badges or colour-coding indicating Seed/Growing/Mature/Withering/Dead states
+    and market readiness.
+
+## 3. Plant Lifecycle Monitor
+- **Functionality**:
+  - Visualise state transitions defined in `state_lifecycle.md` and
+    `PlantState` implementations.
+  - Display resource thresholds sourced from `PlantStateThresholds` and current
+    plant metrics.
+  - Allow simulation of growth ticks, showing projected transitions.
+- **Suggested UI**:
+  - State machine diagram with live highlighting of the active state.
+  - Timeline/history chart of recent growth ticks, water/nutrient changes, and
+    health adjustments.
+  - Buttons for "Apply Growth Tick", "Manual Water", "Manual Fertilise" to
+    drive the command pattern and replay logic.
+
+## 4. Inventory Management
+- **Functionality**:
+  - View all `StockItem` entries with pricing, availability, and associated
+    `PlantInstance` metadata.
+  - Add/remove stock (`Inventory::additem`, `removeItem`, `removeItemById`).
+  - Register plant types so new items spawn greenhouse instances.
+  - Search and filter by name, type, availability, greenhouse location.
+  - Inspect and edit pricing, availability status, and observer bindings.
+- **Suggested UI**:
+  - Tabular inventory view with inline search and filtering controls.
+  - Drawer or modal to add/edit an item (name, price, is plant flag) and to
+    select associated greenhouse bed when applicable.
+  - Quick actions for "Remove", "View Plant Detail", "Register Plant Type".
+
+## 5. File Import & Export (Adapters)
+- **Functionality**:
+  - Import inventory via TXT/CSV adapters, reconciling plant instances with
+    greenhouse beds and prototypes.
+  - Export the current inventory snapshot (including plant states) to TXT/CSV.
+  - Validate files, surface parsing errors, and offer dry-run previews before
+    committing changes.
+- **Suggested UI**:
+  - Dedicated modal/wizard with steps: choose format, pick file, preview parsed
+    entries, resolve validation errors, confirm import.
+  - Export button with format selector and download link to generated files.
+  - Status log listing timestamped import/export operations with results.
+
+## 6. Sales & Customer Operations (Facade)
+- **Functionality**:
+  - Register/unregister customers for cart updates.
+  - Browse catalog, add items to customer carts, and execute purchases via the
+    `SalesFacade::purchaseItem` flow.
+  - Build custom orders using the builder pattern, finalise sales, and trigger
+    `PaymentProcessor` interactions.
+  - Process returns, restocking plant instances when appropriate.
+  - Check stock counts quickly from the sales console.
+- **Suggested UI**:
+  - Customer selector showing active carts and notifications (observer updates).
+  - Product catalog grid with "Add to Cart" actions and availability indicators.
+  - Cart sidebar listing items, quantities, total price, and checkout controls
+    (confirm sale, choose payment method, print receipt).
+  - Custom order wizard leveraging the builder: select template, add/remove
+    `StockItem`s, review & finalise.
+  - Returns dialog allowing barcode/ID lookup with restock confirmation.
+
+## 7. Prototype Registry & Plant Templates
+- **Functionality**:
+  - Manage `PlantPrototypeRegistry`: add, edit, and remove prototype entries.
+  - Configure default water/fertiliser strategies for each prototype.
+  - Trigger creation of new plant instances for testing or inventory stocking.
+- **Suggested UI**:
+  - Registry table with prototype name, type, default strategies, and usage
+    counts.
+  - Form to upload or define new prototypes (name, type, default strategies).
+  - Button to "Spawn Plant Instance" for rapid greenhouse population.
+
+## 8. Staff & Task Management
+- **Functionality**:
+  - List staff members, their assigned beds, observer subscriptions, and reminder
+    queues.
+  - Display care reminders and availability updates generated via the observer
+    pattern.
+  - Manage command queues (water/fertilise tasks) and execute next command.
+  - Initiate care requests that traverse the chain-of-responsibility handlers.
+  - Send internal messages through the mediator (`NurseryMediator`).
+- **Suggested UI**:
+  - Staff roster view with badges indicating outstanding reminders.
+  - Reminder inbox per staff member with filtering by type (Care, Availability,
+    Message).
+  - Task queue list with controls to reorder or execute commands.
+  - Buttons to submit care requests (choose plant, request type) and to send
+    messages to individuals or broadcast.
+
+## 9. Care Strategy Management
+- **Functionality**:
+  - Configure available watering and fertilising strategies (Frequent, Sparse,
+    Seasonal, etc.) and assign them to plants or prototypes.
+  - Preview the effect of strategies on water/nutrient levels.
+- **Suggested UI**:
+  - Strategy library screen describing each implementation and configurable
+    parameters (if extended in future).
+  - Assignment controls on plant and prototype detail pages (dropdown to choose
+    strategy, with apply button).
+  - Simulation widget showing expected resource deltas per strategy.
+
+## 10. Order & Return History
+- **Functionality**:
+  - Maintain a log of all orders built through the builder pattern and the
+    facade, including status transitions (Pending, Paid, Fulfilled, Returned).
+  - Allow searching and filtering by customer, date, status, or total value.
+  - Support return processing by selecting an order, inspecting contained
+    `StockItem`s, and initiating restock flows.
+- **Suggested UI**:
+  - Paginated order history table with expandable rows revealing line items and
+    statuses.
+  - Quick filters (status chips, date range picker) and export to CSV.
+  - Detail drawer for each order with actions: "Mark Paid", "Mark Shipped",
+    "Process Return".
+
+## 11. System Administration
+- **Functionality**:
+  - Configure adapters (file paths, default formats), greenhouse roots, and
+    prototype registries used by the facade.
+  - Manage user roles/permissions for different modules (optional extension).
+  - Provide health checks for subsystems (inventory count vs greenhouse plants,
+    orphaned observers, etc.).
+- **Suggested UI**:
+  - Settings area divided into sections: Inventory, Greenhouse, Sales, Staff,
+    Integrations.
+  - Diagnostic panel with status indicators and "Run Sync" buttons (e.g.,
+    resync greenhouse with inventory, clear dangling observers).
+
+## 12. Error Handling & Notifications
+- **Functionality**:
+  - Surface adapter parsing errors, payment failures, missing prototypes, and
+    observer warnings.
+  - Allow users to acknowledge and resolve issues (e.g., register missing
+    prototype when import fails).
+- **Suggested UI**:
+  - Global toast/alert system for transient messages.
+  - Persistent notification center listing unresolved issues with suggested
+    actions ("Register Prototype", "Retry Payment", "Detach Observer").
+
+
+
+
+---
+
+## Source: Memory Management\Memory management - Composite-Greenhouse.md
+
+
+# Memory Management - Composite Greenhouse
+
+`GreenhouseBed` owns its children. Each call to `add` transfers ownership of a dynamically allocated component
+into the composite, ensuring that destroying a bed destroys every nested `PlantInstance` automatically. When a caller
+needs to reuse a plant or sub-bed, it must invoke `release`/`releasePlant` to regain a `std::unique_ptr` before
+restructuring the greenhouse.
+
+- Inventory manufactures plants via `createPlantInstance`, keeps prototypes alive separately, and uses `GreenhouseBed::add`
+  to hand over plant ownership as soon as a greenhouse root is available. Removing stock calls `releasePlant` so the
+  inventory can destroy the instance or transfer it elsewhere.
+- The inventory maintains an internal *pending* list of `std::unique_ptr<PlantInstance>` when no greenhouse root is set.
+  Once a root bed arrives via `setGreenhouseRoot`, the pending plants migrate into the composite automatically.
+- Iterators (`ConcreteGreenhouseIterator`) and controllers still work with borrowed raw pointers and therefore must not
+  outlive the greenhouse tree. They never delete plants.
+- `PlantInstance` manages its internal state with `std::unique_ptr<PlantState>` while continuing to borrow strategy
+  pointers from longer-lived prototypes managed by the registry.
+
+
+
+
+---
+
+## Source: Memory Management\Memory management - GreenhouseController.md
+
+
+# Memory Management - Greenhouse Controller
+
+`GreenhouseController` orchestrates periodic care over the greenhouse composite. It holds a single `GreenhouseBed*`
+that is treated as a **non-owning** pointer:
+
+- The controller never creates or deletes greenhouse beds; it simply remembers which bed should be managed. Ownership
+  stays with the subsystem that constructed the composite (usually the `Inventory`).
+- `setRootBed()` replaces the pointer and does not perform any clean-up. It is the caller's duty to ensure the previous
+  bed remains alive as long as the controller may still reference it.
+- During `runGrowthTick()` the controller requests a new iterator via `GreenhouseBed::createIterator()`. The controller
+  stores this iterator in a `std::unique_ptr`, guaranteeing automatic destruction once the tick completes. Again, the
+  iterator references plants owned by the greenhouse / inventory; it never frees them.
+
+**Responsibility:** maintainers must ensure that the root bed outlives the controller. When disposing of the greenhouse
+composite, call `setRootBed(nullptr)` before destroying the bed or destroy the controller first. This prevents the
+controller from dereferencing dangling pointers during subsequent ticks.
+
+
+
+
+---
+
+## Source: Memory Management\Memory management - GreenhouseIterator.md
+
+
+# Memory Management - Greenhouse Iterator
+
+The greenhouse composite exposes traversal through the `GreenhouseIterator` interface. Iterators **never own** the
+plants they return; instead they hand out raw `PlantInstance*` values that are guaranteed to remain valid only while
+the owning greenhouse structure keeps the plants alive.
+
+- `GreenhouseBed::createIterator()` allocates a concrete iterator (currently via `std::unique_ptr` in call sites) and
+  populates it with pointers to plants that are stored elsewhere (e.g. `Inventory`).
+- The iterator implementation (`ConcreteGreenhouseIterator`) keeps a local cache of those raw pointers. The cache is
+  invalidated only when the iterator is rebuilt. Destroying the iterator does **not** delete the plants.
+
+**Responsibility:** whoever created the plants (typically `Inventory`) remains responsible for their lifetime. As long
+as the plants outlive the iterator, the traversal is safe. Callers must avoid storing the raw pointers after the owning
+structure (the greenhouse bed) goes out of scope.
+
+This design allows iterators to remain lightweight and avoids duplicating ownership. When additional ownership semantics
+are needed (e.g. synchronising with `std::shared_ptr`), the caller should wrap the returned raw pointer immediately.
+
+
+
+
+---
+
+## Source: Memory Management\Memory management - Observer.md
+
+
+# Memory Management - Observer Pattern
+
+The nursery uses the classic Observer pattern to decouple plant state changes from
+UI and staff reactions. Ownership flows remain explicit so that detaching observers
+never leaks memory or leaves dangling pointers:
+
+- `Subject` stores observers as non-owning raw pointers. When a subject shuts down it
+  broadcasts a `SubjectDestroyed` event with the message "Subject destroyed, observers
+  detached." and clears its subscriber list. Observers must drop cached subject
+  pointers when they receive this event.
+- `PlantInstance` inherits `Subject` and therefore owns the lifecycle of the observer
+  list. When greenhouse beds delete plants (via `std::unique_ptr`), the `Subject`
+  destructor automatically informs staff and stock entries.
+- `StockItem` observes plants but does not own them. It binds to a plant with
+  `setPlant` and immediately detaches in its destructor or when it receives
+  `SubjectDestroyed`, clearing its borrowed pointer and marking the item unavailable.
+- `Staff` members track plants through `observePlant`. The class keeps a set of
+  borrowed plant pointers and removes itself either when explicitly told via
+  `stopObservingPlant` or when the subject emits a destruction event during plant
+  teardown. Staff reminders include the shutdown message so operators know a plant
+  left the nursery.
+- Other observers (e.g., mediator colleagues) follow the same scheme: observe via the
+  raw pointer interface, detach explicitly when done, and rely on the destruction
+  broadcast as a final safety net.
+
+**Best practices**
+
+1. Prefer RAII helpers where possible. Stack-based observers (like `StockItem` in unit
+   tests) automatically detach when they go out of scope because their destructors
+   call `detach`.
+2. Always listen for `SubjectDestroyed`. Any component caching a `PlantInstance*`
+   should null the pointer inside its observer callback before the subject memory is
+   reclaimed.
+3. Avoid storing observers in containers by value; instead keep owning pointers or
+   references and call `detach` in the owner destructor. This keeps the observer list
+   free of dangling entries.
+
+Following these rules allows the Observer subsystem to rely on lightweight raw
+pointers without compromising correctness or leaking resources.
+
+
+
+
+---
+
+## Source: Memory Management\Memory management - Plant-Prototype-and-Registry.md
+
+
+# Memory Management - Plant Prototype Registry
+
+`PlantPrototypeRegistry` stores each prototype in a `std::unique_ptr<Plant>`, meaning the registry owns the lifetime
+of every prototype inserted through `addPrototype`. When the registry is destroyed (or a prototype is replaced), the
+unique pointer automatically releases the underlying `Plant` instance.
+
+Clone semantics:
+
+- `createPlant()` returns a raw `Plant*` produced by calling `clone()` on the stored prototype. The registry transfers
+  ownership of this clone to the caller, who becomes responsible for deleting it when finished.
+- `hasPrototype()` simply checks whether a non-null prototype exists; it does not affect ownership.
+
+Usage guidelines:
+
+1. Always pass `std::unique_ptr<Plant>` into `addPrototype`. Handing over a raw pointer risks leaks if an exception is
+   thrown before the registry takes ownership.
+2. After calling `createPlant()`, wrap the returned raw pointer in a smart pointer (e.g., `std::unique_ptr<Plant>`) in
+   the receiving subsystem to ensure proper cleanup.
+3. Treat the registry pointer (`PlantPrototypeRegistry*`) as non-owning when passed around. In `facade_test.cpp`, for
+   example, we now hold the registry in a `std::unique_ptr` to match this contract.
+
+Following these rules keeps prototype ownership clear: the registry owns the templates, and callers own the clones.
+
+
+
+
+---
+
+## Source: Memory Management\Memory management - State-Plant-Lifecycle.md
+
+
+# Memory Management - State/Plant Lifecycle
+
+`PlantInstance` owns its lifecycle state via `std::unique_ptr<PlantState>`. Each transition calls
+`plant.setState(std::make_unique<NextState>())`, transferring ownership to the instance and automatically destroying the
+previous state when the pointer is replaced or when the plant is destroyed.
+
+Key relationships:
+
+- `PlantInstance` **owns** the active `PlantState` and frees it automatically thanks to `std::unique_ptr`.
+- `PlantState` implementations never attempt to delete themselves; they simply call `PlantInstance::setState(...)` with a
+  freshly allocated state when a transition is required.
+- Strategies (`WaterStrategy`, `FertilizeStrategy`) and the prototype pointer (`Plant* plantType`) remain raw,
+  non-owning pointers. They reference shared objects managed elsewhere (e.g. registries or flyweights). The code assumes
+  those objects outlive the `PlantInstance` that references them.
+
+Guidelines to avoid leaks:
+
+1. Always allocate new states with `std::make_unique<ConcreteState>()` before passing them to `setState`. This guarantees
+   the previous state is released immediately.
+2. Never store the address of a `PlantState` outside the owning `PlantInstance`. Use `PlantInstance::getState()` for
+   inspection only.
+3. When injecting strategies or prototype pointers, ensure the lifetime is managed outside the plant (typically by the
+   registry or inventory). If ownership changes, replace the raw pointers with smart pointers at the owning boundary.
+
+Following these rules keeps the lifecycle self-contained and prevents dangling pointers during state transitions.
+
+
+
+
+---
+
+## Source: state_lifecycle.md
+
+
+# Plant Lifecycle State Machine
+
+This document describes the lifecycle state machine implemented for `PlantInstance`.
+
+## Overview
+
+Each `PlantInstance` owns a polymorphic `PlantState` responsible for reacting to watering, fertilising and tick events. The configured strategies are invoked through the state layer, allowing behaviour that adapts as the plant progresses through its lifecycle.
+
+Key states:
+
+- **Seed** - freshly planted specimen just after germination.
+- **Growing** - healthy plant actively gaining vitality.
+- **Mature** - fully grown plant ready for sale.
+- **Withering** - stressed plant that requires immediate care.
+- **Dead** - terminal state; the plant can no longer recover.
+
+Transitions are driven by the plant's health, water and nutrient levels. Constants describing the thresholds live in `include/PlantStateThresholds.h` and are reused across states to keep behaviour consistent.
+
+## Shared Concepts
+
+- **Memory & Ownership** - each `PlantInstance` owns its active state via
+  `std::unique_ptr<PlantState>`, guaranteeing the old state is destroyed whenever
+  `setState` installs a replacement. Observers attached to the plant receive a
+  `SubjectDestroyed` message during teardown so `StockItem` and `Staff` instances
+  can null their borrowed pointers safely.
+- **Water Strategy & Fertilize Strategy** - state methods call `PlantInstance::applyWaterStrategy()` and `PlantInstance::applyFertilizeStrategy()` to execute the currently configured strategies. When a state transition occurs during a care action, the action is replayed on the new state exactly once; the `PlantInstance::isReplayingAction()` guard prevents duplicate strategy invocations.
+- **Resource Stress** - water below `kWitheringWaterThreshold` or nutrients below `kWitheringNutrientThreshold` will push the plant towards the Withering track or reduce health during ticks.
+- **Recovery** - water and nutrients at or above the seed-to-growing thresholds, together with adequate health, allow the plant to recover from Withering.
+- **Observer Notifications** - `PlantInstance` inherits from `Subject` and issues observer events when availability changes (entering or leaving the Mature state) and when care is required (Withering transitions or resource depletion after ticks). Inventory items (`StockItem`) and staff subscribers react to these broadcasts to keep the UI and task queues in sync.
+
+Helper utilities in `include/PlantStateUtils.h` centralise checks such as `isDead`, `meetsSeedToGrowingRequirements`, `meetsGrowingToMatureRequirements`, and `hasRecoveredResources`.
+
+## State Behaviour
+
+### Seed State
+
+File: `src/SeedState.cpp`
+
+- **Water / Fertilise** - increase water by 20, nutrients by 18 respectively, and boost health (+4 for water, +3 for nutrients). Strategies are triggered unless the action is a replay.
+- **Tick** - applies `penaliseForLowResources`. Health increases slightly when resources are healthy, drops moderately if either resource is low, and drops heavily if both are low.
+- **Transitions**
+  - To **Growing**: water ≥ `kSeedToGrowingWater`, nutrients ≥ `kSeedToGrowingNutrients`, and health ≥ `kSeedToGrowingHealth`.
+  - To **Dead**: health ≤ `kDeadHealthThreshold`.
+
+### Growing State
+
+File: `src/GrowingState.cpp`
+
+- **Water / Fertilise** - apply configured strategies and adjust health (+3) alongside the specific resource (water or nutrient +18).
+- **Tick** - if resources are stressed the plant loses 7 health; otherwise it gains 2.
+- **Transitions**
+  - To **Withering**: resource stress (water < `kWitheringWaterThreshold` or nutrients < `kWitheringNutrientThreshold`).
+  - To **Mature**: meets growing-to-mature thresholds for water, nutrients and health.
+  - To **Dead**: health ≤ `kDeadHealthThreshold`.
+
+### Mature State
+
+File: `src/MatureState.cpp`
+
+- **Water / Fertilise** - apply strategy, add 12 to the relevant resource, increase health by 1.
+- **Tick** - health declines slightly (−1) when resources are adequate, and sharply (−6) under stress.
+- **Transitions**
+  - To **Withering**: resource stress or health < `kMatureHealthFloor`.
+  - To **Dead**: health ≤ `kDeadHealthThreshold`.
+
+### Withering State
+
+File: `src/WitheringState.cpp`
+
+- **Water / Fertilise** - rehydrate/refuel with +22 resource adjustments and health boosts (+5 on water, +4 on fertilise).
+- **Tick** - health degrades by 6 each cycle until rescued or dead.
+- **Transitions**
+  - To **Dead**: health ≤ `kWitheringCriticalHealth` or overall health ≤ `kDeadHealthThreshold`.
+  - To **Mature**: meets growing-to-mature thresholds.
+  - To **Growing**: water and nutrients have recovered (at least seed thresholds) and health ≥ `kWitheringRecoveryHealth`.
+
+### Dead State
+
+File: `src/DeadState.cpp`
+
+- All actions are no-ops. Once dead, the plant remains dead.
+
+## Promotion Replays
+
+When an action causes a state transition (for example, fertilising a healthy seed that immediately satisfies the growing thresholds), `PlantInstance::performWater()` and `performFertilize()` detect the state change and replay the same event on the new state exactly once. This guarantees that the new state's behaviour runs without doubling the strategy effects.
+
+## Health Adjustments
+
+- Setter methods clamp water, nutrients and health between 0 and 100.
+- Positive deltas are designed to stack with strategy effects; the tests in `tests/plant_state_test.cpp` validate that strategies run once per requested action even across promotions.
+
+## Testing
+
+`tests/plant_state_test.cpp` covers:
+
+- Full lifecycle from Seed → Growing → Mature → Withering → Dead.
+- Idempotent care in the Mature state.
+- Promotion replay correctness (Seed fertilise promotion).
+- Recovery from Withering back to Growing/Mature with water and fertiliser.
+
+Running `make plant_state_unit_test` or the umbrella `make test` executes these checks.
+
+
+
