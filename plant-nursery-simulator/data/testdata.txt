@@ -1,0 +1,4 @@
+Plant,Rose,10,Mature
+Plant,Tulip,6,Mature
+Plant,Tulip2,5,Mature
+Item,Pot,7
