@@ -6,7 +6,7 @@ This document outlines the 30-minute demo flow, speaker scripts, and technical c
 
 * **Total Time:** 30 Minutes
 * **Team:**
-    * **You (Speaker):** Intro, Other UMLs, Live UI Simulation, Conclusion
+    * **Adriano (Speaker):** Intro, Other UMLs, Live UI Simulation, Conclusion
     * **Johan (Speaker):** System Architecture & Design Patterns
     * **Zoe (Speaker):** Code Documentation (Doxygen)
     * **Bulelani (Speaker):** Development Practices (Git Workflow)
@@ -16,7 +16,7 @@ This document outlines the 30-minute demo flow, speaker scripts, and technical c
 
 ## 1. Introduction (3 Minutes)
 
-* **Speaker:** You
+* **Speaker:** Adriano
 * **Driver:** Connor
 
 #### 🕹️ [Connor's Cues]
@@ -29,7 +29,7 @@ This document outlines the 30-minute demo flow, speaker scripts, and technical c
     * Title: Plant Palace Nursery System
     * Course: COS214 Final Project
     * Team Name: [Your Creative Team Name]
-    * Members: [Your Name], Johan, Zoe, Bulelani, Connor
+    * Members: Adriano, Johan, Zoe, Bulelani, Connor
 * **Slide 2: The Project Goal**
     * **Objective:** "Design and implement a flexible, maintainable, and scalable Plant Nursery Simulator in C++."
     * **Core Task:** "Model the three main areas of a working nursery:"
@@ -38,16 +38,16 @@ This document outlines the 30-minute demo flow, speaker scripts, and technical c
         * The Customers & Sales Floor
     * **Key Constraint:** "Use object-oriented principles and at least 10 design patterns to manage complexity."
 * **Slide 3: Demo Agenda**
-    1.  Introduction (Me)
+    1.  Introduction (Adriano)
     2.  System Architecture & Patterns (Johan)
-    3.  Behavioural Modelling (Me)
-    4.  Live System Simulation (Me & Connor)
+    3.  Behavioural Modelling (Adriano)
+    4.  Live System Simulation (Adriano & Connor)
     5.  Documentation (Zoe)
     6.  Development Workflow (Bulelani)
     7.  Conclusion & Q&A
 
-#### 🎤 Your Speech (Intro)
-> "Good morning everyone. My name is [Your Name], and on behalf of my team—Johan, Zoe, Bulelani, and Connor—I'd like to welcome you to the demo of our COS214 final project, the Plant Palace Nursery System.
+#### 🎤 Adriano's Speech (Intro)
+> "Good morning everyone. My name is Adriano, and on behalf of my team—Johan, Zoe, Bulelani, and Connor—I'd like to welcome you to the demo of our COS214 final project, the Plant Palace Nursery System.
 >
 > The goal of this project was to design and implement a complex, object-oriented simulation of a plant nursery in C++17. The specification required us to model the three core areas of the business: the **Greenhouse** where plants grow, the **Staff** who care for them, and the **Customers** on the sales floor.
 >
@@ -104,7 +104,7 @@ This document outlines the 30-minute demo flow, speaker scripts, and technical c
 
 ## 3. Behavioural Modelling (2 Minutes)
 
-* **Speaker:** You
+* **Speaker:** Adriano
 * **Driver:** Connor
 
 #### 🕹️ [Connor's Cues]
@@ -120,7 +120,7 @@ This document outlines the 30-minute demo flow, speaker scripts, and technical c
         * Object Diagram
         * Communication Diagram
 
-#### 🎤 Your Speech (Behavioural Modelling)
+#### 🎤 Adriano's Speech (Behavioural Modelling)
 > "Thanks, Johan. As part of our initial design for Practical 5, we also created several other UML diagrams to model the system's *behaviour*.
 >
 > On this slide, you can see our **State Diagram**, which models the plant lifecycle from Seed to Dead. We also have an **Activity Diagram** for the sales workflow, and **Sequence** and **Communication** diagrams to map out object interactions.
@@ -131,7 +131,7 @@ This document outlines the 30-minute demo flow, speaker scripts, and technical c
 
 ## 4. Live System Simulation (10 Minutes)
 
-* **Speaker:** You
+* **Speaker:** Adriano
 * **Driver:** Connor
 
 #### 🕹️ [Connor's Cues]
@@ -181,7 +181,7 @@ This document outlines the 30-minute demo flow, speaker scripts, and technical c
     12. Click **"Finalise Order"**. (Pause for log update).
     13. Go back to the "Inventory List" sub-tab (show that the Bonsai is gone).
 
-#### 🎤 Your Speech (Live Simulation)
+#### 🎤 Adriano's Speech (Live Simulation)
 > "Okay, this is the main interface for the Plant Palace Simulator. The system is organized into tabs: Messaging, Greenhouse Management, Sales & Inventory, and System Admin. The log at the bottom timestamps key actions.
 >
 > **Flow 1: System Admin & Setup (Adapters & Prototypes)**
@@ -286,7 +286,7 @@ This document outlines the 30-minute demo flow, speaker scripts, and technical c
 
 ## 7. Conclusion & Q&A (2 Minutes)
 
-* **Speaker:** You
+* **Speaker:** Adriano
 * **Driver:** Connor
 
 #### 🕹️ [Connor's Cues]
@@ -298,7 +298,7 @@ This document outlines the 30-minute demo flow, speaker scripts, and technical c
     * Title: Thank You
     * Message: Questions?
 
-#### 🎤 Your Speech (Conclusion)
+#### 🎤 Adriano's Speech (Conclusion)
 > "Thank you, Bulelani and Zoe.
 >
 > In summary, our Plant Palace system successfully models a complex nursery using C++17 and object-oriented principles. By applying design patterns like **Facade**, **Composite**, **Observer**, and **Adapter**, we built a system that is flexible, maintainable, and meets all the project requirements.
