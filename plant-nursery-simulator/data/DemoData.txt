@@ -1,0 +1,50 @@
+Plant,Rose,10.00,Mature
+Plant,Tulip,6.00,Growing
+Item,Spade,12.00
+Item,Pot,7.00
+Plant,Sunflower,8.50,Growing
+Plant,Oak Sapling,15.00,Seed
+Item,Watering Can,14.99
+Item,Fertilizer,5.00
+Plant,Fern,7.00,Mature
+Plant,Venus Flytrap,25.00,Growing
+Plant,Cactus,12.00,Mature
+Plant,Bonsai Tree,50.00,Mature
+Item,Gardening Gloves,9.50
+Item,Pruning Shears,18.00
+Plant,Lavender,9.00,Growing
+Plant,Mint,5.50,Growing
+Plant,Basil,5.50,Growing
+Plant,Orchid,30.00,Mature
+Item,Soil Bag,8.00
+Item,Compost Bin,45.00
+Plant,Fiddle Leaf Fig,40.00,Growing
+Plant,Snake Plant,22.00,Mature
+Plant,Peace Lily,18.00,Growing
+Plant,Spider Plant,15.00,Mature
+Item,Trowel,6.50
+Item,Wheelbarrow,75.00
+Plant,Marigold,4.00,Seed
+Plant,Zinnia,4.50,Seed
+Plant,Poppy,5.00,Growing
+Plant,Daisy,6.00,Mature
+Item,Hose,25.00
+Item,Nozzle,8.00
+Plant,Pothos,14.00,Growing
+Plant,Monstera,35.00,Growing
+Plant,Aloe Vera,10.00,Mature
+Plant,Jade Plant,12.50,Mature
+Item,Rake,15.00
+Item,Shovel,20.00
+Plant,Petunia,5.00,Seed
+Plant,Begonia,7.50,Growing
+Plant,Hydrangea,28.00,Mature
+Plant,Peony,15.00,Growing
+Item,Weed Puller,11.00
+Item,Gardening Fork,13.50
+Plant,Succulent,8.00,Mature
+Plant,Air Plant,12.00,Mature
+Plant,Fittonia,9.00,Growing
+Plant,Calathea,20.00,Growing
+Item,Plant Stand,30.00
+Item,Hanging Basket,15.00
