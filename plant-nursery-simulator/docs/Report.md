@@ -1,20 +1,20 @@
 # Plant Nursery Simulator — Final Report
 
-**Design Patterns, Requirements, and System Overview**
-**Course:** COS214 (University of Pretoria) 
-**Team:** The Tormentos
-**Date:** 2025-11-02
+**Design Patterns, Requirements, and System Overview**  
+**Course:** COS214 (University of Pretoria)  
+**Team:** The Tormentos  
+**Date:** 2025-11-02  
 
 
 ## Table of Contents
 
 1. [Research Brief: Nursery Domain Findings](#1-research-brief-nursery-domain-findings)
-   1.1 [Plant care and growth management](#11-plant-care-and-growth-management)
-   1.2 [Staff coordination and task flow](#12-staff-coordination-and-task-flow)
-   1.3 [Customer experience and sales workflow](#13-customer-experience-and-sales-workflow)
-   1.4 [System scalability and data management](#14-system-scalability-and-data-management)
-   1.5 [Assumptions and definitions](#15-assumptions-and-definitions)
-   1.6 [References](#16-references)
+    1. [Plant Care and Growth Management](#11-plant-care-and-growth-management)
+    2. [Staff Coordination and Task Flow](#12-staff-coordination-and-task-flow)
+    3. [Customer Experience and Sales Workflow](#13-customer-experience-and-sales-workflow)
+    4. [System Scalability and Data Management](#14-system-scalability-and-data-management)
+    5. [Assumptions and Definitions](#15-assumptions-and-definitions)
+    6. [References](#16-references)
 2. [System Overview](#2-system-overview)
 3. [Functional & Non-Functional Requirements](#3-functional--non-functional-requirements)
 4. [Design Patterns Report](#4-design-patterns-report)
@@ -131,7 +131,7 @@ The Plant Nursery Simulator models a nursery business end-to-end:
 
 ### Iterator — Inventory
 
-![Iterator - Inventory](diagrams/ClassDiagram/DPClassDiagrams/IteratorInventory.png)
+<img src="diagrams/ClassDiagram/DPClassDiagrams/IteratorInventory.png" alt="Iterator - Inventory" width="600"/>
 
 * **Intent & rationale:** Uniform traversal over inventory without exposing containers; enforce business ordering.
 * **Where:** `InventoryCollection.h`, `InventoryIterator.h`, `ConcreteInventoryIterator.*`, `Inventory.*`
@@ -142,7 +142,7 @@ The Plant Nursery Simulator models a nursery business end-to-end:
 
 ### Iterator — Greenhouse
 
-![Iterator - Greenhouse](diagrams/ClassDiagram/DPClassDiagrams/IteratorGreenhouse.png)
+<img src="diagrams/ClassDiagram/DPClassDiagrams/IteratorGreenhouse.png" alt="Iterator - Greenhouse" width="600"/>
 
 * **Intent & rationale:** Traverse Composite greenhouse without coupling traversal to structure.
 * **Where:** `GreenhouseIterator.h`, `ConcreteGreenhouseIterator.*`, `GreenhouseComponent.h`, `GreenhouseBed.*`, `GreenhouseController.*`
@@ -153,7 +153,7 @@ The Plant Nursery Simulator models a nursery business end-to-end:
 
 ### Composite — Greenhouse Structure
 
-![Composite - Greenhouse Structure](diagrams/ClassDiagram/DPClassDiagrams/CompositeGreenhouse.png)
+<img src="diagrams/ClassDiagram/DPClassDiagrams/CompositeGreenhouse.png" alt="Composite - Greenhouse Structure" width="600"/>
 
 * **Intent & rationale:** Part–whole hierarchy of beds and plants; uniform operations.
 * **Where:** `GreenhouseComponent.h`, `GreenhouseBed.*`, `PlantInstance.*`
@@ -164,7 +164,7 @@ The Plant Nursery Simulator models a nursery business end-to-end:
 
 ### Facade — Sales
 
-![Facade - Sales](diagrams/ClassDiagram/DPClassDiagrams/FacadeSales.png)
+<img src="diagrams/ClassDiagram/DPClassDiagrams/FacadeSales.png" alt="Facade - Sales" width="600"/>
 
 * **Intent & rationale:** Single entry point for sales operations decoupling UI from subsystems.
 * **Where:** `SalesFacade.*` (+ `Inventory`, `PaymentProcessor`, `OrderBuilder`)
@@ -173,7 +173,7 @@ The Plant Nursery Simulator models a nursery business end-to-end:
 
 ### Builder — Orders
 
-![Builder - Orders](diagrams/ClassDiagram/DPClassDiagrams/BuilderOrders.png)
+<img src="diagrams/ClassDiagram/DPClassDiagrams/BuilderOrder.png" alt="Builder - Order" width="600"/>
 
 * **Intent & rationale:** Step-by-step construction of complex orders via director presets.
 * **Where:** `Order.*`, `OrderBuilder.h`, `CustomOrderBuilder.*`, `OrderDirector.*`
@@ -183,7 +183,7 @@ The Plant Nursery Simulator models a nursery business end-to-end:
 
 ### Observer — Plants, Staff, Stock Items
 
-![Observer - Plants, Staff, Stock](diagrams/ClassDiagram/DPClassDiagrams/ObserverPlantsStaffStock.png)
+<img src="diagrams/ClassDiagram/DPClassDiagrams/ObserverPlant.png" alt="Observer - Plants, Staff, Stock Items" width="600"/>
 
 * **Intent & rationale:** Decouple plant events from staff reminders and storefront availability.
 * **Where:** `Observer.h`, `Subject.*`, `Staff.*`, `StockItem.*`, `PlantInstance.*`
@@ -193,7 +193,7 @@ The Plant Nursery Simulator models a nursery business end-to-end:
 
 ### Adapter — Inventory File I/O
 
-![Adapter - Inventory File I/O](diagrams/ClassDiagram/DPClassDiagrams/AdapterInventory.png)
+<img src="diagrams/ClassDiagram/DPClassDiagrams/AdapterIO.png" alt="Adapter - Inventory File I/O" width="600"/>
 
 * **Intent & rationale:** Pluggable CSV/TXT I/O without changing inventory logic.
 * **Where:** `FileAdapter.h` (Target), `CSVReaderWriter.*` / `TXTReaderWriter.*` (Adaptees), `CSVAdapter.*` / `TXTAdapter.*` (Adapters); `Inventory` uses `FileAdapter`.
@@ -202,7 +202,7 @@ The Plant Nursery Simulator models a nursery business end-to-end:
 
 ### Prototype — Plants and Registry
 
-![Prototype - Plants and Registry](diagrams/ClassDiagram/DPClassDiagrams/PrototypePlantsRegistry.png)
+<img src="diagrams/ClassDiagram/DPClassDiagrams/PrototypePlant.png" alt="Prototype - Plants and Registry" width="600"/>
 
 * **Intent & rationale:** Data-driven creation of plant types by cloning prototypes.
 * **Where:** `Plant.*` (`clone()`), `PlantPrototypeRegistry.*`
@@ -211,7 +211,7 @@ The Plant Nursery Simulator models a nursery business end-to-end:
 
 ### State — Plant Lifecycle
 
-![State - Plant Lifecycle](diagrams/ClassDiagram/DPClassDiagrams/StatePlantLifecycle.png)
+<img src="diagrams/ClassDiagram/DPClassDiagrams/StatePlant.png" alt="State - Plant Lifecycle" width="600"/>
 
 * **Intent & rationale:** Encapsulate lifecycle behaviour and transitions.
 * **Where:** `PlantState.h`, concrete states (Seed/Growing/Mature/Withering/Dead), helpers (`PlantStateUtils`, `PlantStateThresholds`); `PlantInstance` delegates.
@@ -220,7 +220,7 @@ The Plant Nursery Simulator models a nursery business end-to-end:
 
 ### Command — Plant Care Tasks
 
-![Command - Plant Care Tasks](diagrams/ClassDiagram/DPClassDiagrams/CommandPlantCare.png)
+<img src="diagrams/ClassDiagram/DPClassDiagrams/CommandPlantCare.png" alt="Command - Plant Care Tasks" width="600"/>
 
 * **Intent & rationale:** Encapsulate care actions (water, fertilise) queued by staff.
 * **Where:** `PlantCommand.h`, `WaterPlant.*`, `FertilizePlant.*`; receiver `PlantInstance`; invoker `Staff`.
@@ -229,7 +229,7 @@ The Plant Nursery Simulator models a nursery business end-to-end:
 
 ### Mediator — Floor Coordination
 
-![Mediator - Floor Coordination](diagrams/ClassDiagram/DPClassDiagrams/MediatorFloor.png)
+<img src="diagrams/ClassDiagram/DPClassDiagrams/MediatorFloor.png" alt="Mediator - Floor Coordination" width="600"/>
 
 * **Intent & rationale:** Centralise communication among colleagues to reduce coupling.
 * **Where:** `FloorMediator.h`, `NurseryMediator.*`; `Colleague` base; `Customer`/`Staff`.
@@ -238,7 +238,7 @@ The Plant Nursery Simulator models a nursery business end-to-end:
 
 ### Chain of Responsibility — Care Routing
 
-![Chain of Responsibility - Care Routing](diagrams/ClassDiagram/DPClassDiagrams/ChainOfResponsibilityCare.png)
+<img src="diagrams/ClassDiagram/DPClassDiagrams/CORHandlers.png" alt="Chain of Responsibility - Care Routing" width="600"/>
 
 * **Intent & rationale:** Route care requests through handlers; easy extensibility.
 * **Where:** `CareRequestHandler.h`, `WateringHandler.*`, `FertilizingHandler.*`; wired by `Staff`.
@@ -247,7 +247,7 @@ The Plant Nursery Simulator models a nursery business end-to-end:
 
 ### Strategy — Watering and Fertilising
 
-![Strategy - Watering and Fertilising](diagrams/ClassDiagram/DPClassDiagrams/StrategyWateringFertilize.png)
+<img src="diagrams/ClassDiagram/DPClassDiagrams/StrategyPrototypePlant.png" alt="Strategy - Watering and Fertilising" width="600" />
 
 * **Intent & rationale:** Swap care algorithms at runtime; optional prototyped presets.
 * **Where:** `WaterStrategy.h`, `FertilizeStrategy.h`; concrete strategies; used by `PlantInstance`.
