@@ -212,6 +212,7 @@ object frmMain: TfrmMain
     Align = alTop
     BevelOuter = bvNone
     TabOrder = 1
+    ExplicitWidth = 1025
     object btnSimulate: TButton
       Left = 8
       Top = 11
@@ -233,6 +234,8 @@ object frmMain: TfrmMain
     Align = alBottom
     Images = vrtlmglstMain
     TabOrder = 0
+    ExplicitTop = 444
+    ExplicitWidth = 1025
     object tsLog: TTabSheet
       Caption = 'Log'
       ImageIndex = 1
@@ -257,6 +260,7 @@ object frmMain: TfrmMain
         ScrollBars = ssVertical
         TabOrder = 0
         StyleElements = [seBorder]
+        ExplicitWidth = 1017
       end
     end
     object tsMessages: TTabSheet
@@ -460,6 +464,8 @@ object frmMain: TfrmMain
     Align = alClient
     Images = vrtlmglstMain
     TabOrder = 2
+    ExplicitWidth = 1025
+    ExplicitHeight = 395
     object tsGreenhouseManagement: TTabSheet
       Caption = 'Greenhouse Management   '
       ImageIndex = 3
@@ -476,6 +482,8 @@ object frmMain: TfrmMain
         BevelOuter = bvNone
         TabOrder = 0
         UseWheelForScrolling = True
+        ExplicitWidth = 836
+        ExplicitHeight = 359
         inline frmGreenhouseInformation1: TfrmGreenhouseInformation
           Left = 0
           Top = 0
@@ -492,14 +500,16 @@ object frmMain: TfrmMain
           ParentColor = False
           ParentFont = False
           TabOrder = 0
-          ExplicitWidth = 813
+          ExplicitWidth = 811
           inherited grpAction: TGroupBox
             inherited btnFertilise: TBitBtn
               Top = 137
+              Images = nil
               ExplicitTop = 137
             end
             inherited btnWater: TBitBtn
               Top = 98
+              Images = nil
               ExplicitTop = 98
             end
           end
@@ -526,6 +536,7 @@ object frmMain: TfrmMain
         Align = alLeft
         Caption = 'Panel1'
         TabOrder = 1
+        ExplicitHeight = 359
         object tvGreenhouse: TTreeView
           Left = 1
           Top = 1
@@ -535,6 +546,7 @@ object frmMain: TfrmMain
           Indent = 19
           TabOrder = 0
           OnChange = tvGreenhouseChange
+          ExplicitHeight = 357
         end
       end
     end
@@ -644,9 +656,6 @@ object frmMain: TfrmMain
               ParentFont = False
               TabOrder = 0
               ExplicitWidth = 986
-              inherited btnRefund: TBitBtn
-                Images = nil
-              end
               inherited btnAddToOrder: TBitBtn
                 Anchors = [akLeft]
                 Images = nil

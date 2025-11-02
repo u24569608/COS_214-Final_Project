@@ -110,25 +110,13 @@ object frmSales: TfrmSales
     TabOrder = 1
     StyleElements = [seClient, seBorder]
   end
-  object btnRefund: TBitBtn
-    Left = 445
-    Top = 171
-    Width = 173
-    Height = 33
-    Caption = 'Refund Order'
-    Enabled = False
-    ImageIndex = 20
-    ImageName = 'Refund'
-    Images = frmMain.vrtlmglstMain
-    TabOrder = 2
-  end
   object cmbCustomerSelect: TComboBox
     Left = 445
     Top = 84
     Width = 173
     Height = 29
     Enabled = False
-    TabOrder = 3
+    TabOrder = 2
     Text = 'Customer'
     OnChange = cmbCustomerSelectChange
   end
@@ -142,7 +130,7 @@ object frmSales: TfrmSales
     ImageIndex = 12
     ImageName = 'Add'
     Images = frmMain.vrtlmglstMain
-    TabOrder = 4
+    TabOrder = 3
     OnClick = btnAddToOrderClick
   end
   object btnProcessPayment: TBitBtn
@@ -156,7 +144,7 @@ object frmSales: TfrmSales
     ImageIndex = 13
     ImageName = 'Cash'
     Images = frmMain.vrtlmglstMain
-    TabOrder = 5
+    TabOrder = 4
     OnClick = btnProcessPaymentClick
   end
 end

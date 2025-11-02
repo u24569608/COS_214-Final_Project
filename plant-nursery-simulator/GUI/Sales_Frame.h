@@ -26,7 +26,6 @@ __published:	// IDE-managed Components
 	TRichEdit *redtOrderDetails;
 	TBitBtn *btnProcessPayment;
 	TLabel *lblOrderSummaryHeading;
-	TBitBtn *btnRefund;
 	TComboBox *cmbCustomerSelect;
 	TLabel *lblCustomerSelectionHeading;
 	/**
