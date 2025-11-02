@@ -42,12 +42,12 @@ This document outlines the 30-minute demo flow, speaker scripts, and technical c
     2.  System Architecture & Patterns (Johan)
     3.  Behavioural Modelling (Adriano)
     4.  Live System Simulation (Adriano & Connor)
-    5.  Documentation (Zoe)
+    5.  Documentation (Zoë)
     6.  Development Workflow (Bulelani)
     7.  Conclusion & Q&A
 
 #### 🎤 Adriano's Speech (Intro)
-> "Good morning everyone. My name is Adriano, and on behalf of my team—Johan, Zoe, Bulelani, and Connor—I'd like to welcome you to the demo of our COS214 final project, the Plant Palace Nursery System.
+> "Good morning everyone. My name is Adriano, and on behalf of my team—Johan, Zoë, Bulelani, and Connor—I'd like to welcome you to the demo of our COS214 final project, the Plant Palace Nursery System.
 >
 > The goal of this project was to design and implement a complex, object-oriented simulation of a plant nursery in C++17. The specification required us to model the three core areas of the business: the **Greenhouse** where plants grow, the **Staff** who care for them, and the **Customers** on the sales floor.
 >
@@ -236,12 +236,12 @@ This document outlines the 30-minute demo flow, speaker scripts, and technical c
 
 ## 5. Code Documentation (2.5 Minutes)
 
-* **Speaker:** Zoe
+* **Speaker:** Zoë
 * **Driver:** Connor
 
 #### 🕹️ [Connor's Cues]
 * Switch from the GUI to the web browser showing the Doxygen HTML output.
-* Navigate to a key class page, like `PlantInstance` or `SalesFacade`, as Zoe begins.
+* Navigate to a key class page, like `PlantInstance` or `SalesFacade`, as Zoë begins.
 * Scroll down to show method details and parameters as she mentions them.
 * Click on a collaboration diagram if she points it out.
 
@@ -303,7 +303,7 @@ This document outlines the 30-minute demo flow, speaker scripts, and technical c
     * Message: Questions?
 
 #### 🎤 Adriano's Speech (Conclusion)
-> "Thank you, Bulelani and Zoe.
+> "Thank you, Bulelani and Zoë.
 >
 > In summary, our Plant Palace system successfully models a complex nursery using C++17 and object-oriented principles. By applying design patterns like **Facade**, **Composite**, **Observer**, and **Adapter**, we built a system that is flexible, maintainable, and meets all the project requirements.
 >
