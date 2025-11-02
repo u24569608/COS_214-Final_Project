@@ -280,7 +280,7 @@ This document outlines the 30-minute demo flow, speaker scripts, and technical c
 * Describe the team's branching strategy (e.g., "We used a feature-branch workflow. Developers would create a new branch, implement their feature, and then open a Pull Request for review.").
 * (While Connor shows the GitHub page) Point to the closed Pull Requests and the commit history, noting that all members contributed regularly, meeting the 10-commit requirement.
 * Mention the use of **Unit Tests**: "We also implemented automated unit tests to ensure key functionalities, like our patterns and business logic, worked as expected. Every member contributed to writing these tests."
-* (Optional) If you did the bonus: "We also set up a GitHub Actions pipeline to automatically lint and test our code on every commit."
+* "We also set up a GitHub Actions pipeline to automatically lint and test our code on every commit."
 
 ---
 
