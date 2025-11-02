@@ -198,14 +198,14 @@ This document outlines the 30-minute demo flow, speaker scripts, and technical c
 >
 > "Now let's see that plant. In the **Greenhouse Management** tab, we can browse the **Composite** structure. As we expand the beds, you can see we have nested beds and individual plants.
 >
-> "Here is the 'Bonsai' we just added. When we select it, the right panel updates with its live data. This is the **Observer** pattern at work; the UI observes the plant. We can see its vitals and its current **State**, which is 'Growing'.
+> "Here is the 'Bonsai' we just added. When we select it, the right panel updates with its live data. This is the **Observer** pattern at work; the UI observes the plant. We can see its vitals and its current **State**, which is 'seed'.
 >
-> "Now, let's simulate time passing. By clicking 'Run Growth Tick', we use a **Greenhouse Iterator** to visit every plant in the composite and apply growth. You can see the plant's vitals changing in the log.
+> "Now, let's simulate time passing. By clicking 'Run Growth Tick', we use a **Greenhouse Iterator** to visit every plant in the composite and apply growth. You can see the plant's vitals changing in the log, additionally lets assign a staff member to track our new 'bonsai'plant.
 >
 > "Let's run a few more ticks. ... Okay, notice the log? The plant's state changed to 'Mature', and its 'Sale Readiness' is now 'True'. This state change was also *observed* by its corresponding `StockItem`, so it's now available for sale."
 >
 > **Flow 3: Staff & Plant Care (Command, Observer, Strategy)**
->
+> 
 > "Let's run another tick. ... Ah, the log now says 'Care Required: Needs Water'. The plant's `WaterStrategy` determined it was thirsty and, as a Subject, it *notified* its **Observers**.
 >
 > "If we go to the **System Admin** tab and look at 'Staff Tasks', we can see 'Staff 1' is observing that plant, so a 'Water Plant' task appeared in their queue. This is the **Command** pattern. The request is an object in a queue.
