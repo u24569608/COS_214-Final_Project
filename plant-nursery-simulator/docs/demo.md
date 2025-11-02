@@ -194,9 +194,11 @@ This document outlines the 30-minute demo flow, speaker scripts, and technical c
 >
 > "Now that we have this 'Bonsai' prototype, we can clone it into the greenhouse. We just select the prototype, choose the 'Main Greenhouse' bed, set a price, and add it. A new `PlantInstance` is created from the prototype and added to the greenhouse **Composite**."
 >
+> "btw, we can also add for example a purple pot from the add item in system admin." 
+>
 > **Flow 2: Greenhouse Management (Composite, Iterator, Observer, State)**
 >
-> "Now let's see that plant. In the **Greenhouse Management** tab, we can browse the **Composite** structure. As we expand the beds, you can see we have nested beds and individual plants.
+> "Now moving on let's see that plant. In the **Greenhouse Management** tab, we can browse the **Composite** structure. As we expand the beds, you can see we have nested beds and individual plants.
 >
 > "Here is the 'Bonsai' we just added. When we select it, the right panel updates with its live data. This is the **Observer** pattern at work; the UI observes the plant. We can see its vitals and its current **State**, which is 'seed'.
 >
@@ -206,25 +208,27 @@ This document outlines the 30-minute demo flow, speaker scripts, and technical c
 >
 > **Flow 3: Staff & Plant Care (Command, Observer, Strategy)**
 > 
-> "Let's run another tick. ... Ah, the log now says 'Care Required: Needs Water'. The plant's `WaterStrategy` determined it was thirsty and, as a Subject, it *notified* its **Observers**.
+> "Let's some more growth ticks, we now notice that the plant requires care. The plant's `WaterStrategy` determined it was thirsty and, as a Subject, it *notified* its **Observers**.
 >
-> "If we go to the **System Admin** tab and look at 'Staff Tasks', we can see 'Staff 1' is observing that plant, so a 'Water Plant' task appeared in their queue. This is the **Command** pattern. The request is an object in a queue.
+> "If we go to the **System Admin** tab and look at 'Staff Tasks', we can see 'Staff 101' is observing that plant, so a 'Water Plant' task appeared in their queue. This is the **Command** pattern. The request is an object in a queue.
 >
 > "When we process the next task, the command is executed, the plant is watered, and the task is removed from the queue.
 >
 > "Back in the **Greenhouse** tab, we can also change the plant's care **Strategy** at runtime. We'll select the Bonsai and change its Water Strategy from 'Sparse' to 'Frequent'. Now, this plant instance will use a different watering algorithm."
 >
+> "additionally we can manualy queue a water or fertilizing task for a selected plant and staff memeber, this will add the care request to the staff memebers pending task queue."
+> 
 > **Flow 4: Messaging & Sales (Mediator, Facade, Builder, Iterator)**
 >
-> "While we're here, let's use the **Messaging** tab. This system uses the **Mediator** pattern to decouple staff and customers. We'll send a message from 'Staff 1' to 'Customer 1' saying 'Your Bonsai is ready'.
+> "While we're here, let's use the **Messaging** tab. This system uses the **Mediator** pattern to decouple staff and customers. We'll send a message from 'Staff 101' to 'Customer 201' saying 'Your Bonsai is ready'.
 >
 > "Finally, let's sell that Bonsai. In the **Sales & Inventory** tab, the inventory list—which is populated by an **Inventory Iterator**—shows our Bonsai is listed as 'Available'.
 >
-> "In the 'Create Order' sub-tab, we'll select 'Customer 1'.
+> "In the 'sales' sub-tab, from the 'Select Item' dropdown, we'll add the 'Bonsai' to the order. This dropdown only shows items that are *actually* available for sale, thanks to the Observer and Iterator patterns working together.
 >
-> "Now, from the 'Select Item' dropdown, we'll add the 'Bonsai' to the order. This dropdown only shows items that are *actually* available for sale, thanks to the Observer and Iterator patterns working together.
+> "Now, we'll also select 'Customer 201'.
 >
-> "When we click 'Finalise Order', we are calling our **Sales Facade**. This one method call handles everything: it uses an **Order Builder** to create the order, tells the `PaymentProcessor` to charge the customer, and updates the `Inventory` to remove the item. As you can see, the order is logged, and if we check the inventory list, the Bonsai is gone."
+> "When we click 'Process Payment', we are calling our **Sales Facade**. This one method call handles everything: it uses an **Order Builder** to create the order, tells the `PaymentProcessor` to charge the customer, and updates the `Inventory` to remove the item. As you can see, the order is logged, additionally if we check the inventory list and greenhouse, the Bonsai is gone."
 >
 > "That concludes the main simulation flow. As you can see, the patterns work together to create a decoupled and flexible system. Now, I'll pass it over to Zoe to discuss our documentation."
 
