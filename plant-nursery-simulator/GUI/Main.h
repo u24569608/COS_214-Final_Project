@@ -1,0 +1,561 @@
+//---------------------------------------------------------------------------
+
+#ifndef MainH
+#define MainH
+//---------------------------------------------------------------------------
+#include <System.Classes.hpp>
+#include <Vcl.Controls.hpp>
+#include <Vcl.StdCtrls.hpp>
+#include <Vcl.Forms.hpp>
+#include <Vcl.ComCtrls.hpp>
+#include <Vcl.Menus.hpp>
+#include <Vcl.ExtCtrls.hpp>
+#include <System.Skia.hpp>
+#include <Vcl.Skia.hpp>
+#include <Vcl.BaseImageCollection.hpp>
+#include <Vcl.ImageCollection.hpp>
+#include <System.ImageList.hpp>
+#include <Vcl.ImgList.hpp>
+#include <Vcl.VirtualImageList.hpp>
+#include <Vcl.Buttons.hpp>
+#include "Greenhouse_Information_Frame.h"
+#include "Sales_Frame.h"
+#include <Vcl.Dialogs.hpp>
+#include <Vcl.Mask.hpp>
+#include <functional>
+#include <memory>
+#include <optional>
+#include <string>
+#include <unordered_map>
+#include <unordered_set>
+#include <vector>
+
+#include "../include/NurseryMediator.h"
+#include "../include/Colleague.h"
+#include "../include/Staff.h"
+#include "../include/Customer.h"
+
+#include "../include/PlantPrototypeRegistry.h"
+#include "../include/Plant.h"
+#include "../include/GreenhouseBed.h"
+#include "../include/PlantInstance.h"
+#include "../include/GreenhouseComponent.h"
+#include "../include/GreenhouseIterator.h"
+#include "../include/ConcreteGreenhouseIterator.h"
+
+#include "../include/Inventory.h"
+#include "../include/FileAdapter.h"
+#include "../include/CSVAdapter.h"
+#include "../include/TXTAdapter.h"
+
+#include "../include/StockItem.h"
+#include "../include/InventoryIterator.h"
+#include "../include/InventoryCollection.h"
+#include "../include/ConcreteInventoryIterator.h"
+
+#include "../include/SalesFacade.h"
+#include "../include/OrderBuilder.h"
+#include "../include/CustomOrderBuilder.h"
+#include "../include/Order.h"
+#include "../include/PaymentProcessor.h"
+
+
+#include "Add_Item.h"
+#include "Add_Plant.h"
+
+
+#include "../include/WaterStrategy.h"
+#include "../include/FrequentWatering.h"
+#include "../include/SparseWatering.h"
+#include "../include/SeasonalWatering.h"
+#include "../include/FertilizeStrategy.h"
+#include "../include/LiquidFertilizer.h"
+#include "../include/OrganicFertilizer.h"
+#include "../include/SlowReleaseFertilizer.h"
+#include "../include/GreenhouseController.h"
+
+struct ObserverEvent;
+class Observer;
+//---------------------------------------------------------------------------
+class TfrmMain : public TForm
+{
+__published:	// IDE-managed Components
+	TMainMenu *mmMain;
+	TPanel *pnlTop;
+	TPageControl *pgcBase;
+	TPageControl *pgcMain;
+	TTabSheet *tsLog;
+	TTabSheet *tsMessages;
+	TRichEdit *redtLog;
+	TPanel *pnlMessaging;
+	TComboBox *cmbSender;
+	TComboBox *cmbReceiver;
+	TRichEdit *redtMessages;
+	TEdit *edtMessageBody;
+	TLabel *lblMessageBodyHeading;
+	TLabel *lblSenderHeading;
+	TLabel *lblReceiverHeading;
+	TSkSvg *sksvgArrow;
+	TImageCollection *imgclctnMain;
+	TVirtualImageList *vrtlmglstMain;
+	TBitBtn *btnSend;
+	TTabSheet *tsGreenhouseManagement;
+	TTabSheet *tsSalesInventory;
+	TTabSheet *tsSystemAdmin;
+	TTreeView *tvGreenhouse;
+	TScrollBox *scrlbxGreenhouseInformation;
+	TfrmGreenhouseInformation *frmGreenhouseInformation1;
+	TPageControl *pgcSalesInventory;
+	TTabSheet *tsInventory;
+	TTabSheet *tsSales;
+	TListView *lvInventory;
+	TPanel *pnlInventoryMovement;
+	TBitBtn *btnInventoryUp;
+	TBitBtn *btnInventoryDown;
+	TScrollBox *scrlbxSales;
+	TfrmSales *frmSales1;
+	TPageControl *pgcSystemAdmin;
+	TTabSheet *tsInventoryManagement;
+	TTabSheet *tsPlantPrototypes;
+	TTabSheet *tsStaffTasks;
+	TButton *btnLoadInventory;
+	TButton *btnSaveInventory;
+	TButton *btnClonePlant;
+	TComboBox *cmbPrototypes;
+	TLabel *lblSelectPlantCloneHeading;
+	TListView *lvStaffTaskQueue;
+	TLabel *lblStaffTaskQueueHeading;
+	TBitBtn *btnProcessNextTask;
+	TPanel *pnlPlantPrototype;
+	TPanel *pnlInventoryManagement;
+	TBitBtn *btnClearMessages;
+	TBitBtn *btnReverse;
+	TLabel *lblSwitchHeading;
+	TLabel *lblClearMessagesHeading;
+	TButton *btnSimulate;
+	TFileOpenDialog *dlgOpenLoadInventory;
+	TFileSaveDialog *dlgSaveSaveInventory;
+	TPanel *pnlGreenhouseListView;
+	TLabel *lblAddPlantToRegistryHeading;
+	TButton *btnAddPlantToRegistry;
+	TLabeledEdit *lbledtPlantPrice;
+	TLabel *lblAddItemHeading;
+	TButton *btnAddItem;
+	TLabel *lblIOHeading;
+	TComboBox *cmbGreenhouseSelection;
+	TLabel *Label1;
+	TLabel *Label2;
+	TButton *btnAssignObserve;
+	/**
+	 * @brief Keeps the send button state in sync with message body edits.
+	 * @param Sender Component raising the event.
+	 */
+	void __fastcall edtMessageBodyChange(TObject *Sender);
+	/**
+	 * @brief Performs initial data loading and UI wiring during form construction.
+	 * @param Sender Component raising the event.
+	 */
+	void __fastcall FormCreate(TObject *Sender);
+	/**
+	 * @brief Dispatches a mediator message using the selected sender and receiver.
+	 * @param Sender Component raising the event.
+	 */
+	void __fastcall btnSendClick(TObject *Sender);
+	/**
+	 * @brief Clears message history panes when the clear button is pressed.
+	 * @param Sender Component raising the event.
+	 */
+	void __fastcall btnClearMessagesClick(TObject *Sender);
+	/**
+	 * @brief Reverses the currently selected staff task queue ordering.
+	 * @param Sender Component raising the event.
+	 */
+	void __fastcall btnReverseClick(TObject *Sender);
+	/**
+	 * @brief Responds to greenhouse tree navigation changes.
+	 * @param Sender Component raising the event.
+	 * @param Node Newly selected node.
+	 */
+	void __fastcall tvGreenhouseChange(TObject *Sender, TTreeNode *Node);
+	/**
+	 * @brief Loads inventory data from disk and refreshes the UI.
+	 * @param Sender Component raising the event.
+	 */
+	void __fastcall btnLoadInventoryClick(TObject *Sender);
+	/**
+	 * @brief Moves the selected inventory item upward in the list.
+	 * @param Sender Component raising the event.
+	 */
+	void __fastcall btnInventoryUpClick(TObject *Sender);
+	/**
+	 * @brief Moves the selected inventory item downward in the list.
+	 * @param Sender Component raising the event.
+	 */
+	void __fastcall btnInventoryDownClick(TObject *Sender);
+	/**
+	 * @brief Persists the current inventory state to the chosen file.
+	 * @param Sender Component raising the event.
+	 */
+	void __fastcall btnSaveInventoryClick(TObject *Sender);
+	/**
+	 * @brief Refreshes runtime data and UI bindings when the form gains focus.
+	 * @param Sender Component raising the event.
+	 */
+	void __fastcall FormActivate(TObject *Sender);
+	/**
+	 * @brief Opens the add-plant dialog and registers a new prototype on success.
+	 * @param Sender Component raising the event.
+	 */
+	void __fastcall btnAddPlantToRegistryClick(TObject *Sender);
+	/**
+	 * @brief Launches the add-item dialog and integrates the created stock item.
+	 * @param Sender Component raising the event.
+	 */
+	void __fastcall btnAddItemClick(TObject *Sender);
+	/**
+	 * @brief Handles the Clone Plant button click, initiating plant creation from a prototype.
+	 * @param Sender Component raising the event.
+	 */
+	void __fastcall btnClonePlantClick(TObject *Sender);
+	/**
+	 * @brief Enables greenhouse selection once a prototype is chosen.
+	 * @param Sender Component raising the event.
+	 */
+	void __fastcall cmbPrototypesChange(TObject *Sender);
+	/**
+	 * @brief Reacts to greenhouse selection changes and enables price input.
+	 * @param Sender Component raising the event.
+	 */
+	void __fastcall cmbGreenhouseSelectionChange(TObject *Sender);
+	/**
+	 * @brief Enables the clone button when a valid price is entered.
+	 * @param Sender Component raising the event.
+	 */
+	void __fastcall lbledtPlantPriceChange(TObject *Sender);
+	/**
+	 * @brief Processes the next queued staff task when the button is clicked.
+	 * @param Sender Component raising the event.
+	 */
+	void __fastcall btnProcessNextTaskClick(TObject *Sender);
+	/**
+	 * @brief Tracks list view selection changes to enable task processing.
+	 * @param Sender Component raising the event.
+	 * @param Item Newly focused list item.
+	 * @param Selected True if the item is selected.
+	 */
+	void __fastcall lvStaffTaskQueueSelectItem(TObject *Sender, TListItem *Item, bool Selected);
+	/**
+	 * @brief Runs a greenhouse growth tick when the simulate button is pressed.
+	 * @param Sender Component raising the event.
+	 */
+	void __fastcall btnSimulateClick(TObject *Sender);
+	/**
+	 * @brief Updates staff context when the observer combo selection changes.
+	 * @param Sender Component raising the event.
+	 */
+	void __fastcall cmbStaffMemberChange(TObject *Sender);
+	/**
+	 * @brief Queues a watering command for the current plant/staff selection.
+	 * @param Sender Component raising the event.
+	 */
+	void __fastcall btnWaterClick(TObject *Sender);
+	/**
+	 * @brief Queues a fertilising command for the current plant/staff selection.
+	 * @param Sender Component raising the event.
+	 */
+	void __fastcall btnFertiliseClick(TObject *Sender);
+	/**
+	 * @brief Assigns the selected staff member as an observer of the active plant.
+	 * @param Sender Component raising the event.
+	 */
+	void __fastcall btnAssignObserveClick(TObject *Sender);
+	/**
+	 * @brief Responds to watering strategy radio group clicks.
+	 * @param Sender Component raising the event.
+	 */
+	void __fastcall rgWaterStrategyClick(TObject *Sender);
+	/**
+	 * @brief Responds to fertilising strategy radio group clicks.
+	 * @param Sender Component raising the event.
+	 */
+	void __fastcall rgFertiliseStrategyClick(TObject *Sender);
+	/**
+	 * @brief Displays the pending task list for a staff member on double-click.
+	 * @param Sender Component raising the event.
+	 */
+	void __fastcall lvStaffTaskQueueDblClick(TObject *Sender);
+
+
+private:	// User declarations
+	// --- Mediator Pattern ---
+	// Mediator Object
+	std::unique_ptr<NurseryMediator> objMediator;
+
+
+
+
+	// A helper function to fill in the combo boxes
+	/**
+	 * @brief Populates sender/receiver combo boxes with available colleagues.
+	 */
+	void PopulateColleagueComboBoxes();
+
+
+	// --- Composite Pattern ---
+	std::unique_ptr<PlantPrototypeRegistry> objPrototypeRegistry;
+	std::unique_ptr<GreenhouseBed> objGreenhouse; // The (Composite) root
+	/**
+	 * @brief Recursively inserts greenhouse components into the tree view.
+	 * @param parentNode Parent node for insertion (nullptr for root).
+	 * @param component Composite component to add.
+	 */
+	void PopulateGreenhouseTree(TTreeNode* parentNode, GreenhouseComponent* component);
+
+
+    std::unique_ptr<WaterStrategy> stratFreqWater;
+	std::unique_ptr<WaterStrategy> stratSparseWater;
+	std::unique_ptr<WaterStrategy> stratSeasonalWater;
+	std::unique_ptr<FertilizeStrategy> stratLiquidFert;
+	std::unique_ptr<FertilizeStrategy> stratOrganicFert;
+	std::unique_ptr<FertilizeStrategy> stratSlowFert;
+	std::unique_ptr<GreenhouseController> objGreenhouseController;
+
+	PlantInstance* currentPlantSelection;
+	Staff* currentStaffSelection;
+
+	/**
+	 * @brief Refreshes the prototypes combo box with registry entries.
+	 */
+	void PopulatePrototypeComboBox();
+	/**
+	 * @brief Populates the staff selection combo box for observer assignment.
+	 */
+	void PopulateStaffMemberComboBox();
+	/**
+	 * @brief Hooks UI events for the greenhouse information frame controls.
+	 */
+	void AttachGreenhouseFrameHandlers();
+	/**
+	 * @brief Lightweight snapshot of plant metrics for change detection.
+	 */
+	struct PlantDisplaySnapshot {
+		std::string typeName; ///< Human-friendly plant category name.
+		std::string stateName; ///< Current lifecycle state name.
+		int health; ///< Health progress value.
+		int water; ///< Water meter value.
+		int nutrients; ///< Nutrient meter value.
+		bool saleReady; ///< True when the plant is marked as market-ready.
+	};
+	/**
+	 * @brief Populates the details frame using the provided plant context.
+	 * @param plant Plant instance to inspect.
+	 * @param logChanges When true, delta information is written to the log.
+	 */
+	void LoadPlantDetails(PlantInstance* plant, bool logChanges = false);
+	/**
+	 * @brief Clears the plant detail frame to its default state.
+	 */
+	void ClearPlantDetails();
+	/**
+	 * @brief Refreshes the detail frame for the currently selected plant.
+	 * @param logChanges When true, emits log entries for metric deltas.
+	 */
+	void UpdateSelectedPlantDisplay(bool logChanges);
+	/**
+	 * @brief Retrieves a staff pointer held in the combo-box object map.
+	 * @param index Combo box item index.
+	 * @return Matching staff pointer or nullptr.
+	 */
+	Staff* ResolveStaffFromCombo(int index) const;
+	/**
+	 * @brief Searches the colleague list for a staff member by identifier.
+	 * @param id Numeric staff identifier.
+	 * @return Matching staff pointer or nullptr.
+	 */
+	Staff* FindStaffById(int id) const;
+	/**
+	 * @brief Maps a radio-group index to a watering strategy instance.
+	 * @param index Radio-group index.
+	 * @return Strategy pointer or nullptr when unavailable.
+	 */
+	WaterStrategy* WaterStrategyFromIndex(int index) const;
+	/**
+	 * @brief Maps a radio-group index to a fertilising strategy instance.
+	 * @param index Radio-group index.
+	 * @return Strategy pointer or nullptr when unavailable.
+	 */
+	FertilizeStrategy* FertilizeStrategyFromIndex(int index) const;
+	/**
+	 * @brief Determines the radio index for a given watering strategy pointer.
+	 * @param strategy Strategy instance to evaluate.
+	 * @return Matching index or -1 when unknown.
+	 */
+	int WaterStrategyIndexFromPointer(WaterStrategy* strategy) const;
+	/**
+	 * @brief Determines the radio index for a given fertilising strategy pointer.
+	 * @param strategy Strategy instance to evaluate.
+	 * @return Matching index or -1 when unknown.
+	 */
+	int FertilizeStrategyIndexFromPointer(FertilizeStrategy* strategy) const;
+	/**
+	 * @brief Caches a pre-formatted label for a tracked plant.
+	 * @param plant Plant instance serving as the key.
+	 * @param label Human-readable label describing the plant.
+	 */
+	void CachePlantLabel(PlantInstance* plant, const UnicodeString& label);
+	/**
+	 * @brief Builds a display label for a live plant instance.
+	 * @param plant Plant instance to describe.
+	 * @return Combined type/name label; empty when plant is nullptr.
+	 */
+	UnicodeString BuildPlantLabel(PlantInstance* plant) const;
+	/**
+	 * @brief Drops all cached state for a plant that is no longer valid.
+	 * @param plant Plant pointer to forget.
+	 */
+	void ForgetPlant(PlantInstance* plant);
+	/**
+	 * @brief Provides safe access to the current plant selection.
+	 * @param contextHint Label describing the action requiring the plant.
+	 * @return Non-null pointer when the plant is still tracked; otherwise nullptr.
+	 */
+	PlantInstance* GetTrackedPlantOrNull(const UnicodeString& contextHint);
+	/**
+	 * @brief Rebuilds the staff task queue list view from model data.
+	 */
+	void RefreshStaffTaskQueue();
+	/**
+	 * @brief Configures list view columns and hooks for staff task management.
+	 */
+	void WireStaffTaskEvents();
+
+public:		// User declarations
+	__fastcall TfrmMain(TComponent* Owner);
+	/**
+	 * @brief Cleans up UI observers and log sinks before destruction.
+	 */
+	__fastcall ~TfrmMain();
+	/**
+	 * @brief Appends a timestamped entry to the application log pane.
+	 * @param message Unicode string to write.
+	 */
+	void AppendLog(const UnicodeString& message);
+	/**
+	 * @brief Hooks logging callbacks for every staff colleague.
+	 */
+	void RegisterStaffLoggers();
+	/**
+	 * @brief Ensures the shared UI observer is attached to a specific plant.
+	 * @param plant Target plant that should emit GUI updates.
+	 */
+	void AttachObserverToPlant(PlantInstance* plant);
+	/**
+	 * @brief Attaches the UI observer to all plants currently hosted in the greenhouse.
+	 */
+	void AttachLoggerToAllPlants();
+	/**
+	 * @brief Builds a snapshot of key plant stats for delta tracking.
+	 * @param plant Plant to sample.
+	 * @return Snapshot of display-relevant metrics.
+	 */
+	PlantDisplaySnapshot BuildSnapshot(PlantInstance* plant) const;
+	/**
+	 * @brief Logs differences between two stored plant snapshots.
+	 * @param before Baseline snapshot.
+	 * @param after Updated snapshot.
+	 * @param plantLabel Label identifying the plant in log output.
+	 */
+	void LogSnapshotDelta(const PlantDisplaySnapshot& before, const PlantDisplaySnapshot& after, const UnicodeString& plantLabel);
+	/**
+	 * @brief Removes previously installed staff logging callbacks.
+	 */
+	void ResetStaffLoggers();
+	/**
+	 * @brief Detaches the UI observer from every tracked plant instance.
+	 */
+	void DetachObserverFromAllPlants();
+	/**
+	 * @brief Reselects a staff member in the queue view by identifier.
+	 * @param staffId Identifier to locate.
+	 */
+	void SelectStaffRowById(int staffId);
+	/**
+	 * @brief Rebuilds the greenhouse tree view to match current model state.
+	 */
+	void RefreshGreenhouseDisplay();
+	/**
+	 * @brief Resets greenhouse-related UI controls to reflect the current model.
+	 */
+	void ResetGreenhouseStructure();
+    /**
+     * @brief Repopulates the sales item combo with available stock.
+     */
+    void PopulateSalesItemComboBox();
+	/**
+	 * @brief Resets the sales frame order display to its default state.
+	 */
+	void UpdateOrderDisplay();
+     // --- Sales/Order Objects ---
+	std::unique_ptr<PaymentProcessor> objPaymentProcessor;
+	std::unique_ptr<OrderBuilder> objOrderBuilder;
+	std::unique_ptr<SalesFacade> objSalesFacade;
+	std::unique_ptr<Order> currentOrder;
+	std::unique_ptr<Inventory> objInventory;
+	/**
+	 * @brief Rebuilds the inventory list view from current stock.
+	 */
+	void RefreshInventoryListView();
+	/**
+	 * @brief Enables or disables care controls based on current selection state.
+	 */
+	void UpdateCareActionState();
+
+	/**
+	 * @brief Populates the customer combo box with known customer IDs.
+	 */
+	void PopulateCustomerComboBox();
+	/**
+	 * @brief Processes observer events raised by plant instances.
+	 * @param event Observer payload describing the state change.
+	 */
+	void HandlePlantObserverEvent(const ObserverEvent& event);
+	/**
+	 * @brief Resolves the inventory stock item represented by a sales combo entry.
+	 * @param comboIndex Index within the combo box.
+	 * @param displayText Fallback display text to use when the index is out of range.
+	 * @return Pointer to the corresponding stock item, or nullptr if not found.
+	 */
+	StockItem* ResolveSalesItemByIndex(int comboIndex, const UnicodeString& displayText) const;
+	/**
+	 * @brief Synchronises internal combo tracking after an entry is removed.
+	 * @param itemId Identifier of the item that was erased from the combo box UI.
+	 */
+	void RemoveSalesComboEntryById(const std::string& itemId);
+	/**
+	 * @brief Clears the sales combo prior to an inventory reload to avoid stale references.
+	 */
+	void ResetSalesCombo();
+
+    // A list to hold all colleagues (Staff and Customers)
+	std::vector<std::unique_ptr<Colleague>> vtrColleagues;
+
+    /**
+     * @brief Populates the greenhouse bed combo box with available beds.
+     * @param component Current component to inspect.
+     * @param prefix Hierarchical label prefix for nested beds.
+     */
+     void PopulateGreenhouseBedComboBox(GreenhouseComponent* component, const std::string& prefix = "");
+
+	std::optional<PlantDisplaySnapshot> currentPlantSnapshot;
+	PlantInstance* snapshotPlant;
+	std::unique_ptr<Observer> plantLogObserver;
+	std::unordered_map<PlantInstance*, UnicodeString> knownPlantLabels; ///< Cached labels for tracked plants.
+	std::unordered_set<PlantInstance*> loggedPlants;
+	std::vector<std::string> salesComboIds; ///< Mirrors sales combo entries with inventory item identifiers.
+	std::vector<Staff*> staffComboEntries; ///< Mirrors staff combo entries with colleague pointers.
+	std::vector<std::unique_ptr<Plant>> ownedPrototypeClones;
+};
+//---------------------------------------------------------------------------
+extern PACKAGE TfrmMain *frmMain;
+//---------------------------------------------------------------------------
+#endif

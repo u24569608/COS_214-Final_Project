@@ -1,0 +1,4 @@
+Plant,Spade,Twelve,Mature
+Item,Gloves,15.75,Extra
+Unknown,Shears,20
+Item,Shears,20

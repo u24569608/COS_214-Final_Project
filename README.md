@@ -1,10 +1,18 @@
-# 🌿 Plant Palace
+<div align="center">
+<h1>Plant Palace</h1></div>
 
-A sophisticated C++ simulation of a plant nursery management system, developed for the **COS 214 final project** at the **University of Pretoria**. This project demonstrates the practical application of various **software design patterns** to build a flexible, maintainable, and scalable system.
 
----
 
-## 🌿 Key Features
+A sophisticated `C++` simulation of a plant nursery management system, developed for the **COS 214 Final Project** at the **University of Pretoria**. This project demonstrates the practical application of various **GoF Software Design Patterns** to build a flexible, maintainable, and scalable system.
+
+<h2>Badges</h2>
+
+![GitHub Issues](https://img.shields.io/github/issues/u24569608/COS_214-Final_Project)
+![GitHub Pull Requests](https://img.shields.io/github/issues-pr/u24569608/COS_214-Final_Project)
+![GitHub Repo Size](https://img.shields.io/github/repo-size/u24569608/COS_214-Final_Project)
+![Unit Tests](https://github.com/u24569608/COS_214-Final_Project/actions/workflows/unit_tests.yml/badge.svg?branch=developer)
+
+## Key Features
 
 - **Dynamic Plant Management** – Create, track, and manage a diverse range of plants using the **Prototype** and **Factory** patterns.  
 
@@ -12,6 +20,7 @@ A sophisticated C++ simulation of a plant nursery management system, developed f
 
 - **Hierarchical Greenhouse Structure** – Organize plants into beds and larger greenhouse units with the **Composite** pattern for uniform care operations.  
 
+- **Live Inventory Status** – Stock items observe their backing plants to reflect real-time availability.  
 - **Automated Staff Alerts** – Staff are automatically notified when plants need care via the **Observer** pattern.  
 
 - **Decoupled Communication** – Staff and Customers interact through a central **Mediator**, reducing system complexity.  
@@ -20,24 +29,25 @@ A sophisticated C++ simulation of a plant nursery management system, developed f
 
 - **Flexible Data Loading** – Load inventory from various file formats (TXT, CSV) using the **Adapter** pattern.
 
----
+## Getting Started
 
-## 🚀 Getting Started
+`Coming Soon`
 
-Follow these instructions to compile and run the simulation on your local machine.
+## Prerequisites
 
-### Prerequisites
-
-- C++ compiler that supports **C++11** (e.g., GCC, Clang)  
-
-- `make` build automation tool
+`Coming Soon`
 
 
-git clone https://github.com/your-username/plant-nursery-simulator.git
-cd plant-nursery-simulator
+<h2>Technologies</h2>
+<p align="center">
+  <a href="https://skillicons.dev">
+    <img src="https://skillicons.dev/icons?i=cpp,git,github,vscode" />
+  </a>
+</p>
 
 
-## 👥 Meet the Development Team – The Tormentos
+
+<h2>Team</h2>
 
 <table>
   <tr>
@@ -50,35 +60,35 @@ cd plant-nursery-simulator
   <tr>
     <td><img src="plant-nursery-simulator/docs/images/adriano.jpg" width="120" height="140" /></td>
     <td>Adriano</td>
-    <td>Team Lead / code implamentation</td>
+    <td>Team Lead & Code Implementation</td>
     <td><a href="https://github.com/Adri4no098">GitHub</a></td>
     <td><a href="https://linkedin.com/in/adriano-jorge-909486378">LinkedIn</a></td>
   </tr>
   <tr>
     <td><img src="plant-nursery-simulator/docs/images/zoe.jpg" width="120" height="140" /></td>
-    <td>Zoe</td>
-    <td>Lead Developer – Documenting & Implamentation</td>
-    <td><a href="https://github.com/zoe-github">GitHub</a></td>
-    <td><a href="https://linkedin.com/in/zoe-linkedin">LinkedIn</a></td>
+    <td>Zoë</td>
+    <td>Lead Developer, Documentation & Code Implementation</td>
+    <td><a href="https://github.com/ZoeJ72005/">GitHub</a></td>
+    <td><a href="https://www.linkedin.com/in/zo%C3%AB-joubert-8b494835a">LinkedIn</a></td>
   </tr>
   <tr>
     <td><img src="plant-nursery-simulator/docs/images/johan.jpg" width="120" height="140" /></td>
     <td>Johan</td>
-    <td>Lead Developer – Diagrams & Implamentation</td>
-    <td><a href="https://github.com/johan-github">GitHub</a></td>
-    <td><a href="https://linkedin.com/in/johan-linkedin">LinkedIn</a></td>
+    <td>Lead Developer, Diagrams & Code Implementation</td>
+    <td><a href="https://github.com/FJNel">GitHub</a></td>
+    <td><a href="https://linkedin.com/in/johan-nel-03baa0306/">LinkedIn</a></td>
   </tr>
   <tr>
-    <td><img src="plant-nursery-simulator/docs/images/connor.jpg" width="120" height="140" /></td>
+    <td><img src="plant-nursery-simulator/docs/images/connor.jpg" width="120" height="150" /></td>
     <td>Connor</td>
-    <td>Lead Developer – Gui and implementation</td>
-    <td><a href="https://github.com/connor-github">GitHub</a></td>
-    <td><a href="https://linkedin.com/in/connor-linkedin">LinkedIn</a></td>
+    <td>Lead Developer, UI/UX & Code Implementation</td>
+    <td><a href="https://github.com/u24569608">GitHub</a></td>
+    <td><a href="https://linkedin.com/in/connorbellUP/">LinkedIn</a></td>
   </tr>
   <tr>
     <td><img src="plant-nursery-simulator/docs/images/bulelani.jpg" width="120" height="140" /></td>
     <td>Bulelani</td>
-    <td>Lead Developer - Code Implamentation</td>
+    <td>Lead Developer, Code Implementation</td>
     <td><a href="https://github.com/bulelani-github">GitHub</a></td>
     <td><a href="https://linkedin.com/in/bulelani-linkedin">LinkedIn</a></td>
   </tr>
