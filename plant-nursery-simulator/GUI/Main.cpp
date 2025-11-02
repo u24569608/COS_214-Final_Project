@@ -1647,9 +1647,9 @@ void TfrmMain::ClearPlantDetails()
 		return;
 	}
 
-	frmGreenhouseInformation1->lbledtPlantName->Text = "-";
-	frmGreenhouseInformation1->lbledtPlantState->Text = "-";
-	frmGreenhouseInformation1->lbledtSaleReadiness->Text = "-";
+	frmGreenhouseInformation1->lbledtPlantName->Text = "—";
+	frmGreenhouseInformation1->lbledtPlantState->Text = "—";
+	frmGreenhouseInformation1->lbledtSaleReadiness->Text = "—";
 	frmGreenhouseInformation1->pbGrowth->Position = 0;
 	frmGreenhouseInformation1->pbWater->Position = 0;
 	frmGreenhouseInformation1->pbNutrients->Position = 0;
@@ -1834,4 +1834,5 @@ int TfrmMain::FertilizeStrategyIndexFromPointer(FertilizeStrategy* strategy) con
 	return -1;
 }
 //---------------------------------------------------------------------------
+
 
