@@ -1,7 +1,7 @@
 # Plant Nursery Simulator — Final Report
 
 **Design Patterns, Requirements, and System Overview**
-**Course:** COS214 (University of Pretoria)
+**Course:** COS214 (University of Pretoria) 
 **Team:** The Tormentos
 **Date:** 2025-11-02
 
@@ -131,6 +131,8 @@ The Plant Nursery Simulator models a nursery business end-to-end:
 
 ### Iterator — Inventory
 
+![Iterator - Inventory](diagrams/ClassDiagram/DPClassDiagrams/IteratorInventory.png)
+
 * **Intent & rationale:** Uniform traversal over inventory without exposing containers; enforce business ordering.
 * **Where:** `InventoryCollection.h`, `InventoryIterator.h`, `ConcreteInventoryIterator.*`, `Inventory.*`
 * **Participants:** `InventoryIterator` (Iterator), `ConcreteInventoryIterator` (ConcreteIterator), `InventoryCollection` (Aggregate), `Inventory` (ConcreteAggregate)
@@ -139,6 +141,8 @@ The Plant Nursery Simulator models a nursery business end-to-end:
 * **Efficiency:** O(n) rebuild; lazy recalculation.
 
 ### Iterator — Greenhouse
+
+![Iterator - Greenhouse](diagrams/ClassDiagram/DPClassDiagrams/IteratorGreenhouse.png)
 
 * **Intent & rationale:** Traverse Composite greenhouse without coupling traversal to structure.
 * **Where:** `GreenhouseIterator.h`, `ConcreteGreenhouseIterator.*`, `GreenhouseComponent.h`, `GreenhouseBed.*`, `GreenhouseController.*`
@@ -149,6 +153,8 @@ The Plant Nursery Simulator models a nursery business end-to-end:
 
 ### Composite — Greenhouse Structure
 
+![Composite - Greenhouse Structure](diagrams/ClassDiagram/DPClassDiagrams/CompositeGreenhouse.png)
+
 * **Intent & rationale:** Part–whole hierarchy of beds and plants; uniform operations.
 * **Where:** `GreenhouseComponent.h`, `GreenhouseBed.*`, `PlantInstance.*`
 * **Participants:** Component (`GreenhouseComponent`), Composite (`GreenhouseBed`), Leaf (`PlantInstance`)
@@ -158,12 +164,16 @@ The Plant Nursery Simulator models a nursery business end-to-end:
 
 ### Facade — Sales
 
+![Facade - Sales](diagrams/ClassDiagram/DPClassDiagrams/FacadeSales.png)
+
 * **Intent & rationale:** Single entry point for sales operations decoupling UI from subsystems.
 * **Where:** `SalesFacade.*` (+ `Inventory`, `PaymentProcessor`, `OrderBuilder`)
 * **FRs:** FR25
 * **Efficiency:** O(1) orchestration per item.
 
 ### Builder — Orders
+
+![Builder - Orders](diagrams/ClassDiagram/DPClassDiagrams/BuilderOrders.png)
 
 * **Intent & rationale:** Step-by-step construction of complex orders via director presets.
 * **Where:** `Order.*`, `OrderBuilder.h`, `CustomOrderBuilder.*`, `OrderDirector.*`
@@ -173,6 +183,8 @@ The Plant Nursery Simulator models a nursery business end-to-end:
 
 ### Observer — Plants, Staff, Stock Items
 
+![Observer - Plants, Staff, Stock](diagrams/ClassDiagram/DPClassDiagrams/ObserverPlantsStaffStock.png)
+
 * **Intent & rationale:** Decouple plant events from staff reminders and storefront availability.
 * **Where:** `Observer.h`, `Subject.*`, `Staff.*`, `StockItem.*`, `PlantInstance.*`
 * **Participants:** Subject (`PlantInstance`), Observer (`Staff`, `StockItem`)
@@ -181,12 +193,16 @@ The Plant Nursery Simulator models a nursery business end-to-end:
 
 ### Adapter — Inventory File I/O
 
+![Adapter - Inventory File I/O](diagrams/ClassDiagram/DPClassDiagrams/AdapterInventory.png)
+
 * **Intent & rationale:** Pluggable CSV/TXT I/O without changing inventory logic.
 * **Where:** `FileAdapter.h` (Target), `CSVReaderWriter.*` / `TXTReaderWriter.*` (Adaptees), `CSVAdapter.*` / `TXTAdapter.*` (Adapters); `Inventory` uses `FileAdapter`.
 * **FRs:** FR8, FR9
 * **Efficiency:** Single-pass encode/decode; streams via iterators.
 
 ### Prototype — Plants and Registry
+
+![Prototype - Plants and Registry](diagrams/ClassDiagram/DPClassDiagrams/PrototypePlantsRegistry.png)
 
 * **Intent & rationale:** Data-driven creation of plant types by cloning prototypes.
 * **Where:** `Plant.*` (`clone()`), `PlantPrototypeRegistry.*`
@@ -195,12 +211,16 @@ The Plant Nursery Simulator models a nursery business end-to-end:
 
 ### State — Plant Lifecycle
 
+![State - Plant Lifecycle](diagrams/ClassDiagram/DPClassDiagrams/StatePlantLifecycle.png)
+
 * **Intent & rationale:** Encapsulate lifecycle behaviour and transitions.
 * **Where:** `PlantState.h`, concrete states (Seed/Growing/Mature/Withering/Dead), helpers (`PlantStateUtils`, `PlantStateThresholds`); `PlantInstance` delegates.
 * **FRs:** FR3, FR4
 * **Efficiency:** Constant-time per tick per plant.
 
 ### Command — Plant Care Tasks
+
+![Command - Plant Care Tasks](diagrams/ClassDiagram/DPClassDiagrams/CommandPlantCare.png)
 
 * **Intent & rationale:** Encapsulate care actions (water, fertilise) queued by staff.
 * **Where:** `PlantCommand.h`, `WaterPlant.*`, `FertilizePlant.*`; receiver `PlantInstance`; invoker `Staff`.
@@ -209,6 +229,8 @@ The Plant Nursery Simulator models a nursery business end-to-end:
 
 ### Mediator — Floor Coordination
 
+![Mediator - Floor Coordination](diagrams/ClassDiagram/DPClassDiagrams/MediatorFloor.png)
+
 * **Intent & rationale:** Centralise communication among colleagues to reduce coupling.
 * **Where:** `FloorMediator.h`, `NurseryMediator.*`; `Colleague` base; `Customer`/`Staff`.
 * **FRs:** FR22, FR23
@@ -216,12 +238,16 @@ The Plant Nursery Simulator models a nursery business end-to-end:
 
 ### Chain of Responsibility — Care Routing
 
+![Chain of Responsibility - Care Routing](diagrams/ClassDiagram/DPClassDiagrams/ChainOfResponsibilityCare.png)
+
 * **Intent & rationale:** Route care requests through handlers; easy extensibility.
 * **Where:** `CareRequestHandler.h`, `WateringHandler.*`, `FertilizingHandler.*`; wired by `Staff`.
 * **FRs:** FR20, FR21
 * **Efficiency:** O(h) worst case where h is handler depth.
 
 ### Strategy — Watering and Fertilising
+
+![Strategy - Watering and Fertilising](diagrams/ClassDiagram/DPClassDiagrams/StrategyWateringFertilize.png)
 
 * **Intent & rationale:** Swap care algorithms at runtime; optional prototyped presets.
 * **Where:** `WaterStrategy.h`, `FertilizeStrategy.h`; concrete strategies; used by `PlantInstance`.
