@@ -10,9 +10,13 @@
 #include "../include/GreenhouseBed.h"
 #include "../include/PlantCommand.h"
 #include "../include/PlantInstance.h"
+#include "../include/WaterPlant.h"
+#include "../include/FertilizePlant.h"
 
 #include <string>
+#include <sstream>
 #include <utility>
+#include <vector>
 
 namespace {
 std::string buildReminderMessage(const ObserverEvent& event) {
@@ -47,8 +51,12 @@ Staff::~Staff() {
 
 void Staff::update(const ObserverEvent& event) {
     if (event.type == ObserverEventType::SubjectDestroyed) {
-        if (event.source != nullptr) {
-            observedPlants.erase(static_cast<PlantInstance*>(event.source));
+        PlantInstance* retired = event.source != nullptr
+                                     ? static_cast<PlantInstance*>(event.source)
+                                     : nullptr;
+        if (retired != nullptr) {
+            observedPlants.erase(retired);
+            removeCommandsForPlant(retired);
         }
         if (!event.message.empty()) {
             careReminders.push_back({StaffReminderType::Message, event.message});
@@ -69,7 +77,12 @@ void Staff::update(const ObserverEvent& event) {
     }
 
     if (event.type == ObserverEventType::CareRequired) {
-        careReminders.push_back({StaffReminderType::Care, buildReminderMessage(event)});
+        const std::string reminder = buildReminderMessage(event);
+        careReminders.push_back({StaffReminderType::Care, reminder});
+        if (plant != nullptr) {
+            enqueueCareTasks(plant);
+        }
+        log(name + " received care request: " + reminder);
         return;
     }
 
@@ -84,8 +97,10 @@ void Staff::update(const ObserverEvent& event) {
                                                        event.source,
                                                        message,
                                                        event.availability})});
+        log(name + " received availability update: " + message);
         return;
     }
+
 }
 
 int Staff::getID() const {
@@ -101,24 +116,44 @@ void Staff::send(std::string message, int colleagueID) {
 
 void Staff::receive(std::string message) {
     careReminders.push_back({StaffReminderType::Message, "Message: " + message});
+    log(name + " received message: " + message);
 }
 
-void Staff::addCommandToQueue(PlantCommand* cmd) {
-    if (cmd == nullptr) {
+void Staff::addCommandToQueue(std::unique_ptr<PlantCommand> cmd) {
+    if (!cmd) {
         return;
     }
-    taskQueue.push_back(cmd);
+    PlantInstance* target = cmd->getTarget();
+    std::ostringstream oss;
+    oss << name << " queued " << cmd->getCommandName();
+    if (target != nullptr) {
+        oss << " for " << target->getPlantTypeName() << " (" << target->getName() << ")";
+    }
+    taskQueue.push_back(std::move(cmd));
+    log(oss.str());
 }
 
-void Staff::processNextTask() {
+PlantInstance* Staff::processNextTask() {
     if (taskQueue.empty()) {
-        return;
+        log(name + " has no tasks to process");
+        return nullptr;
     }
-    PlantCommand* next = taskQueue.front();
-    taskQueue.erase(taskQueue.begin());
-    if (next != nullptr) {
+    std::unique_ptr<PlantCommand> next = std::move(taskQueue.front());
+    taskQueue.pop_front();
+
+    PlantInstance* target = next ? next->getTarget() : nullptr;
+    std::string label = next ? next->getCommandName() : "Task";
+    if (next) {
         next->handleRequest();
     }
+
+    std::ostringstream oss;
+    oss << name << " processed " << label;
+    if (target != nullptr) {
+        oss << " for " << target->getPlantTypeName() << " (" << target->getName() << ")";
+    }
+    log(oss.str());
+    return target;
 }
 
 int Staff::getTaskQueueSize() const {
@@ -131,6 +166,62 @@ int Staff::getCareReminderCount() const {
 
 const std::vector<StaffReminder>& Staff::getCareReminders() const {
     return careReminders;
+}
+
+std::vector<std::string> Staff::describePendingTasks() const {
+    std::vector<std::string> descriptions;
+    descriptions.reserve(taskQueue.size());
+    for (const auto& command : taskQueue) {
+        if (!command) {
+            continue;
+        }
+        std::string line = command->getCommandName();
+        if (PlantInstance* target = command->getTarget()) {
+            std::string typeName = target->getPlantTypeName();
+            if (typeName.empty()) {
+                typeName = target->getName();
+            }
+            line += " - ";
+            line += typeName;
+            line += " (";
+            line += target->getName();
+            line += ")";
+        }
+        descriptions.push_back(std::move(line));
+    }
+    return descriptions;
+}
+
+bool Staff::removeCommandsForPlant(PlantInstance* plant) {
+    if (plant == nullptr || taskQueue.empty()) {
+        return false;
+    }
+
+    bool removed = false;
+    for (auto it = taskQueue.begin(); it != taskQueue.end();) {
+        PlantInstance* target = (*it) ? (*it)->getTarget() : nullptr;
+        if (target == plant) {
+            it = taskQueue.erase(it);
+            removed = true;
+        } else {
+            ++it;
+        }
+    }
+
+    if (removed) {
+        log(name + " removed pending tasks for a retired plant.");
+    }
+    return removed;
+}
+
+void Staff::resetAssignments() {
+    stopObservingAll();
+    taskQueue.clear();
+    careReminders.clear();
+}
+
+void Staff::setLogSink(std::function<void(const std::string&)> sink) {
+    logSink = std::move(sink);
 }
 
 void Staff::observePlant(PlantInstance* plant) {
@@ -188,4 +279,23 @@ void Staff::stopObservingAll() {
         }
     }
     observedPlants.clear();
+}
+
+void Staff::log(const std::string& message) const {
+    if (logSink) {
+        logSink(message);
+    }
+}
+
+void Staff::enqueueCareTasks(PlantInstance* plant) {
+    if (plant == nullptr) {
+        return;
+    }
+
+    if (plant->isThirsty()) {
+        addCommandToQueue(std::make_unique<WaterPlant>(plant));
+    }
+    if (plant->needsFertilizing()) {
+        addCommandToQueue(std::make_unique<FertilizePlant>(plant));
+    }
 }

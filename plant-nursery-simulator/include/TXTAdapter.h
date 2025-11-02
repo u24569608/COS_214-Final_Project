@@ -2,12 +2,11 @@
 #define TXT_ADAPTER_H
 
 #include "FileAdapter.h"
+#include "TXTReaderWriter.h"
 #include <string>
-#include <memory>
 
-// Forward declarations
+// Forward declaration
 class Inventory;
-class TXTReaderWriter;
 
 /**
  * @file TXTAdapter.h
@@ -36,7 +35,7 @@ public:
     void saveInventory(std::string filePath, Inventory* inventory) override;
 
 private:
-    std::unique_ptr<TXTReaderWriter> txtReader; ///< The wrapped 'Adaptee'.
+    TXTReaderWriter txtReader; ///< TXT helper used to read/write stock data.
 };
 
 #endif // TXT_ADAPTER_H

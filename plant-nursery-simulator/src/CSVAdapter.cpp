@@ -11,6 +11,9 @@
 #include "../include/PlantPrototypeRegistry.h"
 #include "../include/PlantInstance.h"
 #include "../include/PlantState.h"
+#include "../include/Plant.h"
+#include "../include/FrequentWatering.h"
+#include "../include/LiquidFertilizer.h"
 #include "../include/SeedState.h"
 #include "../include/GrowingState.h"
 #include "../include/MatureState.h"
@@ -50,11 +53,48 @@ double parsePrice(const std::string& raw, size_t lineNumber, const std::string& 
     }
 }
 
+WaterStrategy& defaultWaterStrategy() {
+    static FrequentWatering strategy;
+    return strategy;
+}
+
+FertilizeStrategy& defaultFertilizerStrategy() {
+    static LiquidFertilizer strategy;
+    return strategy;
+}
+
+class ImportedPlantPrototype : public Plant {
+public:
+	explicit ImportedPlantPrototype(const std::string& plantName) {
+		setName(plantName);
+		setType("Imported");
+		setDefaultWaterStrat(&defaultWaterStrategy());
+		setDefaultFertStrat(&defaultFertilizerStrategy());
+	}
+
+	ImportedPlantPrototype(const ImportedPlantPrototype& other) : Plant() {
+		setName(other.getName());
+		setType(other.getType());
+		setDefaultWaterStrat(other.getDefaultWaterStrat());
+		setDefaultFertStrat(other.getDefaultFertStrat());
+	}
+
+	Plant* clone() const override {
+		return new ImportedPlantPrototype(*this);
+	}
+};
+
+void ensurePrototypeExists(PlantPrototypeRegistry* registry, const std::string& plantName) {
+	if (!registry || plantName.empty() || registry->hasPrototype(plantName)) {
+		return;
+	}
+
+	registry->addPrototype(plantName, std::make_unique<ImportedPlantPrototype>(plantName));
+}
+
 } // namespace
 
-CSVAdapter::CSVAdapter()
-    : csvReader(std::make_unique<CSVReaderWriter>()) {
-}
+CSVAdapter::CSVAdapter() = default;
 
 /**
  * @brief Loads inventory from a CSV file and recreates greenhouse-backed plant instances.
@@ -66,7 +106,7 @@ void CSVAdapter::loadInventory(std::string filePath, Inventory* inventory) {
         return;
     }
 
-    const std::vector<std::vector<std::string>> rows = csvReader->readCsv(filePath);
+    const std::vector<std::vector<std::string>> rows = csvReader.readCsv(filePath);
 
     for (size_t i = 0; i < rows.size(); ++i) {
         const std::vector<std::string>& row = rows[i];
@@ -97,16 +137,23 @@ void CSVAdapter::loadInventory(std::string filePath, Inventory* inventory) {
             const double price = parsePrice(row[2], i + 1, filePath);
             const std::string& stateLabel = row[3];
 
-            bool treatAsPlant = true;
             PlantPrototypeRegistry* registry = inventory->getPlantRegistry();
-            if (registry != nullptr && !registry->hasPrototype(name)) {
-                treatAsPlant = false;
+            if (registry != nullptr) {
+                ensurePrototypeExists(registry, name);
             }
+
+            const bool treatAsPlant = registry != nullptr && registry->hasPrototype(name);
             if (treatAsPlant) {
                 inventory->registerPlantType(name);
             }
             PlantInstance* plant = treatAsPlant ? inventory->createPlantInstance(name) : nullptr;
             if (plant != nullptr) {
+                if (plant->getWaterStrategy() == nullptr) {
+                    plant->setWaterStrategy(&defaultWaterStrategy());
+                }
+                if (plant->getFertilizeStrategy() == nullptr) {
+                    plant->setFertilizeStrategy(&defaultFertilizerStrategy());
+                }
                 if (std::unique_ptr<PlantState> desiredState = makeStateFromLabel(stateLabel)) {
                     plant->setState(std::move(desiredState));
                 }
@@ -137,7 +184,7 @@ void CSVAdapter::saveInventory(std::string filePath, Inventory* inventory) {
         itemsToSave.push_back(item);
     }
 
-    if (csvReader->writeDataToCSV(filePath, itemsToSave)) {
+    if (csvReader.writeDataToCSV(filePath, itemsToSave)) {
         std::cout << "[CSVAdapter] Saved inventory to " << filePath << std::endl;
     } else {
         std::cerr << "[CSVAdapter] Error: Failed to save inventory to " << filePath << std::endl;

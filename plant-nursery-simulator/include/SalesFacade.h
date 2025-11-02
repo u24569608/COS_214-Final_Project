@@ -63,6 +63,7 @@ public:
      */
     void registerPlantType(const std::string& name);
 
+
     /**
      * @brief Simplifies buying a single item at the counter.
      * @return bool True if the sale was successful.
@@ -79,9 +80,11 @@ public:
 
     /**
      * @brief Creative Function: Processes a complex custom order.
-     * @return Order* The finalized order, or nullptr if failed.
+     * @param customer Customer charged for the order (optional).
+     * @param order Order assembled by the caller; status is updated to "Paid" on success.
+     * @return bool True when payment succeeds and inventory updates are applied.
      */
-    Order* buildAndFinalizeOrder(Customer* customer, std::vector<StockItem> items);
+    bool buildAndFinalizeOrder(Customer* customer, Order& order);
 
     /**
      * @brief Creative Function: Processes a return.

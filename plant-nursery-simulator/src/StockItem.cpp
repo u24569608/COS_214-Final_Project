@@ -111,22 +111,12 @@ void StockItem::update(const ObserverEvent& event) {
             const bool available = *event.availability == AvailabilityStatus::Available;
             setIsAvailible(available);
         }
-        if (!event.message.empty()) {
-            displayStatus = event.message;
-        } else if (event.availability.has_value()) {
-            displayStatus = (*event.availability == AvailabilityStatus::Available)
-                                ? "Available"
-                                : "Unavailable";
-        }
         break;
     }
     case ObserverEventType::SubjectDestroyed: {
         // Subject will remove this observer; ensure local pointer no longer used.
         plant = nullptr;
         setIsAvailible(false);
-        if (!event.message.empty()) {
-            displayStatus = event.message;
-        }
         break;
     }
     default:
@@ -147,7 +137,6 @@ void StockItem::bindToPlant(PlantInstance* newPlant) {
 
     if (newPlant == nullptr) {
         setIsAvailible(false);
-        displayStatus = "Plant unavailable for sale";
         return;
     }
 
@@ -156,7 +145,6 @@ void StockItem::bindToPlant(PlantInstance* newPlant) {
 
     const bool available = plant->isAvailableForSale();
     setIsAvailible(available);
-    displayStatus = available ? "Plant ready for sale" : "Plant unavailable for sale";
 }
 
 void StockItem::detachFromPlant() {
@@ -165,5 +153,4 @@ void StockItem::detachFromPlant() {
         plant = nullptr;
     }
     setIsAvailible(false);
-    displayStatus = "Plant unavailable for sale";
 }

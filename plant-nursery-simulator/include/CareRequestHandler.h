@@ -12,7 +12,13 @@ class PlantInstance;
  */
 class CareRequestHandler {
 public:
+    /**
+     * @brief Initialises the handler with no successor in the chain.
+     */
     CareRequestHandler();
+    /**
+     * @brief Virtual destructor to support cleanup through base pointers.
+     */
     virtual ~CareRequestHandler();
 
     /**

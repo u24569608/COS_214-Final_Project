@@ -11,6 +11,9 @@
 #include "../include/PlantPrototypeRegistry.h"
 #include "../include/PlantInstance.h"
 #include "../include/PlantState.h"
+#include "../include/FrequentWatering.h"
+#include "../include/LiquidFertilizer.h"
+#include "../include/Plant.h"
 #include "../include/SeedState.h"
 #include "../include/GrowingState.h"
 #include "../include/MatureState.h"
@@ -20,9 +23,7 @@
 #include <iostream>
 #include <memory>
 
-TXTAdapter::TXTAdapter()
-    : txtReader(std::make_unique<TXTReaderWriter>()) {
-}
+TXTAdapter::TXTAdapter() = default;
 
 namespace {
 std::unique_ptr<PlantState> makeStateFromLabel(const std::string& label) {
@@ -52,6 +53,45 @@ double parsePrice(const std::string& raw, size_t lineNumber, const std::string& 
         return 0.0;
     }
 }
+
+WaterStrategy& defaultWaterStrategy() {
+    static FrequentWatering strategy;
+    return strategy;
+}
+
+FertilizeStrategy& defaultFertilizerStrategy() {
+    static LiquidFertilizer strategy;
+    return strategy;
+}
+
+class ImportedPlantPrototype : public Plant {
+public:
+	explicit ImportedPlantPrototype(const std::string& plantName) {
+		setName(plantName);
+		setType("Imported");
+		setDefaultWaterStrat(&defaultWaterStrategy());
+		setDefaultFertStrat(&defaultFertilizerStrategy());
+	}
+
+	ImportedPlantPrototype(const ImportedPlantPrototype& other) : Plant() {
+		setName(other.getName());
+		setType(other.getType());
+		setDefaultWaterStrat(other.getDefaultWaterStrat());
+		setDefaultFertStrat(other.getDefaultFertStrat());
+	}
+
+	Plant* clone() const override {
+		return new ImportedPlantPrototype(*this);
+	}
+};
+
+void ensurePrototypeExists(PlantPrototypeRegistry* registry, const std::string& plantName) {
+	if (!registry || plantName.empty() || registry->hasPrototype(plantName)) {
+		return;
+	}
+
+	registry->addPrototype(plantName, std::make_unique<ImportedPlantPrototype>(plantName));
+}
 } // namespace
 
 /**
@@ -66,7 +106,7 @@ void TXTAdapter::loadInventory(std::string filePath, Inventory* inventory) {
         return;
     }
 
-    std::vector<std::string> lines = txtReader->readDataFromTxt(filePath);
+    std::vector<std::string> lines = txtReader.readDataFromTxt(filePath);
 
     for (size_t i = 0; i < lines.size(); ++i) {
         std::stringstream ss(lines[i]);
@@ -110,16 +150,23 @@ void TXTAdapter::loadInventory(std::string filePath, Inventory* inventory) {
             const double price = parsePrice(parts[2], i + 1, filePath);
             const std::string& stateLabel = parts[3];
 
-            bool treatAsPlant = true;
             PlantPrototypeRegistry* registry = inventory->getPlantRegistry();
-            if (registry != nullptr && !registry->hasPrototype(name)) {
-                treatAsPlant = false;
+            if (registry != nullptr) {
+                ensurePrototypeExists(registry, name);
             }
+
+            const bool treatAsPlant = registry != nullptr && registry->hasPrototype(name);
             if (treatAsPlant) {
                 inventory->registerPlantType(name);
             }
             PlantInstance* plant = treatAsPlant ? inventory->createPlantInstance(name) : nullptr;
             if (plant != nullptr) {
+                if (plant->getWaterStrategy() == nullptr) {
+                    plant->setWaterStrategy(&defaultWaterStrategy());
+                }
+                if (plant->getFertilizeStrategy() == nullptr) {
+                    plant->setFertilizeStrategy(&defaultFertilizerStrategy());
+                }
                 if (std::unique_ptr<PlantState> desiredState = makeStateFromLabel(stateLabel)) {
                     plant->setState(std::move(desiredState));
                 }
@@ -150,7 +197,7 @@ void TXTAdapter::saveInventory(std::string filePath, Inventory* inventory) {
         itemsToSave.push_back(item);
     }
 
-    if (txtReader->writeDataToTxt(filePath, itemsToSave)) {
+    if (txtReader.writeDataToTxt(filePath, itemsToSave)) {
         std::cout << "[TXTAdapter] Saved inventory to " << filePath << std::endl;
     } else {
         std::cerr << "[TXTAdapter] Error: Failed to save inventory to " << filePath << std::endl;

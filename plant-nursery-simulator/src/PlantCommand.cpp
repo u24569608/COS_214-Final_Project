@@ -10,3 +10,7 @@ PlantCommand::PlantCommand(PlantInstance* p) {
 }
 
 PlantCommand::~PlantCommand() = default;
+
+PlantInstance* PlantCommand::getTarget() const {
+    return plant;
+}
