@@ -2,9 +2,8 @@
 #define PLANT_PROTOTYPE_REGISTRY_H
 
 #include <map>
-#include <memory>
 #include <string>
-#include <vector>
+#include <memory>
 
 // Forward declaration
 class Plant;
@@ -46,12 +45,6 @@ public:
      * @return True if a prototype is registered and non-null.
      */
     bool hasPrototype(const std::string& name) const;
-
-    /**
-     * @brief Enumerates the registered prototype names for UI population.
-     * @return Vector of prototype identifiers sorted by insertion order.
-     */
-    std::vector<std::string> listPrototypes() const;
 
 private:
     std::map<std::string, std::unique_ptr<Plant>> prototypes;

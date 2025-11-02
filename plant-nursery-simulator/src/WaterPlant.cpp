@@ -19,7 +19,3 @@ void WaterPlant::handleRequest() {
     
     this->plant->performWater();
 }
-
-std::string WaterPlant::getCommandName() const {
-    return "Water Plant";
-}

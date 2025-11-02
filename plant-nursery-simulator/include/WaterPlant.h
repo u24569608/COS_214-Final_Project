@@ -14,7 +14,6 @@ class WaterPlant : public PlantCommand {
 public:
     WaterPlant(PlantInstance* p);
     void handleRequest() override;
-    std::string getCommandName() const override;
 };
 
 #endif // WATER_PLANT_H

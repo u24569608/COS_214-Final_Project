@@ -42,14 +42,3 @@ bool PlantPrototypeRegistry::hasPrototype(const std::string& name) const {
     auto it = prototypes.find(name);
     return it != prototypes.end() && it->second != nullptr;
 }
-
-std::vector<std::string> PlantPrototypeRegistry::listPrototypes() const {
-    std::vector<std::string> names;
-    names.reserve(prototypes.size());
-    for (const auto& entry : prototypes) {
-        if (entry.second != nullptr) {
-            names.push_back(entry.first);
-        }
-    }
-    return names;
-}

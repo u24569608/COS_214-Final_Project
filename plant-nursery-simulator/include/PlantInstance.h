@@ -179,16 +179,6 @@ public:
      * @param newName The new name to assign; ignored when empty.
      */
     void rename(const std::string& newName);
-    /**
-     * @brief Provides access to the active watering strategy reference.
-     * @return Borrowed pointer to the current watering strategy, or nullptr when unset.
-     */
-    WaterStrategy* getWaterStrategy() const;
-    /**
-     * @brief Provides access to the active fertilising strategy reference.
-     * @return Borrowed pointer to the current fertilising strategy, or nullptr when unset.
-     */
-    FertilizeStrategy* getFertilizeStrategy() const;
 
 private:
     /**
@@ -219,13 +209,6 @@ private:
      * @brief Emits a care request notification if any critical resource is low.
      */
     void requestCareIfNeeded();
-    /**
-     * @brief Emits observer notifications describing stat adjustments.
-     * @param metric Human readable metric name (e.g. "Water level").
-     * @param oldValue Previous recorded value.
-     * @param newValue Updated value after the change.
-     */
-    void emitStatChange(const std::string& metric, int oldValue, int newValue);
 };
 
 #endif // PLANT_INSTANCE_H

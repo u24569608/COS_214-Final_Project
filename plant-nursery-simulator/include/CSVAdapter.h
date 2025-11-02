@@ -2,11 +2,12 @@
 #define CSV_ADAPTER_H
 
 #include "FileAdapter.h"
-#include "CSVReaderWriter.h"
 #include <string>
+#include <memory>
 
-// Forward declaration
+// Forward declarations
 class Inventory;
+class CSVReaderWriter;
 
 /**
  * @file CSVAdapter.h
@@ -35,7 +36,7 @@ public:
     void saveInventory(std::string filePath, Inventory* inventory) override;
 
 private:
-    CSVReaderWriter csvReader; ///< CSV helper used to read/write stock data.
+    std::unique_ptr<CSVReaderWriter> csvReader; ///< The wrapped 'Adaptee'.
 };
 
 #endif // CSV_ADAPTER_H

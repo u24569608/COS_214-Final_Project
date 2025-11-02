@@ -19,7 +19,3 @@ void FertilizePlant::handleRequest() {
     
     this->plant->performFertilize();
 }
-
-std::string FertilizePlant::getCommandName() const {
-    return "Fertilise Plant";
-}

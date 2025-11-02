@@ -123,13 +123,6 @@ public:
      */
     PlantInstance* createPlantInstance(const std::string& plantName);
 
-    /**
-     * @brief Indicates whether the inventory still manages the supplied plant pointer.
-     * @param plant Candidate plant instance.
-     * @return True when the plant is currently registered with the greenhouse structure.
-     */
-    bool isManagingPlant(PlantInstance* plant) const;
-
     // Friend class needed for iterator implementation
     friend class ConcreteInventoryIterator;
 

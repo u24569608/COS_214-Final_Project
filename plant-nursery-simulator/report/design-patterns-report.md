@@ -1,0 +1,628 @@
+# Design Patterns Report
+
+This report documents every design pattern identified and used in the Plant Nursery Simulator. For each pattern we explain the intent and rationale (why we chose it), identify the concrete implementation in this codebase (where it is), list the participants, outline key interactions, and map the pattern to the functional requirements (FRs) in `plant-nursery-simulator/docs/Functional_and_non-functional_requirements.md`.
+
+See also: `plant-nursery-simulator/docs/GUI Requirements.md` for UI-focused items that the Facade and Iterator patterns help enable.
+
+Note: File paths point to headers in `include/` and implementations in `src/` within `plant-nursery-simulator/`.
+
+---
+
+## Research Brief: Nursery Domain Findings
+
+The research phase examined how commercial nurseries operate across plant cultivation, staff coordination, and customer experience. Nurseries behave like living ecosystems where biological growth, human scheduling, and sales interactions constantly influence each other. Understanding those loops guided the simulator so that it mirrors the adaptability of a real operation while staying maintainable.
+
+### Plant care and growth management
+- Nurseries manage diverse plant families (annuals, perennials, succulents, shrubs, trees) with distinct water, soil, nutrient, and sunlight profiles (Department of Agriculture, 2023; Royal Horticultural Society, 2022).
+- Climate and irrigation systems must adjust on schedule to avoid stress across batches.
+- Insight applied: Each `PlantInstance` owns pluggable watering and fertilising strategies (Strategy pattern) so care algorithms can reflect cultivar differences. Lifecycle state transitions (Seed, Growing, Mature, Withering, Dead) capture that a plant responds differently to care depending on maturity (State pattern). Health vitals and thresholds encode the simplified horticultural rules that drive those transitions.
+
+### Staff coordination and task flow
+- Nursery teams span growers, floor staff, cashiers, and logistics who need shared context (shift notes, stock changes, care alerts).
+- Command batching and delegation help manage repetitive jobs (watering runs, pruning, order prep).
+- Insight applied: Care requests become `Command` objects that staff can queue, undo, or audit; specialised handlers (Chain of Responsibility) route tasks to the right role. A `NurseryMediator` centralises communication so staff, inventory, and customer service modules interact without tight coupling, matching the broadcast-style coordination observed in practice.
+
+### Customer experience and sales workflow
+- Differentiated service (bespoke potting, gift preparation, delivery) is a competitive lever (Garden Centre Magazine, 2024).
+- Checkout systems shield customers from internal stock/database complexity.
+- Insight applied: The `SalesFacade` offers a single entry point for the GUI and demo scripts, hiding payment, stock reservation, and notification details. The `OrderDirector` with a `CustomOrderBuilder` composes customised orders (pot finish, wrapping, delivery slot) so optional features stay modular.
+
+### System scalability and data management
+- Nurseries expand by adding greenhouse sections, experimenting with cultivars, and switching record formats as partners demand (CSV exports, plain text manifests).
+- Insight applied: A composite greenhouse structure lets controllers treat beds and individual plants uniformly and extend the hierarchy as the site grows. Plant prototypes are stored in a registry so new cultivars can be cloned without revisiting construction code (Prototype pattern). CSV and TXT file formats are supported through adapters, insulating inventory logic from I/O changes (Adapter pattern). Observer links keep UI widgets and stock records in sync when a plant changes availability.
+
+### Assumptions and definitions
+- Plants are modelled with core vitals (health, water, nutrients, sunlight preference) rather than biological precision; simulation ticks abstract real-time growth.
+- Customer preferences focus on order customisation features exposed through the builder (pot, wrapping, delivery); financials remain high level.
+- The nursery operates in a controlled climate so environmental factors enter via strategies and state thresholds instead of free-form physics.
+
+### References
+- Department of Agriculture. (2023). *Greenhouse Management and Plant Propagation Guide.* Pretoria.
+- Royal Horticultural Society. (2022). *Plant Care Best Practices.* London.
+- Garden Centre Magazine. (2024). *Trends in Customer Personalisation and Retail Nurseries.*
+
+---
+
+## Functional Requirement Traceability
+
+Functional Requirement (FR) identifiers used throughout this report refer to the definitions captured in `docs/Functional_and_non-functional_requirements.md`. The table below highlights the primary mapping between each design pattern focus area and the FRs it fulfils; detailed rationale and evidence appear in the dedicated pattern sections that follow.
+
+| Pattern focus | FR IDs | Requirement source |
+| --- | --- | --- |
+| Prototype (Plant registry) | FR1, FR2 | `docs/Functional_and_non-functional_requirements.md` |
+| State (Lifecycle transitions) | FR3, FR4 | `docs/Functional_and_non-functional_requirements.md` |
+| Strategy (Water/Fertiliser) | FR5, FR6, FR7 | `docs/Functional_and_non-functional_requirements.md` |
+| Adapter (Inventory I/O) | FR8, FR9 | `docs/Functional_and_non-functional_requirements.md` |
+| Composite (Greenhouse structure) | FR10, FR11, FR26 | `docs/Functional_and_non-functional_requirements.md` |
+| Iterator (Greenhouse traversal) | FR12, FR26 | `docs/Functional_and_non-functional_requirements.md` |
+| Observer (Plant notifications) | FR13, FR14, FR27 | `docs/Functional_and_non-functional_requirements.md` |
+| Iterator (Inventory traversal) | FR15, FR16 | `docs/Functional_and_non-functional_requirements.md` |
+| Command (Care tasks) | FR18, FR19 | `docs/Functional_and_non-functional_requirements.md` |
+| Chain of Responsibility (Care routing) | FR20, FR21 | `docs/Functional_and_non-functional_requirements.md` |
+| Mediator (Nursery coordination) | FR22, FR23 | `docs/Functional_and_non-functional_requirements.md` |
+| Builder (Order customisation) | FR24 | `docs/Functional_and_non-functional_requirements.md` |
+| Facade (Sales workflow) | FR25 | `docs/Functional_and_non-functional_requirements.md` |
+
+---
+
+## System Overview
+
+The Plant Nursery Simulator models a nursery business end‑to‑end:
+- Greenhouse: Plants are organised in a Composite of beds and leaves. A Greenhouse Iterator traverses all plants in depth‑first order to apply periodic growth ticks and care.
+- Plants and lifecycle: Each plant instance holds vitals (health, water, nutrients) and a lifecycle State (Seed → Growing → Mature → Withering → Dead). States encapsulate per‑stage behaviour; Strategy objects (watering, fertilising) update vitals.
+- Observation: Plants are Subjects and notify Observers (Staff, StockItem) about care needs and availability changes. This decouples lifecycle from UI/operations.
+- Inventory and sales: Inventory maintains StockItems (some linked to PlantInstances). An Inventory Iterator exposes a stable traversal prioritising market‑ready plant stock. SalesFacade orchestrates sales, orders, inventory updates, and uses the Builder to assemble orders.
+- Persistence: File Adapters (CSV/TXT) abstract I/O so Inventory remains independent of file formats; Adapters adapt Reader/Writers to the `FileAdapter` target.
+- Operations: Care actions are Commands queued and executed by Staff; care requests route through a Chain of Responsibility; Customer/Staff communication goes via a Mediator.
+
+---
+
+## Iterator - Inventory
+
+![Iterator - Inventory](diagrams/ClassDiagram/DPClassDiagrams/IteratorInventory.png)
+
+### Intent and rationale
+ - Provide a uniform way to traverse inventory items without exposing the underlying container. Supports browsing and sales workflows cleanly and testably while enforcing domain order.
+### Where implemented
+  - `include/InventoryCollection.h` (Aggregate interface)
+  - `include/InventoryIterator.h` (Iterator interface)
+  - `include/ConcreteInventoryIterator.h`, `src/ConcreteInventoryIterator.cpp` (ConcreteIterator)
+  - `include/Inventory.h`, `src/Inventory.cpp` (ConcreteAggregate creating iterators)
+### Participants
+  - Iterator: `InventoryIterator`
+  - ConcreteIterator: `ConcreteInventoryIterator`
+  - Aggregate: `InventoryCollection`
+  - ConcreteAggregate: `Inventory`
+### Key interactions
+  - Client code obtains an iterator via `Inventory::createIterator()` and traverses items with `hasNext()/next()`.
+### Functional requirements (with code references and tests)
+  - FR15: Aggregate interface to create iterators
+    - Code: src/Inventory.cpp:33
+    - Test: tests/iterator_test.cpp:23 (testEmptyInventory)
+  - FR16: Iterate over inventory items for browsing and sales
+    - Code: src/ConcreteInventoryIterator.cpp:20,29,42,47,60-129
+    - Tests: tests/iterator_test.cpp:46 (prioritisation), 82 (reset reflects state changes)
+
+### Why this pattern
+  - Over nested loops or exposing containers: The inventory manages multiple concerns (greenhouse-linked items, readiness, ID mapping). Exposing `items` would leak representation and allow incorrect traversal order. The iterator encapsulates a purpose-built ordering that prioritizes sale-ready plant-backed stock while hiding internal storage, as seen in `ConcreteInventoryIterator::rebuildTraversal()`.
+  - Over Visitor: We do not need double dispatch or per-element operations; we only need a traversal order and simple item access. Iterator keeps responsibilities minimal and testable.
+  - Over returning vectors: The iterator recalculates traversal lazily and can stay consistent as the inventory changes without materializing transient copies in client code.
+
+### Implementation evidence
+  - `Inventory` is the ConcreteAggregate that returns `InventoryIterator*` from `createIterator()` (`include/Inventory.h`).
+  - `ConcreteInventoryIterator` builds a stable traversal by first walking the greenhouse via `GreenhouseIterator` and selecting plant-backed, market-ready `StockItem`s, then appending remaining eligible stock (`src/ConcreteInventoryIterator.cpp`).
+  - Market readiness is checked through the associated `PlantInstance::isAvailableForSale()`, ensuring business rules drive traversal order.
+
+### Why efficient
+  - O(n) rebuild on demand; reuses greenhouse iterator for plant order; avoids repeated vector materialisation in clients.
+
+---
+
+## Iterator - Greenhouse
+
+![Iterator - Greenhouse](diagrams/ClassDiagram/DPClassDiagrams/IteratorGreenhouse.png)
+
+### Intent and rationale
+  - Traverse all plants within a hierarchical greenhouse (Composite) without coupling traversal logic to the structure. Enables controller-driven growth ticks and batch care.
+### Where implemented
+  - `include/GreenhouseIterator.h` (Iterator interface)
+  - `include/ConcreteGreenhouseIterator.h`, `src/ConcreteGreenhouseIterator.cpp` (ConcreteIterator; DFS across beds/leaves)
+  - `include/GreenhouseComponent.h` (Aggregate component)
+  - `include/GreenhouseBed.h`, `src/GreenhouseBed.cpp` (ConcreteAggregate root/branch)
+  - `include/GreenhouseController.h`, `src/GreenhouseController.cpp` (uses iterator to run ticks)
+### Participants
+  - Iterator: `GreenhouseIterator`
+  - ConcreteIterator: `ConcreteGreenhouseIterator`
+  - Aggregate/Component: `GreenhouseComponent`
+  - ConcreteAggregate: `GreenhouseBed`
+### Key interactions
+  - `GreenhouseController::runGrowthTick()` requests a fresh iterator from the current bed root and iterates plants to apply per-tick updates.
+### Functional requirements (with code references and tests)
+  - FR12: Iterator over greenhouse hierarchy
+    - Code: src/GreenhouseBed.cpp:62; src/ConcreteGreenhouseIterator.cpp:15,26,38,42,49-64
+    - Tests: tests/greenhouse_iterator_test.cpp:20 (empty), 32 (flat), 57 (nested), 92 (refresh)
+  - FR26: Controller executes growth tick by iterating plants
+    - Code: include/GreenhouseController.h:30
+    - Tests: exercised via iterator + state in tests/plant_state_test.cpp:121
+
+### Why this pattern
+  - Over manual recursive traversal: Encapsulating traversal into an iterator decouples the controller and any client code from the composite’s depth and shape (beds within beds). This prevents repeated reimplementation of DFS/BFS and reduces recursion risks.
+  - Over Visitor: The controller mostly needs enumeration; per-node double-dispatch is unnecessary and would overcomplicate the design.
+
+### Implementation evidence
+  - `ConcreteGreenhouseIterator::collectPlants()` performs a DFS over `GreenhouseBed::children`, collecting `PlantInstance` leaves in a flat order (`src/ConcreteGreenhouseIterator.cpp`).
+  - `GreenhouseBed::createIterator()` is the factory for a bed-scoped iterator, keeping creation close to the composite (`include/GreenhouseBed.h`).
+
+### Why efficient
+  - Single DFS collection and O(n) iteration per tick; no repeated visits; flat traversal array improves locality.
+
+---
+
+## Composite - Greenhouse Structure
+
+![Composite - Greenhouse Structure](diagrams/ClassDiagram/DPClassDiagrams/CompositeGreenhouse.png)
+
+### Intent and rationale
+  - Represent part–whole hierarchies (beds composed of beds and plants) and enable uniform treatment of leaves and composites. Simplifies applying operations (care, tick, display) to entire structures.
+### Where implemented
+  - `include/GreenhouseComponent.h` (Component abstraction)
+  - `include/GreenhouseBed.h`, `src/GreenhouseBed.cpp` (Composite with child management and delegation)
+  - `include/PlantInstance.h`, `src/PlantInstance.cpp` (Leaf)
+### Participants
+  - Component: `GreenhouseComponent`
+  - Composite: `GreenhouseBed`
+  - Leaf: `PlantInstance`
+### Key interactions
+  - Composite delegates `performCare()` and other operations to children; leaves implement concrete behaviour.
+### Functional requirements (with code references and tests)
+  - FR10: Composite greenhouse hierarchy
+    - Code: src/GreenhouseBed.cpp:21,28,66-81,83-117,58-64
+    - Tests: tests/greenhouse_iterator_test.cpp:70; tests/greenhouse_composite_test.cpp:43
+  - FR11: Cascade care operations to all plants
+    - Code: src/GreenhouseBed.cpp:32-38; src/PlantInstance.cpp:168-175
+    - Tests: tests/greenhouse_composite_test.cpp:59
+  - FR26: Works with Iterator for growth ticks
+    - Code: src/GreenhouseBed.cpp:62
+    - Tests: iterator tests above
+
+### Why this pattern
+  - Over flat collections: The nursery requires grouping plants into beds and potentially nested beds. Composite allows treating beds and plants uniformly (`performCare()`, `createIterator()`), simplifying client code.
+  - Over inheritance-only hierarchies without composition: Without Composite, propagating actions (care, traversal) across variable-depth structures would require conditionals and special cases in multiple places.
+
+### Implementation evidence
+  - `GreenhouseComponent` declares uniform operations; `GreenhouseBed` owns `children` and delegates `performCare()` to them.
+  - `PlantInstance` is the leaf implementing actual care logic, compatible with Composite and Iterator contracts.
+
+### Why efficient
+  - Care cascades in a single pass; ownership via `unique_ptr` keeps memory safe and local.
+
+---
+
+## Facade - Sales
+
+![Facade - Sales](diagrams/ClassDiagram/DPClassDiagrams/FacadeSales.png)
+
+### Intent and rationale
+  - Provide a single entry point for sales operations, decoupling UI/client code from inventory, payments, and order-building complexity.
+### Where implemented
+  - `include/SalesFacade.h`, `src/SalesFacade.cpp`
+  - Subsystems: `include/Inventory.h` (+ `src/Inventory.cpp`), `include/PaymentProcessor.h` (+ `src/PaymentProcessor.cpp`), `include/OrderBuilder.h` (+ builders and `Order`)
+### Participants
+  - Facade: `SalesFacade`
+  - Subsystems: `Inventory`, `PaymentProcessor`, `OrderBuilder`/`CustomOrderBuilder`, `Order`
+### Key interactions
+  - `SalesFacade` orchestrates purchase, stock checks, returns, and order creation without leaking subsystem details to clients.
+### Functional requirements (with code references and tests)
+  - FR25: Unified façade for sales flows
+    - Check stock: src/SalesFacade.cpp:165 — tests/facade_test.cpp:63
+    - Add to inventory: src/SalesFacade.cpp:172-186 — tests/facade_test.cpp:67
+    - Purchase item: src/SalesFacade.cpp:192-235 — tests/facade_test.cpp:79,95
+    - Build+finalise order: src/SalesFacade.cpp:257-307 — tests/facade_test.cpp:111
+    - Process return: src/SalesFacade.cpp:320-357 — tests/facade_test.cpp:134
+    - Cart sync notify: src/SalesFacade.cpp:362-371 — tests/facade_test.cpp:164
+
+### Why this pattern
+  - Over Service Locator or direct subsystem calls: Facade narrows and stabilizes the API the GUI/tests use, while dependencies (`Inventory`, `PaymentProcessor`, builders) remain swappable and independently testable.
+  - Over turning `SalesFacade` into a "master" object: Facade keeps orchestration only; business rules live in subsystems, preventing bloat and maintaining separation of concerns.
+
+### Implementation evidence
+  - `SalesFacade` accepts subsystem pointers and coordinates operations like `purchaseItem`, `addItemToCart`, `buildAndFinalizeOrder`, `checkStock`, and `addItemToInventory`.
+  - It also propagates contextual configuration (greenhouse root, prototype registry) via `setGreenhouseRoot()`/`setPlantRegistry()` for consistent environment setup.
+
+### Why efficient
+  - Orchestration is O(1) per item; leverages inventory IDs to avoid repeated lookups.
+
+---
+
+## Builder - Orders
+
+![Builder - Orders](diagrams/ClassDiagram/DPClassDiagrams/BuilderOrder.png)
+
+### Intent and rationale
+  - Construct complex `Order` objects step-by-step and support different compositions/presets via a director. Keeps `Order` immutable in shape while flexible in content.
+### Where implemented
+  - `include/Order.h`, `src/Order.cpp` (Product)
+  - `include/OrderBuilder.h` (Builder)
+  - `include/CustomOrderBuilder.h`, `src/CustomOrderBuilder.cpp` (ConcreteBuilder)
+  - `include/OrderDirector.h`, `src/OrderDirector.cpp` (Director)
+### Participants
+  - Product: `Order` (contains `StockItem` parts)
+  - Builder: `OrderBuilder`
+  - ConcreteBuilder: `CustomOrderBuilder`
+  - Director: `OrderDirector`
+  - Part: `StockItem`
+### Key interactions
+  - `SalesFacade` can use `OrderBuilder` directly or via `OrderDirector` to assemble orders.
+### Functional requirements (with code references and tests)
+  - FR24: Build orders with optional director presets
+    - Builder API: src/OrderBuilder.cpp:13,22; src/CustomOrderBuilder.cpp:17-24
+    - Facade usage: src/SalesFacade.cpp:257-307
+    - Test: tests/facade_test.cpp:111
+
+### Why this pattern
+  - Over telescoping constructors: Orders vary in composition; using a builder avoids brittle large constructors and allows step-wise construction and validation.
+  - Over simple factory: Builder supports variable numbers and combinations of `StockItem`s and evolving assembly policies; a factory would not capture sequences and optional steps cleanly.
+
+### Implementation evidence
+  - `Order` contains a vector of `StockItem` parts and exposes `addItem()`/`calculateTotal()` used by builders and facade.
+  - `OrderBuilder` defines the steps; `CustomOrderBuilder` implements them for general orders; `OrderDirector` encapsulates common presets when needed.
+
+### Why efficient
+  - Linear in item count; uses simple copies of `StockItem` parts; no reflection or dynamic registration needed.
+
+---
+
+## Observer - Plants, Staff, and Stock Items
+
+![Observer - Plants, Staff, and Stock Items](diagrams/ClassDiagram/DPClassDiagrams/ObserverPlant.png)
+
+### Intent and rationale
+  - Decouple plant lifecycle events from dependent behaviours such as staff reminders and store display availability. Supports many observers without tight coupling.
+### Where implemented
+  - `include/Observer.h` (Observer interface)
+  - `include/Subject.h`, `src/Subject.cpp` (Subject base and lifecycle)
+  - Observers: `include/Staff.h`, `src/Staff.cpp`; `include/StockItem.h`, `src/StockItem.cpp`
+  - Subject: `include/PlantInstance.h`, `src/PlantInstance.cpp` (publishes events on tick/state change)
+### Participants
+  - Subject: `Subject`
+  - ConcreteSubject: `PlantInstance`
+  - Observer: `Observer`
+  - ConcreteObserver: `Staff`, `StockItem`
+### Key interactions
+  - `PlantInstance` notifies observers after growth ticks/state transitions; `Staff::update()` schedules work; `StockItem::update()` syncs sale availability/display state.
+### Functional requirements (with code references and tests)
+  - FR13: Plant subjects notify observers
+    - Code: src/PlantInstance.cpp:116-135,142-153,245-260; src/Subject.cpp:6-16
+    - Tests: cart sync after sale (mediated by facade notification), tests/facade_test.cpp:164
+  - FR14: Staff and stock observers react to events
+    - Code: src/Staff.cpp:66-83; src/StockItem.cpp:102-130,149-155
+    - Tests: adapter/state flows confirm availability and reminders; tests/adapter_test.cpp:119-137
+  - FR27: Stock item availability mirrors plant readiness
+    - Code: src/PlantInstance.cpp:163-165; src/StockItem.cpp:149-155
+    - Tests: prioritised iterator order implies readiness, tests/iterator_test.cpp:62,104
+
+### Model used: Push Model
+  - `PlantInstance::setState()` and `PlantInstance::applyGrowthTick()` build an `ObserverEvent` that already contains the message copy and optional availability flag before calling `Subject::notify()` (`src/PlantInstance.cpp:121-153,267-276`; `src/Subject.cpp:38-45`). Observers such as `StockItem::update()` and `Staff::update()` consume that payload directly, so they do not need to call back into the subject for additional context (`src/StockItem.cpp:110-136`; `src/Staff.cpp:48-88`). This keeps coupling low while ensuring each notification delivers exactly the state the UI and reminder queues require.
+
+### Why this pattern
+  - Over polling: Observers receive timely updates on state changes (care required, availability toggled) without periodic scans over all plants.
+  - Over event buses: A lightweight Subject/Observer pair provides direct, typed notifications suitable for this domain; a generic bus would add complexity without benefit here.
+
+### Implementation evidence
+  - `PlantInstance` inherits `Subject` and calls `notify()` on growth ticks or when `setState()` triggers availability changes.
+  - `StockItem::update()` toggles availability and display status based on `ObserverEvent`.
+  - `Staff::update()` accumulates care reminders when receiving `CareRequired` events.
+
+### Why efficient
+  - O(k) notify where k is subscriber count; simple data payload; snapshot iteration avoids re-entrancy issues.
+
+---
+
+## Adapter - Inventory File I/O
+
+![Adapter - Inventory File I/O](diagrams/ClassDiagram/DPClassDiagrams/AdapterIO.png)
+
+### Intent and rationale
+  - Isolate inventory logic from specific storage formats. Enable pluggable readers/writers (CSV, TXT) without changing inventory code.
+
+### Where implemented
+  - Target: `include/FileAdapter.h`
+  - Adaptees: `include/CSVReaderWriter.h`, `src/CSVReaderWriter.cpp`; `include/TXTReaderWriter.h`, `src/TXTReaderWriter.cpp`
+  - Adapters: `include/CSVAdapter.h`, `src/CSVAdapter.cpp`; `include/TXTAdapter.h`, `src/TXTAdapter.cpp`
+  - Client: `include/Inventory.h`, `src/Inventory.cpp` (uses `FileAdapter`)
+
+### Participants
+  - Target: `FileAdapter`
+  - Adaptee: `CSVReaderWriter`, `TXTReaderWriter`
+  - Adapter: `CSVAdapter`, `TXTAdapter`
+  - Client: `Inventory`
+
+### Key interactions
+  - `Inventory::loadFromFile()/saveToFile()` depend on the `FileAdapter` interface. Concrete adapters delegate to the corresponding reader/writer.
+
+### Functional requirements (with code references and tests)
+  - FR8: File I/O abstraction for inventory
+    - Code: src/Inventory.cpp:137-165
+    - Tests: tests/adapter_test.cpp:33 (CSV round‑trip), 112 (TXT round‑trip)
+  - FR9: Load/save via pluggable adapters (CSV, TXT)
+    - Code: src/CSVAdapter.cpp:58-117,122-140; src/TXTAdapter.cpp:58-130,136-153
+    - Tests: tests/adapter_test.cpp:180-238 (invalid/bad input handling)
+
+### Why this pattern
+  - Over direct file I/O in `Inventory`: The adapter target allows `Inventory` to depend only on `FileAdapter`, enabling addition of new formats without edits to `Inventory`.
+  - Over Strategy: While similar in pluggability, Adapter is the right choice since we adapt existing reader/writer interfaces (`CSVReaderWriter`, `TXTReaderWriter`) that do not match the expected `FileAdapter` API.
+
+### Implementation evidence
+  - `CSVAdapter` and `TXTAdapter` wrap their respective `*ReaderWriter` and translate to the `FileAdapter` interface.
+  - `Inventory::loadFromFile()` and `saveToFile()` simply call through to the adapter, keeping persistence concerns out of collection logic.
+
+### Why efficient
+  - Single‑pass encode/decode; uses `InventoryIterator` to stream items without copying containers; O(n) in item count.
+
+---
+
+## Prototype (Data‑Driven) - Plants and Registry
+
+![Prototype - Plants and Registry](diagrams/ClassDiagram/DPClassDiagrams/PrototypePlant.png)
+
+### Intent and rationale
+  - Support data-driven creation of plant objects by cloning registered prototypes. Allows new plant types without changing creator code.
+### Where implemented
+  - `include/Plant.h`, `src/Plant.cpp` (`Plant::clone()`)
+  - `include/PlantPrototypeRegistry.h`, `src/PlantPrototypeRegistry.cpp` (stores and clones prototypes)
+### Participants
+  - Prototype: `Plant`
+  - Concrete Prototypes: specific `Plant` subtypes
+  - Client/Registry: `PlantPrototypeRegistry`
+### Key interactions
+  - Prototypes are registered under names; the registry clones on demand to create new instances.
+### Functional requirements (with code references and tests)
+  - FR1: Register clonable plant prototypes
+    - Code: src/PlantPrototypeRegistry.cpp:10-16
+    - Tests: prototype registration helpers e.g., tests/iterator_test.cpp:29; tests/adapter_test.cpp:54
+  - FR2: Create plants by cloning prototypes
+    - Code: src/PlantPrototypeRegistry.cpp:18-34; src/Inventory.cpp:219-252
+    - Tests: used in adapter roundtrips and iterator tests
+
+### Why this pattern
+  - Over Abstract Factory/Factory Method: Plant types are data-driven and registered at runtime; Prototype allows cloning configured exemplars without centralizing construction logic for every type.
+  - Over copy constructors alone: The registry maps string keys to polymorphic prototypes with virtual `clone()`, avoiding slicing and keeping creation decoupled from concrete classes.
+
+### Implementation evidence
+  - `PlantPrototypeRegistry::addPrototype()` stores owned prototypes by name; `createPlant()` clones on demand.
+  - `Inventory::createPlantInstance()` requests a prototype and configures a `PlantInstance`, applying default strategies if present.
+
+### Why efficient
+  - Clone cost is O(1); avoids reflection/RTTI factories and keeps ownership explicit.
+
+---
+
+## State - Plant Lifecycle
+
+![State - Plant Lifecycle](diagrams/ClassDiagram/DPClassDiagrams/StatePlant.png)
+
+### Intent and rationale
+  - Encapsulate lifecycle stages and transitions for plants. Keeps per-state behaviour and thresholds modular and extendable.
+### Where implemented
+  - `include/PlantState.h` (State interface)
+  - Concrete states: `include/SeedState.h`, `include/GrowingState.h`, `include/MatureState.h`, `include/WitheringState.h`, `include/DeadState.h` (+ corresponding `src/*.cpp`)
+  - Helpers/thresholds: `include/PlantStateUtils.h`, `include/PlantStateThresholds.h`
+  - Context: `include/PlantInstance.h`, `src/PlantInstance.cpp` (delegates to state and triggers transitions)
+### Participants
+  - State: `PlantState`
+  - ConcreteState: `SeedState`, `GrowingState`, `MatureState`, `WitheringState`, `DeadState`
+  - Context: `PlantInstance`
+### Key interactions
+  - Each growth tick `PlantInstance` asks the current `PlantState` to update and possibly transition; `MatureState` communicates market readiness, but `PlantInstance` performs observer notifications.
+### Functional requirements (with code references and tests)
+  - FR3: Model lifecycle states and transitions
+    - Code: src/PlantInstance.cpp:142-153 (tick), 100-136 (state replacement)
+    - Tests: tests/plant_state_test.cpp:111,147,186,210,231
+  - FR4: Identify market-ready plants for sale
+    - Code: include/PlantState.h:34-40; src/PlantInstance.cpp:163-165
+    - Tests: iterator prioritisation, tests/iterator_test.cpp:62,104
+
+### Why this pattern
+  - Over large conditional chains: Encapsulating per-state logic (`onTick`, `onWater`, `onFertilize`) reduces branching and isolates thresholds/transitions for maintainability.
+  - Over Strategy alone: Strategies handle how to perform care; State determines when and how states change and whether a plant is market-ready.
+
+### Implementation evidence
+  - `PlantState` defines lifecycle hooks; concrete states implement behaviour and transitions. `PlantInstance::setState()` owns state lifetime and centralizes observer notifications when availability changes.
+  - `isMarketReady()` is state-specific (true in `MatureState`) and drives sales availability checks.
+
+### Why efficient
+  - Constant-time per plant per tick; branching isolated within state objects; transitions only on threshold crossings.
+
+---
+
+## Command - Plant Care Tasks
+
+![Command - Plant Care Tasks](diagrams/ClassDiagram/DPClassDiagrams/CommandPlantCare.png)
+
+### Intent and rationale
+  - Encapsulate care actions (water, fertilize) as command objects queued by staff. Enables scheduling, undo/redo extensions, and testing.
+### Where implemented
+  - `include/PlantCommand.h` (Command interface)
+  - `include/WaterPlant.h`, `src/WaterPlant.cpp` (ConcreteCommand)
+  - `include/FertilizePlant.h`, `src/FertilizePlant.cpp` (ConcreteCommand)
+  - Receiver: `include/PlantInstance.h`, `src/PlantInstance.cpp` (performs water/fertilize)
+  - Invoker: `include/Staff.h`, `src/Staff.cpp` (queues and processes commands)
+### Participants
+  - Command: `PlantCommand`
+  - ConcreteCommand: `WaterPlant`, `FertilizePlant`
+  - Receiver: `PlantInstance`
+  - Invoker: `Staff`
+### Key interactions
+  - `Staff` enqueues commands and later processes them; commands call receiver operations to carry out care.
+### Functional requirements (with code references and tests)
+  - FR18: Encapsulate plant care actions as commands
+    - Code: src/WaterPlant.cpp:9-16; src/FertilizePlant.cpp:9-16
+    - Tests: strategy invocation counts in tests/plant_state_test.cpp:136,160
+  - FR19: Staff queue and invoke care commands
+    - Code: src/Staff.cpp:101-117,119-121
+    - Tests: used by integration flows
+
+### Why this pattern
+  - Over direct method calls: Command objects let staff queue, schedule, and potentially undo/redo operations, decoupling request from execution time.
+  - Over function pointers/lambdas: Dedicated command classes capture semantics, enable polymorphic queues, and remain serializable/traceable if needed.
+
+### Implementation evidence
+  - `WaterPlant` and `FertilizePlant` extend `PlantCommand` and call receiver methods on `PlantInstance`. `Staff` maintains a queue and processes tasks later.
+
+### Why efficient
+  - O(1) enqueue/dequeue; direct receiver invocation.
+
+---
+
+## Mediator - Floor Coordination
+
+![Mediator - Floor Coordination](diagrams/ClassDiagram/DPClassDiagrams/MediatorFloor.png)
+
+### Intent and rationale
+  - Centralize communication between colleagues (customers, staff) to avoid tight coupling and complex peer-to-peer links.
+### Where implemented
+  - `include/FloorMediator.h` (Mediator interface)
+  - `include/NurseryMediator.h`, `src/NurseryMediator.cpp` (ConcreteMediator)
+  - `include/Colleague.h` (base), `include/Customer.h` (+ `src/Customer.cpp`), `include/Staff.h` (+ `src/Staff.cpp`) (ConcreteColleagues)
+### Participants
+  - Mediator: `FloorMediator`
+  - ConcreteMediator: `NurseryMediator`
+  - Colleague: `Colleague`
+  - ConcreteColleagues: `Customer`, `Staff`
+### Key interactions
+  - Colleagues send messages to the mediator, which distributes to appropriate recipients, keeping colleagues decoupled.
+### Functional requirements (with code references and tests)
+  - FR22: Coordinate communication via mediator
+    - Code: src/NurseryMediator.cpp:31-59
+    - Tests: used implicitly via facade/customer interactions
+  - FR23: Customers and staff act as colleagues
+    - Code: src/Staff.cpp:90-99; src/Customer.cpp:103-111
+    - Tests: cart sync via sale notify, tests/facade_test.cpp:164
+
+### Why this pattern
+  - Over direct references between colleagues: Mediator avoids N² coupling and simplifies adding/removing colleagues without rewriting routing logic.
+  - Over Observer for chat-like messaging: We require directed messages (with optional recipient); Mediator’s `distribute()` with sender/recipient IDs matches this routing concern.
+
+### Implementation evidence
+  - `NurseryMediator` stores colleagues and routes messages via `distribute()`. `Staff` and `Customer` subclass `Colleague` and use `send()/receive()` to interact.
+
+### Why efficient
+  - O(m) for broadcast across m colleagues; O(1) targeted delivery after a short scan.
+
+---
+
+## Chain of Responsibility - Care Routing
+
+![Chain of Responsibility - Care Routing](diagrams/ClassDiagram/DPClassDiagrams/CORHandlers.png)
+
+### Intent and rationale
+  - Route care requests through a chain of handlers so each handler either processes or delegates. Makes it easy to add new care types.
+### Where implemented
+  - `include/CareRequestHandler.h` (Handler)
+  - `include/WateringHandler.h`, `src/WateringHandler.cpp` (ConcreteHandler)
+  - `include/FertilizingHandler.h`, `src/FertilizingHandler.cpp` (ConcreteHandler)
+  - Client wiring: `include/Staff.h`, `src/Staff.cpp`
+### Participants
+  - Handler: `CareRequestHandler`
+  - ConcreteHandler: `WateringHandler`, `FertilizingHandler`
+### Key interactions
+  - `Staff` composes the chain and submits requests; each handler checks `canHandle()` and either processes or delegates to `next`.
+### Functional requirements (with code references and tests)
+  - FR20: Route care requests through chain
+    - Code: include/CareRequestHandler.h:18-30; src/WateringHandler.cpp:24-42; src/FertilizingHandler.cpp:24-41
+    - Tests: exercised by staff request flows
+  - FR21: Handlers process or delegate
+    - Code: src/WateringHandler.cpp:18-22,35-41; src/FertilizingHandler.cpp:18-22,34-41
+    - Tests: manual verification via Staff::makeCareRequest
+
+### Why this pattern
+  - Over switch/case branching: The chain allows adding new care types without modifying a central dispatcher, respecting Open/Closed Principle.
+  - Over Strategy: We need routing plus delegation to “next” when unsupported; CoR matches that responsibility better.
+
+### Implementation evidence
+  - `CareRequestHandler::handleRequest()` checks `canHandle()` and delegates to `nextHandler` when necessary. `WateringHandler`/`FertilizingHandler` implement the care-specific logic.
+  - `Staff` composes the chain and invokes `makeCareRequest()` with a textual request type.
+
+### Why efficient
+  - Worst-case O(h) where h is handler count; constant work per handler.
+
+---
+
+## Strategy (+ Prototype) - Watering and Fertilizing
+
+![Strategy - Watering and Fertilizing](diagrams/ClassDiagram/DPClassDiagrams/StrategyPrototypePlant.png)
+
+### Intent and rationale
+  - Vary watering and fertilizing algorithms independently of `PlantInstance` and swap them at runtime. We additionally prototype strategies to clone preconfigured policies when needed.
+### Where implemented
+  - Strategy interfaces: `include/WaterStrategy.h`, `include/FertilizeStrategy.h`
+  - Concrete strategies: `include/FrequentWatering.h`, `include/SeasonalWatering.h`, `include/SparseWatering.h`; `include/LiquidFertilizer.h`, `include/SlowReleaseFertilizer.h`, `include/OrganicFertilizer.h` (+ `src/*.cpp`)
+  - Used by: `include/PlantInstance.h`, `src/PlantInstance.cpp` (setters and execution)
+### Participants
+  - Strategy: `WaterStrategy`, `FertilizeStrategy`
+  - ConcreteStrategy: frequent/seasonal/sparse watering; liquid/slow-release/organic fertilizing
+  - Context: `PlantInstance`
+  - Prototype (optional): strategies can be cloned when configured in presets
+### Key interactions
+  - `PlantInstance` calls the current strategies during care or ticks; strategies update plant vitals according to policy.
+### Functional requirements (with code references and tests)
+  - FR5: Interchangeable watering strategies
+    - Code: include/WaterStrategy.h:15-20; src/FrequentWatering.cpp:7-15
+    - Tests: tests/plant_state_test.cpp:136
+  - FR6: Interchangeable fertilizing strategies
+    - Code: include/FertilizeStrategy.h:15-20; src/SlowReleaseFertilizer.cpp:7-15
+    - Tests: tests/plant_state_test.cpp:160
+  - FR7: Change strategies at runtime per plant
+    - Code: src/PlantInstance.cpp:41-47
+    - Tests: tests/plant_state_test.cpp:120-125 (inject tracking strategies)
+
+### Why this pattern
+  - Over flags/if-else: Encapsulating varying algorithms keeps `PlantInstance` free of branching and enables runtime swaps.
+  - Over Command: Strategies are algorithms applied by the plant, not queued actions; Command is used for staff tasking instead.
+  - Prototype addition: Concrete strategies implement `clone()` to allow copying configured strategies if needed by presets/director flows.
+
+### Implementation evidence
+  - Strategy interfaces define `water()`/`fertilize()`; concrete strategies implement different adjustments to vitals (e.g., frequent vs sparse watering).
+  - `PlantInstance::setWaterStrategy()` / `setFertilizeStrategy()` swap algorithms without reconstructing the plant.
+
+### Why efficient
+  - Direct virtual dispatch; O(1) swaps; minimal per‑call overhead.
+
+---
+
+## Cross‑cutting: StockItem in Sales and Observation
+
+- Role in patterns
+  - As an Observer: `StockItem` subscribes to `PlantInstance` and mirrors sale readiness for storefront status.
+  - As a Part in Builder/Facade flows: `Order` aggregates `StockItem`s; `SalesFacade` uses `StockItem` to fulfil purchases and build orders.
+- Where implemented
+  - `include/StockItem.h`, `src/StockItem.cpp`
+- Functional requirements (via patterns above)
+  - FR14, FR27 (Observer); FR24–FR25 (Builder/Facade usage in sales)
+
+---
+
+## Pattern-to-Requirement Summary
+
+- Prototype (Plants): FR1, FR2
+- State (Lifecycle): FR3, FR4
+- Strategy (Water/Fertilize): FR5, FR6, FR7
+- Adapter (I/O): FR8, FR9
+- Composite (Greenhouse): FR10, FR11, FR26
+- Iterator (Greenhouse): FR12, FR26
+- Observer (Plants/Staff/Stock): FR13, FR14, FR27
+- Iterator (Inventory): FR15, FR16
+- Command (Care): FR18, FR19
+- Chain of Responsibility: FR20, FR21
+- Mediator (Floor): FR22, FR23
+- Builder (Orders): FR24
+- Facade (Sales): FR25
+
+---
+
+## Notes on Design Choices
+
+- Separation of concerns: Patterns isolate responsibilities (e.g., state vs. strategy vs. observer) to keep each class focused and testable.
+- Extensibility: New care policies, file formats, plant states, and greenhouse structures can be added with minimal changes, leveraging Strategy, Adapter, State, and Composite.
+- Testability: Iterators, commands, and mediators make behaviour easy to drive from tests without deep setup.
+- Performance: Iterating over Composite structures is linear in the number of plants, satisfying FR/NFR scalability goals.

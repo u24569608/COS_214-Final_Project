@@ -257,13 +257,6 @@ PlantInstance* Inventory::createPlantInstance(const std::string& plantName) {
     return rawInstance;
 }
 
-bool Inventory::isManagingPlant(PlantInstance* plant) const {
-    if (plant == nullptr) {
-        return false;
-    }
-    return greenhousePlants.count(plant) > 0U;
-}
-
 void Inventory::registerPlant(PlantInstance* plant, bool takeOwnership) {
     if (plant == nullptr) {
         return;
