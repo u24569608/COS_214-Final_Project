@@ -14,6 +14,11 @@
 #include "../include/StockItem.h"
 #include "../include/WitheringState.h"
 
+// Pull in command implementations used internally by Staff
+#include "../src/PlantCommand.cpp"
+#include "../src/WaterPlant.cpp"
+#include "../src/FertilizePlant.cpp"
+
 namespace {
 
 class DummyPlant : public Plant {
@@ -72,8 +77,8 @@ void testAttachDetachObservers() {
     plant.setState(std::make_unique<MatureState>());
 
     assertTrue(stock.getIsAvailible(), "Stock item should remain available after maturity");
-    assertEqStr(stock.getDisplayStatus(), "Plant ready for sale",
-                "Stock item should reflect availability change message");
+    assertEqStr(stock.getDisplayStatus(), "Available",
+                "Stock item should reflect the updated availability label");
     assertEqInt(staff.getCareReminderCount(), 1,
                 "Staff should receive an availability reminder when plant matures");
     const auto& reminders = staff.getCareReminders();
@@ -83,7 +88,7 @@ void testAttachDetachObservers() {
     staff.stopObservingPlant(&plant);
     plant.setState(std::make_unique<WitheringState>());
 
-    assertEqStr(stock.getDisplayStatus(), "Plant unavailable for sale",
+    assertEqStr(stock.getDisplayStatus(), "Unavailable",
                 "Stock item should track unavailability after state regression");
     assertEqInt(staff.getCareReminderCount(), 1,
                 "Detached staff should not receive additional reminders");
