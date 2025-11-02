@@ -16,6 +16,9 @@ A sophisticated `C++` simulation of a plant nursery management system, developed
 ![GitHub Repo Size](https://img.shields.io/github/repo-size/u24569608/COS_214-Final_Project)
 ![Unit Tests](https://github.com/u24569608/COS_214-Final_Project/actions/workflows/unit_tests.yml/badge.svg?branch=developer)
 
+![GitHub pull requests](https://img.shields.io/github/issues-pr/u24569608/COS_214-Final_Project)
+![GitHub last commit](https://img.shields.io/github/last-commit/u24569608/COS_214-Final_Project)
+
 ## Key Features
 
 - **Dynamic Plant Management** – Create, track, and manage a diverse range of plants using the **Prototype** and **Factory** patterns.  
