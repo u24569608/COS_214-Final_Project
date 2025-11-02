@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="https://github.com/u24569608/COS_214-Final_Project/blob/Version_1/plant-nursery-simulator/GUI/Plant%20Palace%20Logo.png" alt="Project Logo" width="150"/>
+</p>
+
 <div align="center">
 <h1>Plant Palace</h1></div>
 
@@ -31,7 +35,7 @@ A sophisticated `C++` simulation of a plant nursery management system, developed
 
 ## Getting Started
 
-`Coming Soon`
+To use the GUI application, visit [Releases](https://github.com/u24569608/COS_214-Final_Project/releases) and download the latest installer `Plant_Palace-Version_X-Installer.exe`. Currently the latest version is ***Version 1***. Once you have completed the installer you can then run the GUI application. 
 
 ## Prerequisites
 
