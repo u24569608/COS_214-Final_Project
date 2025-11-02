@@ -8,6 +8,63 @@ Note: File paths point to headers in `include/` and implementations in `src/` wi
 
 ---
 
+## Research Brief: Nursery Domain Findings
+
+The research phase examined how commercial nurseries operate across plant cultivation, staff coordination, and customer experience. Nurseries behave like living ecosystems where biological growth, human scheduling, and sales interactions constantly influence each other. Understanding those loops guided the simulator so that it mirrors the adaptability of a real operation while staying maintainable.
+
+### Plant care and growth management
+- Nurseries manage diverse plant families (annuals, perennials, succulents, shrubs, trees) with distinct water, soil, nutrient, and sunlight profiles (Department of Agriculture, 2023; Royal Horticultural Society, 2022).
+- Climate and irrigation systems must adjust on schedule to avoid stress across batches.
+- Insight applied: Each `PlantInstance` owns pluggable watering and fertilising strategies (Strategy pattern) so care algorithms can reflect cultivar differences. Lifecycle state transitions (Seed, Growing, Mature, Withering, Dead) capture that a plant responds differently to care depending on maturity (State pattern). Health vitals and thresholds encode the simplified horticultural rules that drive those transitions.
+
+### Staff coordination and task flow
+- Nursery teams span growers, floor staff, cashiers, and logistics who need shared context (shift notes, stock changes, care alerts).
+- Command batching and delegation help manage repetitive jobs (watering runs, pruning, order prep).
+- Insight applied: Care requests become `Command` objects that staff can queue, undo, or audit; specialised handlers (Chain of Responsibility) route tasks to the right role. A `NurseryMediator` centralises communication so staff, inventory, and customer service modules interact without tight coupling, matching the broadcast-style coordination observed in practice.
+
+### Customer experience and sales workflow
+- Differentiated service (bespoke potting, gift preparation, delivery) is a competitive lever (Garden Centre Magazine, 2024).
+- Checkout systems shield customers from internal stock/database complexity.
+- Insight applied: The `SalesFacade` offers a single entry point for the GUI and demo scripts, hiding payment, stock reservation, and notification details. The `OrderDirector` with a `CustomOrderBuilder` composes customised orders (pot finish, wrapping, delivery slot) so optional features stay modular.
+
+### System scalability and data management
+- Nurseries expand by adding greenhouse sections, experimenting with cultivars, and switching record formats as partners demand (CSV exports, plain text manifests).
+- Insight applied: A composite greenhouse structure lets controllers treat beds and individual plants uniformly and extend the hierarchy as the site grows. Plant prototypes are stored in a registry so new cultivars can be cloned without revisiting construction code (Prototype pattern). CSV and TXT file formats are supported through adapters, insulating inventory logic from I/O changes (Adapter pattern). Observer links keep UI widgets and stock records in sync when a plant changes availability.
+
+### Assumptions and definitions
+- Plants are modelled with core vitals (health, water, nutrients, sunlight preference) rather than biological precision; simulation ticks abstract real-time growth.
+- Customer preferences focus on order customisation features exposed through the builder (pot, wrapping, delivery); financials remain high level.
+- The nursery operates in a controlled climate so environmental factors enter via strategies and state thresholds instead of free-form physics.
+
+### References
+- Department of Agriculture. (2023). *Greenhouse Management and Plant Propagation Guide.* Pretoria.
+- Royal Horticultural Society. (2022). *Plant Care Best Practices.* London.
+- Garden Centre Magazine. (2024). *Trends in Customer Personalisation and Retail Nurseries.*
+
+---
+
+## Functional Requirement Traceability
+
+Functional Requirement (FR) identifiers used throughout this report refer to the definitions captured in `docs/Functional_and_non-functional_requirements.md`. The table below highlights the primary mapping between each design pattern focus area and the FRs it fulfils; detailed rationale and evidence appear in the dedicated pattern sections that follow.
+
+| Pattern focus | FR IDs | Requirement source |
+| --- | --- | --- |
+| Prototype (Plant registry) | FR1, FR2 | `docs/Functional_and_non-functional_requirements.md` |
+| State (Lifecycle transitions) | FR3, FR4 | `docs/Functional_and_non-functional_requirements.md` |
+| Strategy (Water/Fertiliser) | FR5, FR6, FR7 | `docs/Functional_and_non-functional_requirements.md` |
+| Adapter (Inventory I/O) | FR8, FR9 | `docs/Functional_and_non-functional_requirements.md` |
+| Composite (Greenhouse structure) | FR10, FR11, FR26 | `docs/Functional_and_non-functional_requirements.md` |
+| Iterator (Greenhouse traversal) | FR12, FR26 | `docs/Functional_and_non-functional_requirements.md` |
+| Observer (Plant notifications) | FR13, FR14, FR27 | `docs/Functional_and_non-functional_requirements.md` |
+| Iterator (Inventory traversal) | FR15, FR16 | `docs/Functional_and_non-functional_requirements.md` |
+| Command (Care tasks) | FR18, FR19 | `docs/Functional_and_non-functional_requirements.md` |
+| Chain of Responsibility (Care routing) | FR20, FR21 | `docs/Functional_and_non-functional_requirements.md` |
+| Mediator (Nursery coordination) | FR22, FR23 | `docs/Functional_and_non-functional_requirements.md` |
+| Builder (Order customisation) | FR24 | `docs/Functional_and_non-functional_requirements.md` |
+| Facade (Sales workflow) | FR25 | `docs/Functional_and_non-functional_requirements.md` |
+
+---
+
 ## System Overview
 
 The Plant Nursery Simulator models a nursery business end‑to‑end:
