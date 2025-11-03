@@ -65,40 +65,78 @@ This document outlines the 30-minute demo flow, speaker scripts, and technical c
 * **Driver:** Connor
 
 #### 🕹️ [Connor's Cues]
-* Advance to Slide 4. Be ready to pan/zoom on the class diagram as Johan points out the main zones.
-* Advance to Slide 5 for the Facade pattern.
-* Advance to Slide 6 for Composite/Iterator.
-* Advance to Slide 7 for Observer.
-* Advance to Slide 8 for Adapter.
+* Show Slide 5 (System Architecture Overview) as Johan starts.
+* Advance to Slide 6 for the large class diagram when mentioned.
+* Advance to Slides 7–8 for the Sales Facade.
+* Advance to Slides 9–10 for Composite & Iterator (Greenhouse).
+* Advance to Slides 11–12 for Observer (Plants & Staff).
+* Advance to Slides 13–14 for Adapter (File I/O).
+* Advance to Slides 15–16 for Command (Plant Care).
+* Advance to Slides 17–18 for Chain of Responsibility (Care Routing).
+* Advance to Slides 19–20 for Mediator (Floor Coordination).
+* Advance to Slide 21 for Builder (Orders).
 
 #### slides
-* **Slide 4: System Class Diagram**
-    * A high-resolution image of your complete system class diagram.
-* **Slide 5: Key Pattern: Facade (Sales)**
-    * Show the partial class diagram for the Sales Facade from `design-patterns-report.md`.
-    * Rationale: "Provides a single entry point for complex sales operations (FR25)."
-* **Slide 6: Key Patterns: Composite & Iterator (Greenhouse)**
-    * Show the partial diagrams for Composite and Greenhouse Iterator from `design-patterns-report.md`.
-    * Rationale: "Represents the part-whole greenhouse hierarchy (FR10) and provides uniform traversal for growth ticks (FR12, FR26)."
-* **Slide 7: Key Pattern: Observer (Plant Lifecycle)**
-    * Show the partial diagram for Observer from `design-patterns-report.md`.
-    * Rationale: "Decouples plants (Subjects) from staff and stock items (Observers) (FR13, FR14). Notifies observers of state changes, like 'care needed' or 'ready for sale' (FR27)."
-* **Slide 8: Key Pattern: Adapter (File I/O)**
-    * Show the partial diagram for the File Adapter from `design-patterns-report.md`.
-    * Rationale: "Isolates inventory logic from specific file formats (CSV/TXT) (FR8, FR9)."
+* **Slide 5: System Architecture Overview**
+    * Greenhouse (Composite, Iterator, State)
+    * Staff (Observer, Command, COR, Mediator)
+    * Sales (Builder, Facade, Adapter)
+* **Slide 6: Large Class Diagram**
+* **Slide 7: Facade Pattern — Sales**
+    * Intent: Unified access to inventory/order/payment subsystems
+    * Why: Centralized API, simplifies operations; FR25
+* **Slide 8: Sales Facade Class Diagram**
+* **Slide 9: Composite & Iterator — Greenhouse**
+    * Intent: Traverse beds uniformly; Why: Hierarchical operations; FR10–FR12, FR26
+* **Slide 10: Greenhouse Composite Class Diagram**
+* **Slide 11: Observer Pattern — Plants & Staff**
+    * Intent: Notify on plant health/availability changes; Why: Automates sync; FR13–FR14, FR27
+* **Slide 12: Plant Instance Observer Class Diagram**
+* **Slide 13: Adapter Pattern — File I/O**
+    * Intent: Switch TXT/CSV seamlessly; Why: Extensible I/O; FR8–FR9
+* **Slide 14: I/O Adapter Class Diagram**
+* **Slide 15: Command Pattern — Plant Care**
+    * Intent: Encapsulate actions; Why: Queuing/history; FR18–FR19
+* **Slide 16: Plant Care Command Class Diagram**
+* **Slide 17: Chain of Responsibility — Care Routing**
+    * Intent: Chain of handlers; Why: Extensible routing; FR20–FR21
+* **Slide 18: COR Care Requests Class Diagram**
+* **Slide 19: Mediator Pattern — Floor Coordination**
+    * Intent: Centralize communications; Why: Reduce coupling; FR22–FR23
+* **Slide 20: Floor Mediator Class Diagram**
+* **Slide 21: Builder Pattern — Orders**
+    * Intent: Step‑wise construction; Why: Optional components; FR24
 
-#### 📋 Johan's Outline
-* **Introduce the Class Diagram (Slide 4):**
-    * Start with the high-level class diagram. Point out the three main zones of the system (Greenhouse/Plant, Sales/Inventory, Staff/Customer).
-    * State that the system implements over 10 patterns as required, and you will highlight 4 critical ones from the report.
-* **For each of the 4 key patterns (Slides 5-8), explain:**
-    * **1. What is it?** (e.g., "First, we used the **Facade** pattern.")
-    * **2. Why (The Rationale)?** (e.g., "We chose this to solve FR25. The sales process is complex—it involves checking inventory, building an order, and processing payments. The Facade provides a single, simple entry point for the UI, hiding all that complexity.")
-    * **3. Where (The Participants)?** (Point to the diagram: "Our `SalesFacade` class coordinates the `Inventory`, `OrderBuilder`, and `PaymentProcessor` subsystems.")
-* **Repeat this logic for:**
-    * **Composite + Iterator:** (Why: To handle the nested greenhouse structure (FR10, FR12). How: `GreenhouseComponent` is the interface, `GreenhouseBed` is the composite, and `PlantInstance` is the leaf. The `GreenhouseIterator` lets us traverse this whole structure easily for growth ticks (FR26).)
-    * **Observer:** (Why: To decouple our system (FR13). How: The `PlantInstance` is the Subject. When its state changes (e.g., it needs water, or becomes 'Mature'), it notifies its Observers, like `Staff` (who adds a care task) and the `StockItem` (which updates its sale availability, FR27).)
-    * **Adapter:** (Why: To load/save inventory without locking `Inventory` to one file type (FR8, FR9). How: The `Inventory` class only knows the `FileAdapter` interface. We then created `CSVAdapter` and `TXTAdapter` that 'adapt' our `CSVReaderWriter` to fit that interface.)
+#### 🎤 Johan's Speech (System Architecture & Design Patterns)
+> Thanks Adriano.
+>
+> I’ll be walking you through our nursery system, its architecture and the design patterns that hold it together. I’ll start with a quick overview of the system structure, then move to the large class diagram, and finally highlight some of the key patterns. Throughout, I’ll keep drawing the link between the Greenhouse, Inventory, and Sales: the core connection that keeps the system alive and in sync. (Slide 5)
+>
+> Our architecture is divided into three collaborating zones. The Greenhouse manages plants and their lifecycles. The Staff zone handles care, coordination, and communication. And the Sales zone manages customer interaction, ordering, and file I/O. Each zone uses a cluster of design patterns. The Greenhouse relies on Composite, Iterator, Prototype and State to model its structure and lifecycle; the Staff zone uses Observer, Command, Chain of Responsibility, and Mediator for care and communication; and the Sales zone applies Builder, Facade, and Adapter to streamline ordering and integration. Together, these patterns keep the greenhouse reality and the storefront view perfectly aligned. (Slide 5)
+>
+> Let’s move to the large class diagram. At the centre is the Greenhouse structure. The Composite pattern models beds and plants as a hierarchy: every node, whether a bed or a plant, can receive the same command. The Iterator pattern allows us to traverse that hierarchy without exposing internal details, letting controllers easily perform operations like growth ticks across all plants. Each PlantInstance is also the context for our State pattern. Plants transition through seed, growing, mature, withering, and dead states, each defining how the plant behaves: when it’s ready for sale, how it reacts to care, and when it signals for staff attention. (Slide 6)
+>
+> This is where the Inventory ties in. Every stock item in Inventory is linked directly to a living plant in the greenhouse. Through Observer, stock entries automatically reflect their plant’s state: when a plant becomes market‑ready, it’s marked as available; when it dies or is sold, it’s removed. The result is instant, automatic synchronisation between greenhouse and storefront. Two more patterns appear here even though they don’t have their own slides later on: Strategy lets each plant use a suitable care algorithm—for example, unique watering or fertilising methods per species or lifecycle state—and Prototype ensures new plants are created consistently by cloning pre‑registered templates. It’s data‑driven, so new species can be added dynamically without changing the code. (Slide 6)
+>
+> The Sales Facade unifies the sales workflow: checking stock, building orders, finalising payments, and removing sold items. Without it, clients would have to call multiple subsystems in sequence. With it, everything happens through one clean interface. When a purchase completes, the facade updates the exact stock items tied to specific plants, keeping both systems aligned to the instance level. (Slides 7–8)
+>
+> Composite and Iterator in the Greenhouse. Our greenhouse uses a hierarchy, so Composite lets us treat beds and plants uniformly. The Iterator provides a reusable way to traverse the structure without mixing traversal logic into controllers. Inventory also uses its own iterator to browse both plants and regular stock items like pots or soil, unifying data access across the system. (Slides 9–10)
+>
+> Observer for Plants and Staff. Whenever a plant’s state changes—say moisture drops or it becomes ready for sale—observers are notified. Staff observers create actionable care tasks, while stock observers update availability in the storefront. We use a push model so observers receive only the necessary event data. When a plant is removed, observers detach cleanly to avoid dangling references. (Slides 11–12)
+>
+> Adapter for File I/O. The Adapter pattern allows the system to import and export inventory in multiple formats, TXT, CSV, or future options like JSON, without changing the core logic. When data is loaded, the adapter reconstructs stock items and, for plants, reconnects them to the greenhouse using their prototypes and state information. The greenhouse and storefront join seamlessly as soon as data enters the system. (Slides 13–14)
+>
+> Command for Plant Care. Plant‑care actions such as watering or fertilising are encapsulated as Commands. Staff can queue or execute them independently of timing or order. Each command knows its target plant and runs care logic based on the plant’s current state. Any resulting state change automatically triggers observer updates, keeping inventory and greenhouse aligned. (Slides 15–16)
+>
+> Chain of Responsibility for Care Routing. Different care requests pass through a chain of handlers: watering, fertilising and so on. Each handler processes requests it understands or passes them along. This allows new care types to be added easily. The flow—request → handler → plant → observers → storefront—keeps the system flexible and consistent. (Slides 17–18)
+>
+> Mediator for Floor Coordination. On the shop and greenhouse floors, communication between staff and customers is routed through a Mediator: a central “radio” that prevents every colleague from needing direct references to one another. Messages go to the mediator, which forwards them to the right recipient. This design scales well and makes it easy to add new colleague types later. (Slides 19–20)
+>
+> Builder for Orders. Orders aren’t just lists of items. Builder allows complex, step‑by‑step construction—from quick one‑item sales to pre‑built baskets. The Sales Facade either guides the builder with preset recipes or lets the user assemble items manually. Once payment is finalised, the facade removes the corresponding stock entries and detaches their plants from the greenhouse, maintaining a clean, traceable chain from plant to order. (Slide 21)
+>
+> Stepping back, every pattern plays a focused role: Composite structures the greenhouse. Iterator handles traversal. State drives plant behaviour. Observer keeps all systems in sync. Command and Chain of Responsibility manage care actions. Mediator simplifies communication. Builder, Adapter, and Facade streamline the customer experience and integration. Together, they form a modular system where changes in one area don’t break another. When a plant becomes ready, the storefront shows it instantly. When a sale happens, that specific plant is removed from the greenhouse. And when data is imported, new plants can be simulated immediately. These patterns aren’t academic: they’re what keep our system consistent, flexible, and alive. 
+> 
+> Thank you. Back to Adriano.
 
 ---
 
